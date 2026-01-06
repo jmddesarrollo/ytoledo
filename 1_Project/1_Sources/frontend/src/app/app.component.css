@@ -1,0 +1,41 @@
+/* Menú fijo en la esquina superior izquierda */
+.fixed-menu-container {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1002 !important;
+}
+
+/* Botón para abrir el menú */
+.fixed-menu-button {
+    z-index: 1001;
+}
+
+/* Menú desplegable */
+.fixed-menu-container .p-menu {
+    position: fixed;
+    top: 50px; /* Ajusta según la altura del botón */
+    left: 10px;
+    z-index: 1003; /* Asegúrate de que esté sobre otros elementos */
+}
+
+/* Contenido principal (debajo del menú) */
+.main-content {
+    margin-top: 60px; /* Espacio superior adicional */
+}
+
+.center-col {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Por defecto, arriba */
+    height: 100%; /* Asegura que ocupe el alto disponible */
+}
+
+/* Para móviles: coloca el título debajo del menú y añade margen superior */
+@media (max-width: 600px) {
+    .center-col {
+        align-items: flex-start;
+        justify-content: center;
+        margin-top: 60px; /* Ajusta según la altura de tu menú */
+    }
+}

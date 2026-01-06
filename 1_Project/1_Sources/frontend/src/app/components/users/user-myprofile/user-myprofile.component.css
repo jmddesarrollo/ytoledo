@@ -1,0 +1,9 @@
+.hss-max-width {
+    max-width: 35vw;
+}
+
+@media (max-width:760px) {
+    .hss-max-width {
+        max-width: 60vw;
+    }
+}

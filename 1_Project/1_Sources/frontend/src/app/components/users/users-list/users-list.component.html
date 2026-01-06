@@ -1,0 +1,84 @@
+<div id="div-table" (window:resize)="onResize()">
+    <p-table #dt [value]="users" styleClass="p-datatable-striped" [globalFilterFields]="['username', 'name', 'lastname', 'email', 'role.name']" [scrollable]="true" scrollHeight="{{scrollHeight}}" sortField="username" [sortOrder]="1" sortMode="single" id="hss-listusers-table">
+
+        <ng-template pTemplate="caption">
+            <div class="p-d-flex p-ai-center p-jc-between">
+                <div></div>
+                <div class="w3-right">
+                    <span class="p-input-icon-left w3-margin-right">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar..." id="hss-listusers-btn-search" />
+                    </span>
+                    <p-button label="Añadir usuario" class="w3-margin-bottom w3-right " (click)="addUser()" [disabled]="!permissionWriting" id="hss-listusers-btn-add"></p-button>
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="username" style="width: 150px">Usuario
+                    <p-sortIcon field="username"></p-sortIcon>
+                </th>
+                <th pSortableColumn="name" style="width: 250px">Nombre
+                    <p-sortIcon field="name"></p-sortIcon>
+                </th>
+                <th pSortableColumn="lastname" style="width: 250px">Apellidos
+                    <p-sortIcon field="lastname"></p-sortIcon>
+                </th>
+                <th pSortableColumn="email" style="width: 250px">Email
+                    <p-sortIcon field="email"></p-sortIcon>
+                </th>
+                <th pSortableColumn="member_num" style="width: 100px">Socio
+                    <p-sortIcon field="member_num"></p-sortIcon>
+                </th>
+                <th pSortableColumn="role.name" style="width: 150px">Rol
+                    <p-sortIcon field="role.name"></p-sortIcon>
+                </th>
+                <th pSortableColumn="active" style="text-align:center; width: 125px">Activo
+                    <p-sortIcon field="active"></p-sortIcon>
+                </th>
+                <th style="text-align:center; width: 125px">
+                    Acciones
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-user>
+            <tr id="hss-listusers-tr-{{user.id}}" class="hss-listusers-tr">
+                <td class="hss-overflow" title="{{user.username}}" style="width: 150px" id="hss-listusers-td-username-{{user.id}}">{{user.username}}</td>
+                <td class="hss-overflow" title="{{user.name}}" style="width: 250px" id="hss-listusers-td-name-{{user.id}}">{{user.name}}</td>
+                <td class="hss-overflow" title="{{user.lastname}}" style="width: 250px" id="hss-listusers-td-lastname-{{user.id}}">{{user.lastname}}</td>
+                <td class="hss-overflow" title="{{user.email}}" style="width: 250px" id="hss-listusers-td-email-{{user.id}}">{{user.email}}</td>
+                <td style="width: 100px" id="hss-listusers-td-membernum-{{user.id}}">{{user.member_num}}</td>
+                <td class="hss-overflow" title="{{user.role.name}}" style="width: 150px" id="hss-listusers-td-role-{{user.id}}">{{user.role.name}}</td>
+                <td style="text-align:center; width: 125px">
+                    <p-checkbox [(ngModel)]="user.active" binary="true" inputId="binary" [disabled]="true" id="hss-listusers-td-active-{{user.id}}"></p-checkbox>
+                </td>
+                <td style="text-align:center; width: 125px">
+                    <button pButton type="button" icon="pi pi-cog" (click)="editUser(user)" class="p-button-rounded p-button-text" title="Gestión del usuario" [disabled]="!permissionWriting" id="hss-listusers-btn-edit-{{user.id}}"></button>
+                    <button pButton type="button" icon="pi pi-trash" (click)="confirm(user)" class="p-button-rounded p-button-text w3-text-red" title="Eliminar el usuario" [disabled]="!permissionWriting" id="hss-listusers-btn-del-{{user.id}}"></button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<div *ngIf="userDialog">
+    <p-dialog [(visible)]="userDialog" [style]="{width: '450px'}" header="Datos de usuario" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
+
+        <div>
+            <p-tabView [style]="{height:'100%'}">
+                <p-tabPanel header="General" id="hss-listusers-tb-general">
+                    <app-user-form [user]="user" (cancel)="cancel($event)"></app-user-form>
+                </p-tabPanel>
+                <p-tabPanel header="Contraseña" *ngIf="user.id" id="hss-listusers-tab-password">
+                    <app-user-form-password [user]="user" (cancel)="cancel($event)"></app-user-form-password>
+                </p-tabPanel>
+            </p-tabView>
+        </div>
+
+    </p-dialog>
+</div>
+
+
+<!-- Ventana de Confirmación -->
+<p-confirmPopup></p-confirmPopup>

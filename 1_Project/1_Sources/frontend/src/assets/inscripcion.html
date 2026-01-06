@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitud de Inscripción - Y-Toledo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        
+        .page {
+            width: 210mm;
+            height: 297mm;
+            padding: 15mm;
+            box-sizing: border-box;
+            position: relative;
+            border: 1px solid #eee;
+        }
+        /* Encabezado */
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+        
+        .logo-placeholder {
+            width: 100px;
+            height: 100px;
+            border: 1px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .logo-img {
+            width: 120px;
+            height: auto;
+            max-height: 100px;
+            object-fit: contain;
+        }
+        
+        .title-container {
+            flex-grow: 1;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .title-container h1 {
+            font-size: 18pt;
+            margin: 0;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        
+        .photo-box {
+            width: 90px;
+            height: 110px;
+            border: 1px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        /* Estructura con Texto Vertical */
+        
+        .main-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .vertical-text-box {
+            width: 40px;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            text-align: center;
+            font-weight: bold;
+            font-size: 14pt;
+            color: #555;
+            border-right: 2px solid #333;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-content {
+            flex-grow: 1;
+        }
+        /* Filas y Campos */
+        
+        .row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .field {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        label {
+            font-size: 9pt;
+            font-weight: bold;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+        
+        input[type="text"],
+        input[type="date"],
+        input[type="email"] {
+            padding: 8px;
+            border: 1px solid #333;
+            font-size: 11pt;
+            border-radius: 2px;
+        }
+        /* Proporciones Específicas */
+        
+        .w-2 {
+            flex: 2;
+        }
+        
+        .w-3 {
+            flex: 3;
+        }
+        
+        .disabled-field {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        /* Aceptar Estatutos */
+        
+        .acceptance {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 11pt;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 20px;
+        }
+        
+        .acceptance input {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        /* A SABER Section */
+        
+        .a-saber-section {
+            margin-top: 30px;
+        }
+        
+        .firma-box {
+            height: 100px;
+            border: 1px solid #333;
+            margin-top: 5px;
+        }
+        /* Texto Legal */
+        
+        .footer-legal {
+            position: absolute;
+            bottom: 15mm;
+            left: 15mm;
+            right: 15mm;
+            font-size: 7.5pt;
+            text-align: justify;
+            line-height: 1.2;
+            border-top: 1px solid #ccc;
+            pt: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <div class="header">
+            <img src="images/logo.jpg" alt="Logo Club Senderismo Y-Toledo" class="logo-img">
+            <div class="title-container">
+                <h1>SOLICITUD DE INSCRIPCIÓN AL<br>CLUB DE SENDERISMO Y-TOLEDO</h1>
+            </div>
+            <div class="photo-box">FOTOGRAFÍA</div>
+        </div>
+
+        <div class="main-container" style="height: 400px;">
+            <div class="vertical-text-box">DATOS PERSONALES</div>
+            <div class="form-content">
+                <div class="row">
+                    <div class="field"><label>Nombre</label><input type="text"></div>
+                    <div class="field"><label>Apellidos</label><input type="text"></div>
+                </div>
+                <div class="row">
+                    <div class="field"><label>DNI / NIE</label><input type="text"></div>
+                    <div class="field"><label>Fecha Nacimiento</label><input type="date"></div>
+                    <div class="field w-2"><label>Email</label><input type="email"></div>
+                </div>
+                <div class="row">
+                    <div class="field"><label>Teléfono</label><input type="text"></div>
+                    <div class="field w-2"><label>Domicilio</label><input type="text"></div>
+                </div>
+                <div class="row">
+                    <div class="field"><label>Localidad</label><input type="text"></div>
+                    <div class="field"><label>Provincia</label><input type="text"></div>
+                    <div class="field"><label>Código Postal</label><input type="text"></div>
+                </div>
+                <div class="acceptance">
+                    <input type="checkbox"> <label style="margin:0;">Conozco y acepto los Estatutos del Club</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-container a-saber-section">
+            <div class="vertical-text-box">A SABER</div>
+            <div class="form-content">
+                <div class="row">
+                    <div class="field" style="flex: 0 0 100px;"><label>Nº Socio</label><input type="text" maxlength="3"></div>
+                    <div class="field"><label>Cuantía</label><input type="text" class="disabled-field" value="20 €" readonly></div>
+                    <div class="field"><label>Fecha</label><input type="date"></div>
+                </div>
+                <div class="row" style="margin-top:20px;">
+                    <div class="field w-2"><label>Firma del Peticionario</label>
+                        <div class="firma-box"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-legal">
+            En cumplimiento de la Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales, el titular de los datos de afiliación facilitados en esta hoja de inscripción al Club Deportivo “Senderismo Y-Toledo”,
+            autoriza la inclusión de dichos datos en el fichero de datos de carácter personal del Club Deportivo “Senderismo Y-Toledo”, al objeto exclusivo de posibles comunicaciones y contactos futuros. Los datos no será objeto de cesión de ningún género,
+            a excepción de las necesidades organizativas del Club Deportivo “Senderismo Y-Toledo”. El titular de estos datos puede ejercitar gratuitamente los derechos de oposición, acceso, rectificación y cancelación de los datos personales en los términos
+            previstos en la Ley 15/1999.
+        </div>
+    </div>
+</body>
+
+</html>

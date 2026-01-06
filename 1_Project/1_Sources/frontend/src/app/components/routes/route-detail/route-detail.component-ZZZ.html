@@ -1,0 +1,116 @@
+<div class="p-fluid" *ngIf="route">
+
+    <!-- Información General -->
+    <div class="grid align-items-center mb-3">
+        <div class="col-2 font-bold">Día:</div>
+        <div class="col-10">{{ route.date }}</div>
+    </div>
+
+    <div class="grid align-items-center mb-3">
+        <div class="col-2 font-bold">Ruta:</div>
+        <div class="col-10">{{ route.name }}</div>
+    </div>
+
+    <div class="grid align-items-center mb-3">
+        <div class="col-2 font-bold">Inicio de la ruta:</div>
+        <div class="col-10">{{ route.startPoint }}</div>
+    </div>
+
+    <div class="grid align-items-center mb-3">
+        <div class="col-2 font-bold">Punto de salida:</div>
+        <div class="col-10">
+            Toledo - Aparcamiento de Santa Teresa en Avenida Carlos III
+        </div>
+    </div>
+
+    <div class="grid align-items-center mb-3">
+        <div class="col-2 font-bold">Hora de salida:</div>
+        <div class="col-10">08:30</div>
+    </div>
+
+    <!-- Descripción -->
+    <div class="grid">
+        <div class="col-12">
+            <div class="p-3 border-round bg-gray-100">
+                <h4 class="font-bold">Descripción</h4>
+                <div [innerHTML]="formatDescription(route.description)"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalles de la Ruta -->
+    <div class="grid text-center mt-3">
+        <div class="col-3 p-2">
+            <div class="border-round bg-blue-100 p-3">
+                <b>Distancia:</b> {{ route.distanceKm | number:'1.2-2' }} Km
+            </div>
+        </div>
+        <div class="col-3 p-2">
+            <div class="border-round bg-blue-100 p-3">
+                <b>Desnivel:</b> {{ route.elevationGain }} m.
+            </div>
+        </div>
+        <div class="col-3 p-2">
+            <div class="border-round bg-blue-100 p-3">
+                <b>Altura máx:</b> {{ route.maxHeight }} m.
+            </div>
+        </div>
+        <div class="col-3 p-2">
+            <div class="border-round bg-blue-100 p-3">
+                <b>Altura mín:</b> {{ route.minHeight }} m.
+            </div>
+        </div>
+    </div>
+
+    <div class="grid text-center mt-3">
+        <div class="col-4 p-2">
+            <div class="border-round bg-teal-100 p-3">
+                <b>Duración estimada:</b> {{ route.estimatedDurationHours }}h {{ route.estimatedDurationMinutes }}m +
+                paradas
+            </div>
+        </div>
+        <div class="col-4 p-2">
+            <div class="border-round bg-teal-100 p-3">
+                <b>Tipo:</b> {{ route.type === 1 ? 'Circular' : 'Lineal' }}
+            </div>
+        </div>
+        <div class="col-4 p-2">
+            <div class="border-round bg-teal-100 p-3">
+                <b>Dificultad:</b> {{ route.difficulty }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="grid mt-4">
+        <div class="col-6 text-center" *ngIf="route.signUpLink">
+            <a [href]="route.signUpLink" target="_blank" class="btn bg-primary p-3 border-round text-white font-bold"
+                title="Solo No Socios">
+                Apuntarse
+            </a>
+        </div>
+        <div class="col-6 text-center" *ngIf="route.wikilocLink">
+            <a [href]="route.signUpLink" target="_blank"
+                class="btn bg-green-500 p-3 border-round text-white font-bold">
+                Ver ruta en Wikiloc
+            </a>
+        </div>
+    </div>
+
+    <!-- Mapas -->
+    <div class="grid mt-4">
+        <div class="col-12" *ngIf="route.wikilocMapLink">
+            <div class="p-3 border-round bg-gray-200">
+                <h4 class="font-bold text-center">Mapa de la Ruta</h4>
+                <div class="flex justify-content-center mt-3">
+                    <iframe frameBorder="0" scrolling="no" [src]="route.wikilocMapLink" width="600" height="500"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="!route">
+        <p>Cargando detalles de la ruta...</p>
+    </div>
+</div>

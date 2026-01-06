@@ -1,0 +1,27 @@
+<p-fileUpload #fileUpload name="demo[]" customUpload="true" (onSelect)="onSelectFiles($event.currentFiles)" (onRemove)="onRemoveFile($event.file)" (onError)="onErrorFiles($event)" multiple="multiple" accept="image/*.jpeg" maxFileSize="2000000" fileLimit="50"
+    chooseLabel="Seleccionar archivos" [showUploadButton]="false" [showCancelButton]="false" invalidFileTypeMessageSummary="Solo se admiten archivos jpg" invalidFileTypeMessageDetail="" invalidFileSizeMessageSummary="El límite del tamaño del archivo es de 2Mb"
+    invalidFileSizeMessageDetail="">
+
+    <ng-template pTemplate="content">
+        <div *ngIf="uploadedFiles.length === 0">No se ha seleccionando ningún archivo</div>
+    </ng-template>
+
+</p-fileUpload>
+
+<div class="w3-margin-top">
+    <button type="button" class="w3-btn w3-orange w3-margin-right" (click)="onSubmitFiles()" [disabled]="!permissionWriting">Subir archivos</button>
+    <button type="button" class="w3-btn w3-orange w3-margin-right" (click)="downloadFile()" [disabled]="!permissionWriting">Descargar archivos</button>
+    <button type="button" class="w3-btn w3-orange w3-margin-right" (click)="confirm($event)" [disabled]="!permissionWriting">Eliminar archivos</button>
+</div>
+
+<!-- Ventana de Confirmación -->
+<p-confirmPopup></p-confirmPopup>
+
+<!--
+    accept=".lic"                       [accepts only extension lic file types]
+    accept="image/*"                    [accepts all image file types]
+    accept="image/*.jpeg"               [accepts only JPEG image file types]
+    accept="application/msexcel"        [accepts only xls file types]
+    accept=".xlsm,application/msexcel"  [accepts only xls & xlsm file types]
+    accept="application/msmsword"       [accepts only word file types]
+ -->

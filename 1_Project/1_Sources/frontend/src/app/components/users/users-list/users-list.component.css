@@ -1,0 +1,23 @@
+#div-table {
+    max-width: 90wh;
+    height: 88vh;
+    overflow: auto;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+}
+
+@media screen and (max-width: 64em) {
+    :host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+        top: 0px;
+    }
+}
+
+@media only screen and (max-width: 1367px) {
+    #div-table {
+        height: 82vh;
+    }
+}

@@ -1,0 +1,51 @@
+/* Estilo para la tarjeta */
+.custom-card {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+}
+
+/* Tabla personalizada */
+.custom-table {
+    font-size: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.custom-table thead th {
+    background-color: #007ad9; /* Color del encabezado */
+    color: white;
+    text-align: left;
+    padding: 0.75rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border: none;
+}
+
+.custom-table tbody tr {
+    background-color: white;
+    border-bottom: 1px solid #e5e5e5;
+    transition: background-color 0.3s;
+}
+
+.custom-table tbody tr:hover {
+    background-color: #f0f8ff; /* Color al pasar el cursor */
+}
+
+.custom-table tbody td {
+    padding: 0.75rem;
+    color: #333;
+    vertical-align: middle;
+}
+
+/* Estilos específicos para las columnas */
+.date {
+    font-weight: bold;
+    color: #007ad9;
+}
+
+.route-name {
+    font-style: italic;
+    color: #555;
+}

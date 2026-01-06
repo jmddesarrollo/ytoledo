@@ -1,0 +1,15 @@
+<div class="w3-panel">
+    <div class="p-grid p-jc-center">
+        <div class="w3-container hss-max-width">
+            <div class="w3-panel w3-card-4 w3-light-gray" *ngIf="user">
+                <div class="w3-center w3-margin-top">
+                    <img src="assets/images/logo_Y-Toledo.svg" />
+                    <h3>{{project}} <sub style="font-size: small;">{{version}}</sub></h3>
+                </div>
+                <div>
+                    <app-user-form-password [user]="user" (cancel)="cancel($event)"></app-user-form-password>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

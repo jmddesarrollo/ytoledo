@@ -1,0 +1,80 @@
+/* You can add global styles to this file, and also import other style files */
+
+.hss-overflow {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    /* Se quita ancho al 100% por problemas con columna en tabla Permissions con 3 roles pq el primero lo alarga más que los otros dos, 
+        parece que no afecta comentar este atributo al resto de elementos al estar bien acotados el ancho */
+    /* width: 100%; */
+}
+
+.hss-bold {
+    font-weight: bold;
+}
+
+.hss-pointer {
+    cursor: pointer;
+}
+
+.hss-vertical-middle {
+    vertical-align: middle;
+}
+
+.hss-ico-letter {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 18px;
+    -webkit-text-stroke: 1px #000;
+    -webkit-text-fill-color: transparent;
+}
+
+.hss-p-tag>span {
+    max-width: 500px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    justify-content: left !important;
+}
+
+.p-invalid {
+    color: red;
+}
+
+.p-menu {
+    width: 220px !important;
+}
+
+.p-dialog-title {
+    color: blue;
+}
+
+p-tag span {
+    font-size: 1rem !important;
+}
+
+
+/* Quitar la barra de scrool en tabla si no es necesaria */
+
+.p-datatable-scrollable-body {
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+}
+
+
+/* On screens that are 1367px or greater */
+
+@media screen and (min-width: 1367px) {
+    /*  Mostrar en las ventanas emergentes los dropdown por fuera del formulario, en dispositivos grandes*/
+    .p-dialog-content {
+        overflow: visible !important;
+    }
+}
+
+
+/* On screens that are 1367px or less */
+
+@media screen and (max-width: 1367px) {
+    /*  Mostrar en las ventanas emergentes los dropdown con un máximo de 400 pixeles, en dispositivos medianos o pequeños*/
+    .p-multiselect-panel {
+        max-width: 400px !important;
+    }
+}

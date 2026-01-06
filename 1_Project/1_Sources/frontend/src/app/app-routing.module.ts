@@ -1,0 +1,36 @@
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+
+import { FilesComponent } from './components/files/files-upload/files.component';
+import { LoginComponent } from './components/session/login/login.component';
+import { PermissionsListComponent } from './components/permissions/permissions-list/permissions-list.component';
+import { RecoveryComponent } from './components/session/recovery/recovery.component';
+import { RedirectComponent } from './components/redirect/redirect.component';
+import { RouteDetailComponent } from './components/routes/route-detail/route-detail.component';
+import { RoutesListComponent } from './components/routes/routes-list/routes-list.component';
+import { UserMyprofileComponent } from './components/users/user-myprofile/user-myprofile.component';
+import { UsersListComponent } from './components/users/users-list/users-list.component';
+
+// Componentes de soporte
+// import { FilesComponent } from './components/files/files.component';
+
+const routes: Routes = [
+  { path: '', component: RedirectComponent, data: {titulo: 'Y-Toledo - Redirección'} },
+  { path: 'login', component: LoginComponent, data: {titulo: 'Y-Toledo - Inicio de sesión'}  },
+  { path: 'recovery/:token', component: RecoveryComponent, data: {titulo: 'Y-Toledo - Regenerar contraseña'} },
+  { path: 'users', component: UsersListComponent, data: {titulo: 'Y-Toledo - Usuarios'} },
+  { path: 'my-profile', component: UserMyprofileComponent, data: {titulo: 'Y-Toledo - Perfil del usuario'} },
+  { path: 'permissions', component: PermissionsListComponent, data: {titulo: 'Y-Toledo - Permisos'} },
+  { path: 'routes-list', component: RoutesListComponent, data: {titulo: 'Y-Toledo - Listado de rutas'} },
+  { path: 'route-detail', component: RouteDetailComponent, data: {titulo: 'Y-Toledo - Ruta'} },
+  { path: 'redirect', component: RedirectComponent, data: {titulo: 'Y-Toledo - Redirección'} },
+  { path: 'files', component: FilesComponent, data: {titulo: 'Y-Toledo - Ficheros'} },
+  { path: '404', component: RedirectComponent, data: {titulo: 'Y-Toledo - Redirección'} },
+  { path: '**', component: RedirectComponent, data: {titulo: 'Y-Toledo - Redirección'}  }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }

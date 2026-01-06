@@ -1,0 +1,37 @@
+<div>
+    <p-button label="Gestión de roles" class="w3-right w3-margin-bottom" (click)="roleManager()" [disabled]="!permissionWriting" id="hss-permissions-btn-manage-role"></p-button>
+</div>
+<div class="w3-clear"></div>
+
+<div id="div-table">
+
+    <table id="tablePermissions" class="w3-table" *ngIf="printTable" id="hss-permissions-table">
+        <tr id="hss-permissions-head">
+            <th class="headcol">Permisos</th>
+            <th style="max-width: 200px; min-width: 130px;" class="w3-center hss-overflow hss-permissions-th-rolename" *ngFor="let rol of roles">
+                <span title="{{rol.name}}" id="hss-permissions-th-rolename-{{rol.id}}">{{rol.name}}</span>
+            </th>
+        </tr>
+        <tr *ngFor="let permission of permissions" class="hss-permissions-body" id="hss-permissions-tr-{{permission.id}}">
+            <td class="headcol headtd">{{permission.detail}}</td>
+            <td class="w3-center" *ngFor="let role of roles; index as idx" style="max-width: 200px; min-width: 130px;">
+                <label title="Lectura">R: </label>
+                <input type="checkbox" [(ngModel)]="permission.roles[idx].reading" binary="true" inputId="binary" class="w3-margin-right perm-checkbox" (change)="checkPermission(permission.id, role.id, permission.roles[idx].reading, permission.roles[idx].writing)" [disabled]="role.id === adminRoleId || permission.roles[idx].writing || !permissionWriting"
+                    id="hss-permissions-check-R-{{permission.id}}" />
+                <label title="Escritura">W: </label>
+                <input type="checkbox" [(ngModel)]="permission.roles[idx].writing" binary="true" inputId="binary" class="perm-checkbox" (change)="checkPermission(permission.id, role.id, permission.roles[idx].reading, permission.roles[idx].writing)" [disabled]="role.id === adminRoleId || !permissionWriting"
+                    id="hss-permissions-check-W-{{permission.id}}" />
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div [hidden]="!roleDialog">
+    <p-dialog [(visible)]="roleDialog" [style]="{width: '550px'}" header="Gestión de roles" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false" (onHide)="actionHideDialog()">
+
+        <div class="w3-margin-top">
+            <app-roles-manager></app-roles-manager>
+        </div>
+
+    </p-dialog>
+</div>

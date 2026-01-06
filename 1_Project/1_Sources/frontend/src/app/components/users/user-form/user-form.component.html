@@ -1,0 +1,48 @@
+<form class="w3-container w3-panel" [formGroup]="forma" (ngSubmit)="saveData()" id="hss-useredit-form">
+    <div class="p-field">
+        <label for="username">Usuario</label>
+        <input pInputText type="text" formControlName="username" placeholder="Usuario" autofocus maxlength="45" id="hss-useredit-input-username" />
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['username'].touched && forma.controls['username'].errors?.required" id="hss-useredit-alert-username-req">El usuario es requerido<br></small>
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['username'] && forma.controls['username'].errors?.pattern && !forma.controls['username'].errors?.required" id="hss-useredit-alert-username-format">El usuario está con formato inválido.<br> Solo se permiten letras (a-z, A-Z), números (0-9), punto (.), guión medio (-) y guión bajo (_)<br></small>
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['username'] && forma.controls['username'].errors?.maxtext && !forma.controls['username'].errors?.required" id="hss-useredit-alert-username-max">El usuario supera los caracteres máximos permitidos (45)<br></small>
+    </div>
+    <div class="p-field">
+        <label for="name">Nombre</label>
+        <input pInputText type="text" formControlName="name" placeholder="Nombre del usuario" maxlength="100" id="hss-useredit-input-name" />
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['name'].touched && forma.controls['name'].errors?.required" id="hss-useredit-alert-name-req">El nombre es requerido<br></small>
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['name'] && forma.controls['name'].errors?.pattern && !forma.controls['name'].errors?.required" id="hss-useredit-alert-name-format">El nombre está con formato inválido.<br> Solo se permiten letras (a-z, A-Z), cedilla (ç, Ç), et (&), apóstrofe ('), punto (.), guión medio (-), guión bajo (_), vocales acentuadas y con diéresis (áéíóúäëïöü)<br></small>
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['name'] && forma.controls['name'].errors?.maxtext && !forma.controls['name'].errors?.required" id="hss-useredit-alert-name-max">El nombre supera los caracteres máximos permitidos (100)<br></small>
+    </div>
+    <div class="p-field">
+        <label for="lastname">Apellidos</label>
+        <input pInputText type="text" formControlName="lastname" placeholder="Apellidos del usuario" maxlength="100" id="hss-useredit-input-lastname" />
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['lastname'].touched && forma.controls['lastname'].errors?.required" id="hss-useredit-alert-lastname-req">Los apellidos son requeridos<br></small>
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['lastname'] && forma.controls['lastname'].errors?.pattern && !forma.controls['lastname'].errors?.required" id="hss-useredit-alert-lastname-format">Los apellidos están con formato inválido.<br> Solo se permiten letras (a-z, A-Z), cedilla (ç, Ç), et (&), apóstrofe ('), punto (.), guión medio (-), guión bajo (_), vocales acentuadas y con diéresis (áéíóúäëïöü)<br></small>
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['lastname'] && forma.controls['lastname'].errors?.maxtext && !forma.controls['lastname'].errors?.required" id="hss-useredit-alert-lastname-max">Los apellidos superan los caracteres máximos permitidos (100)<br></small>
+    </div>
+    <div class="p-field">
+        <label for="email">Email</label>
+        <input pInputText type="text" formControlName="email" placeholder="Email del usuario" maxlength="100" id="hss-useredit-input-email" />
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['email'].touched && forma.controls['email'].errors?.required" id="hss-useredit-alert-email-req">El email es requerido<br></small>
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['email'] && forma.controls['email'].errors?.maxtext && !forma.controls['email'].errors?.required" id="hss-useredit-alert-email-max">El email supera los caracteres máximos permitidos (100)<br></small>
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['email'] && forma.controls['email'].errors?.pattern && !forma.controls['email'].errors?.required && forma.controls['email'].touched" id="hss-useredit-alert-email-format">El email está con formato inválido<br></small>
+    </div>
+    <div class="p-field">
+        <label for="member_num">Número de socio</label>
+        <p-inputNumber formControlName="member_num" inputId="member_num" mode="decimal" [min]="1" [max]="9999" maxlength="4" (onInput)="onInputMemberNum($event)" id="hss-useredit-member_num"></p-inputNumber>
+        <small class="p-invalid" *ngIf="!forma.valid && forma.controls['member_num'] && forma.controls['member_num'].errors?.pattern" id="hss-usertedot-alert-member_num">El número de socio está con formato inválido.<br> Formato aceptado de 4 dígitos máximo<br></small>
+    </div>
+    <div class="p-field">
+        <label for="role">Rol</label>
+        <p-dropdown [options]="roles" [(ngModel)]="selectedRole" [ngModelOptions]="{standalone: true}" optionLabel="name" [style]="{'width':'100%'}" (onChange)="changeSelRole()" id="hss-useredit-dropdown-role"></p-dropdown>
+    </div>
+    <div class="p-field">
+        <label for="active" class="w3-margin-right">Activo</label>
+        <p-checkbox formControlName="active" binary="true" inputId="binary" id="hss-useredit-check-active"></p-checkbox>
+    </div>
+
+    <div class="w3-center w3-margin-top">
+        <button pButton pRipple type="submit" label="Guardar" [style]="{'width': '100px'}" class="w3-margin-right" [disabled]="!forma.valid || selectedRole.id === 0" id="hss-useredit-btn-submit"></button>
+        <button pButton pRipple type="button" label="Cancelar" [style]="{'width': '100px'}" class="p-button-warning w3-margin-right" (click)="cancelEmmiter()" id="hss-useredit-btn-cancel"></button>
+    </div>
+</form>

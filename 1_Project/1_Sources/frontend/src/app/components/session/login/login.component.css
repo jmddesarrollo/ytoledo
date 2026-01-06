@@ -1,0 +1,12 @@
+input {
+    min-width: 250px;
+}
+
+img {
+    width: 100px;
+}
+
+.login-form-container {
+    max-width: 400px;
+    margin: 0 auto;
+}

@@ -1,0 +1,29 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve -o",
+    "build": "ng build --prod",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^17.1.0",
+    "@angular/cli": "^17.1.0",
+    "@angular/platform-browser-dynamic": "^17.1.0",
+    "@angular/router": "^17.1.0",
+    "moment": "^2.30.1",
+    "ngx-socket-io": "^4.6.1",
+    "primeflex": "^3.3.1",
+    "primeicons": "^6.0.1",
+    "primeng": "^17.3.3",
+    "rxjs": "^7.8.1",
+    "zone.js": "^0.14.3"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^17.1.0"
+  }
+}

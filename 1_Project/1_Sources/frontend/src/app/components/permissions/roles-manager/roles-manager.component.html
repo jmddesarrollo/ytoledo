@@ -1,0 +1,54 @@
+<div class="card">
+    <form class="w3-container w3-panel" [formGroup]="formaRoleAdd" (ngSubmit)="addRole()" id="hss-role-form-add">
+        <div class="p-formgroup-inline">
+            <div class="p-field">
+                <input pInputTexttype="text" formControlName="name" placeholder="Nombre" autofocus maxlength="45" id="hss-role-input-add-name" />
+            </div>
+            <div class="p-field">
+                <button pButton pRipple type="submit" label="Añadir" [style]="{'width': '100px'}" class="w3-margin-left p-d-inline" [disabled]="!formaRoleAdd.valid" id="hss-role-btn-add"></button>
+            </div>
+        </div>
+        <div>
+            <small class="p-invalid" *ngIf="!formaRoleAdd.valid && formaRoleAdd.controls['name'] && formaRoleAdd.controls['name'].errors?.pattern && !formaRoleAdd.controls['name'].errors?.required" id="hss-role-alert-add-format">El nombre está con formato inválido.<br> Solo se permiten letras (a-z, A-Z), cedilla (ç, Ç), et (&), apóstrofe ('), punto (.), guión medio (-), guión bajo (_), vocales acentuadas y con diéresis (áéíóúäëïöü)<br></small>
+            <small class="p-invalid" *ngIf="!formaRoleAdd.valid && formaRoleAdd.controls['name'] && formaRoleAdd.controls['name'].errors?.maxtext && !formaRoleAdd.controls['name'].errors?.required" id="hss-role-alert-add-max">El nombre supera los caracteres máximos permitidos (45)<br></small>
+        </div>
+    </form>
+
+    <div id="div-table-role">
+        <form class="w3-container w3-panel" [formGroup]="formaRoleEdit" (ngSubmit)="editRole()" id="hss-role-form-edit">
+
+            <p-table [value]="roles" styleClass="p-datatable-striped" id="hss-role-table">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 350px">Nombre</th>
+                        <th style="width:8rem"></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-role>
+                    <tr id="hss-role-tr-{{role.id}}" class="hss-role-tr">
+                        <td *ngIf="editId !== role.id" (click)="changeEditId(role.id)" class="hss-overflow" title="{{role.name}}" style="width: 350px">{{role.name}}</td>
+                        <td *ngIf="editId === role.id" style="width: 350px">
+                            <input pInputTexttype="text" formControlName="name" placeholder="Nombre" autofocus maxlength="45" *ngIf="editId === role.id" />
+                            <br>
+                            <small class="p-invalid" *ngIf="!formaRoleEdit.valid && formaRoleEdit.controls['name'].errors?.required && formaRoleEdit.controls['name'].touched">El nombre es requerido<br></small>
+                            <small class="p-invalid" *ngIf="!formaRoleEdit.valid && formaRoleEdit.controls['name'] && formaRoleEdit.controls['name'].errors?.pattern && !formaRoleEdit.controls['name'].errors?.required">El nombre está con formato inválido.<br> Solo se permiten letras (a-z, A-Z), cedilla (ç, Ç), et (&), apóstrofe ('), punto (.), guión medio (-), guión bajo (_), vocales acentuadas y con diéresis (áéíóúäëïöü)<br></small>
+                            <small class="p-invalid" *ngIf="!formaRoleEdit.valid && formaRoleEdit.controls['name'] && formaRoleEdit.controls['name'].errors?.maxtext && !formaRoleEdit.controls['name'].errors?.required">El nombre supera los caracteres máximos permitidos (45)<br></small>
+                        </td>
+
+                        <td style="width:8rem; text-align:center">
+                            <button pButton pRipple type="button" icon="pi pi-pencil" class="p-button-rounded p-button-text" title="Editar el rol" *ngIf="editId !== role.id" (click)="changeEditId(role)"></button>
+                            <button pButton pRipple type="button" icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" title="Eliminar el rol" *ngIf="editId !== role.id && (role.id !== adminRoleId)" (click)="confirmDelRole(role, $event)"></button>
+
+                            <button pButton pRipple type="submit" icon="pi pi-check" class="p-button-rounded p-button-text p-button-success" title="Confirmar la edición del rol" *ngIf="editId === role.id" [disabled]="!formaRoleEdit.valid"></button>
+                            <button pButton pRipple type="button" icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger" title="Cancelar la edición del rol" *ngIf="editId === role.id" (click)="cancelRole()"></button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </form>
+    </div>
+
+</div>
+
+<!-- Ventana de Confirmación -->
+<p-confirmPopup></p-confirmPopup>

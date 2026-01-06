@@ -1,0 +1,49 @@
+<div class="p-grid ">
+
+    <div class="p-col-12 p-md-3 p-lg-3"></div>
+
+    <div class="p-col-12 p-md-6 p-lg-6">
+        <div class="w3-card-4" *ngIf="user">
+            <header class="w3-container w3-light-grey">
+                <h3 id="hss-myprofile-field-fullname"><span *ngIf="user.lastname">{{user.lastname}},</span> {{user.name}}</h3>
+            </header>
+
+            <div class="w3-margin-top">
+                <p-tabView [style]="{height:'100%'}" id="hss-myprofile-tabs">
+                    <p-tabPanel header="Datos generales" id="hss-myprofile-tab-general">
+                        <div class="w3-container w3-cell">
+                            <p>Usuario</p>
+                            <p>Nombre</p>
+                            <p>Apellidos</p>
+                            <p>Email</p>
+                            <p>Rol</p>
+                        </div>
+
+                        <div class="w3-container w3-cell">
+                            <p class="b hss-overflow hss-max-width" title="{{user.username}}" id="hss-myprofile-field-username">{{user.username}}</p>
+                            <p class="b hss-overflow hss-max-width" title="{{user.name}}" id="hss-myprofile-field-name">{{user.name}}</p>
+                            <p class="b hss-overflow hss-max-width" title="{{user.lastname}}" *ngIf="user.lastname" id="hss-myprofile-field-lastname">{{user.lastname}}</p>
+                            <p class="b hss-overflow hss-max-width" title="{{user.lastname}}" *ngIf="!user.lastname" id="hss-myprofile-field-lastname">-</p>
+                            <p class="b hss-overflow hss-max-width" title="{{user.email}}" id="hss-myprofile-field-email">{{user.email}}</p>
+                            <p *ngIf="user.role" class="b hss-overflow hss-max-width" title="{{user.role.name}}" id="hss-myprofile-field-role">{{user.role.name}}</p>
+                        </div>
+                    </p-tabPanel>
+                    <p-tabPanel header="Cambiar contraseña" id="hss-myprofile-tab-password">
+                        <div style="max-width: 500px;" class="hss-max-width" *ngIf="user.role">
+                            <app-user-form-password [user]="user" (cancel)="cancel($event)"></app-user-form-password>
+                        </div>
+                    </p-tabPanel>
+                </p-tabView>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="p-col-12 p-md-6 p-lg-3">
+        <div class="box">p-col-12 p-md-6 p-lg-3</div>
+    </div>
+    <div class="p-col-12 p-md-6 p-lg-3">
+        <div class="box">p-col-12 p-md-6 p-lg-3</div>
+    </div>
+    <div class="p-col-12 p-md-6 p-lg-3">
+        <div class="box">p-col-12 p-md-6 p-lg-3</div>
+    </div> -->
+</div>

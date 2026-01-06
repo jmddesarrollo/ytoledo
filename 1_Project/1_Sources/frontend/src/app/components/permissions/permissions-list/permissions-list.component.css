@@ -1,0 +1,59 @@
+th {
+    background-color: #F8F9FA;
+    color: #495057;
+
+    font-family: Helvetica, Arial, sans-serif, Symbol; 
+}
+tr:nth-child(odd) {
+    background-color: #F6F6F6;
+}
+
+#div-table {
+    height: 83vh;
+    overflow-x: auto;    
+ 
+    margin-left: 285px;
+    overflow-y: auto;
+    padding: 0;    
+    table-layout: fixed ;
+}
+
+.headcol {
+    position: absolute;
+    width: 300px;
+    left: 0;
+    top: auto;
+    border-top-width: 1px;
+    /*only relevant for first row*/
+    margin-top: -1px;
+    /*compensate for top border*/
+}
+.headcol:nth-child(odd) {
+    background-color: #F6F6F6;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+}
+
+
+/* .headcol {
+    position: absolute;
+    width: 280px;
+    left: 0;
+} */
+
+@media screen and (max-width: 64em) {
+    :host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+        top: 0px;
+    }
+}
+
+/* On screens that are 1367px or less */
+@media screen and (max-width: 1367px) {
+    #div-table {    
+        height: 75vh;
+    }
+}

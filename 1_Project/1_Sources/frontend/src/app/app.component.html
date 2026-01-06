@@ -1,0 +1,44 @@
+<!-- Contenedor del menú fijo -->
+<div class="fixed-menu-container">
+    <button
+        type="button"
+        pButton
+        icon="pi pi-bars"
+        label="{{ project }}"
+        (click)="menu.toggle($event)"
+        class="fixed-menu-button"
+    ></button>
+    <p-menu
+        #menu
+        [model]="items"
+        [popup]="true"
+        appendTo="body"
+    ></p-menu>
+</div>
+
+<!-- Contenido principal -->
+<div class="main-content">
+    <div class="p-grid">
+        <div class="p-col-8 center-col">
+            <div class="toolbar" role="banner">
+                <h3 class="w3-text-blue">{{ title }}</h3>
+            </div>
+        </div>
+        <div class="p-col-2">
+            <span class="w3-badge w3-right w3-margin-top w3-blue w3-margin-right" *ngIf="wrPermission === 'R'"
+                title="Permiso de lectura">
+                {{ wrPermission }}
+            </span>
+            <span class="w3-badge w3-right w3-margin-top w3-blue w3-margin-right" *ngIf="wrPermission === 'W'"
+                title="Permiso de lectura y escritura">
+                {{ wrPermission }}
+            </span>
+        </div>
+    </div>
+
+    <div class="w3-panel">
+        <router-outlet></router-outlet>
+    </div>
+</div>
+
+<p-toast></p-toast>
