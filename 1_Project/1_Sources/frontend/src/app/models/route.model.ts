@@ -16,6 +16,31 @@ export class RouteModel {
         public difficulty: string,
         public signUpLink?: string,
         public wikilocLink?: string,     
-        public wikilocMapLink?: string   
+        public wikilocMapLink?: string,
+        public userId?: number,
+        public createdAt?: Date,
+        public updatedAt?: Date
     ) {}
+
+    // Getter para compatibilidad con formato HH:MM
+    get estimatedDuration(): string {
+        if (this.estimatedDurationHours === undefined || this.estimatedDurationMinutes === undefined) {
+            return '';
+        }
+        const hours = this.estimatedDurationHours.toString().padStart(2, '0');
+        const minutes = this.estimatedDurationMinutes.toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
+    // Setter para compatibilidad con formato HH:MM
+    set estimatedDuration(duration: string) {
+        if (!duration) {
+            this.estimatedDurationHours = 0;
+            this.estimatedDurationMinutes = 0;
+            return;
+        }
+        const parts = duration.split(':');
+        this.estimatedDurationHours = parseInt(parts[0]) || 0;
+        this.estimatedDurationMinutes = parseInt(parts[1]) || 0;
+    }
 }

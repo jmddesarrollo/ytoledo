@@ -10,11 +10,110 @@ export default class RouteDAL {
 
     constructor() { }
 
-    public getRoutes() {
-        const routes = Routes.findAll({ raw: true, order: [['date', 'ASC']] })
+    public getRoutes(filters?: any) {
+        let whereClause: any = {};
+        let orderClause: any = [['date', 'ASC']];
+
+        // Aplicar filtros si se proporcionan
+        if (filters) {
+            if (filters.difficulty) {
+                whereClause.difficulty = filters.difficulty;
+            }
+
+            if (filters.minDistance || filters.maxDistance) {
+                whereClause.distance_km = {};
+                if (filters.minDistance) {
+                    whereClause.distance_km[Op.gte] = filters.minDistance;
+                }
+                if (filters.maxDistance) {
+                    whereClause.distance_km[Op.lte] = filters.maxDistance;
+                }
+            }
+
+            if (filters.search) {
+                whereClause[Op.or] = [
+                    { name: { [Op.like]: `%${filters.search}%` } },
+                    { description: { [Op.like]: `%${filters.search}%` } }
+                ];
+            }
+
+            if (filters.dateFrom) {
+                whereClause.date = whereClause.date || {};
+                whereClause.date[Op.gte] = filters.dateFrom;
+            }
+
+            if (filters.dateTo) {
+                whereClause.date = whereClause.date || {};
+                whereClause.date[Op.lte] = filters.dateTo;
+            }
+
+            // Ordenamiento personalizado
+            if (filters.orderBy) {
+                const direction = filters.orderDirection || 'ASC';
+                orderClause = [[filters.orderBy, direction]];
+            }
+        }
+
+        const queryOptions: any = {
+            where: whereClause,
+            order: orderClause,
+            raw: true
+        };
+
+        // Paginación
+        if (filters && filters.page && filters.limit) {
+            const offset = (filters.page - 1) * filters.limit;
+            queryOptions.limit = filters.limit;
+            queryOptions.offset = offset;
+        }
+
+        const routes = Routes.findAll(queryOptions)
             .catch(() => { throw new ControlException('Ha ocurrido un error al buscar las rutas', 500); });
 
         return routes;
+    }
+
+    public async getRoutesCount(filters?: any) {
+        let whereClause: any = {};
+
+        // Aplicar los mismos filtros que en getRoutes
+        if (filters) {
+            if (filters.difficulty) {
+                whereClause.difficulty = filters.difficulty;
+            }
+
+            if (filters.minDistance || filters.maxDistance) {
+                whereClause.distance_km = {};
+                if (filters.minDistance) {
+                    whereClause.distance_km[Op.gte] = filters.minDistance;
+                }
+                if (filters.maxDistance) {
+                    whereClause.distance_km[Op.lte] = filters.maxDistance;
+                }
+            }
+
+            if (filters.search) {
+                whereClause[Op.or] = [
+                    { name: { [Op.like]: `%${filters.search}%` } },
+                    { description: { [Op.like]: `%${filters.search}%` } }
+                ];
+            }
+
+            if (filters.dateFrom) {
+                whereClause.date = whereClause.date || {};
+                whereClause.date[Op.gte] = filters.dateFrom;
+            }
+
+            if (filters.dateTo) {
+                whereClause.date = whereClause.date || {};
+                whereClause.date[Op.lte] = filters.dateTo;
+            }
+        }
+
+        const count = await Routes.count({ where: whereClause })
+            .catch(() => { throw new ControlException('Ha ocurrido un error al contar las rutas', 500); });
+
+        return count;
     }
 
     public getRoute(id: number) {

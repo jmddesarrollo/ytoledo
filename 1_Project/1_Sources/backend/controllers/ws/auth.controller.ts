@@ -7,7 +7,7 @@ import AuthorizedMiddleware from '../../server/middlewares/authorized.middleware
 
 // EMAIL
 import mailSMTPClass from '../../server/mail/sendSMTP.mail';
-const env = process.env.JMD_NODE_ENV || 'development';
+const env = process.env.YTO_NODE_ENV || 'development';
 const config = require('../../config/config')[env];
 var path = require('path');
 //
@@ -125,7 +125,7 @@ export class AuthController {
             const dirLogoGreen = path.resolve('./files/images/logo_green.jpg');
 
             let message = {
-                from: process.env.JMD_MAILER_USER,
+                from: process.env.YTO_MAILER_USER,
                 to: user.email,
                 subject: '[YToledo - Club de Senderismo] Regenerar la contraseña',
                 html: `

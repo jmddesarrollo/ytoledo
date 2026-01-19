@@ -7,6 +7,7 @@ import { PermissionsListComponent } from './components/permissions/permissions-l
 import { RecoveryComponent } from './components/session/recovery/recovery.component';
 import { RedirectComponent } from './components/redirect/redirect.component';
 import { RouteDetailComponent } from './components/routes/route-detail/route-detail.component';
+import { RouteFormComponent } from './components/routes/route-form/route-form.component';
 import { RoutesListComponent } from './components/routes/routes-list/routes-list.component';
 import { UserMyprofileComponent } from './components/users/user-myprofile/user-myprofile.component';
 import { UsersListComponent } from './components/users/users-list/users-list.component';
@@ -21,8 +22,17 @@ const routes: Routes = [
   { path: 'users', component: UsersListComponent, data: {titulo: 'Y-Toledo - Usuarios'} },
   { path: 'my-profile', component: UserMyprofileComponent, data: {titulo: 'Y-Toledo - Perfil del usuario'} },
   { path: 'permissions', component: PermissionsListComponent, data: {titulo: 'Y-Toledo - Permisos'} },
-  { path: 'routes-list', component: RoutesListComponent, data: {titulo: 'Y-Toledo - Listado de rutas'} },
-  { path: 'route-detail', component: RouteDetailComponent, data: {titulo: 'Y-Toledo - Ruta'} },
+  
+  // Rutas de gestión de rutas
+  { path: 'routes', component: RoutesListComponent, data: {titulo: 'Y-Toledo - Gestión de Rutas'} },
+  { path: 'routes/create', component: RouteFormComponent, data: {titulo: 'Y-Toledo - Nueva Ruta'} },
+  { path: 'routes/edit/:id', component: RouteFormComponent, data: {titulo: 'Y-Toledo - Editar Ruta'} },
+  { path: 'routes/detail/:id', component: RouteDetailComponent, data: {titulo: 'Y-Toledo - Detalle de Ruta'} },
+  
+  // Rutas legacy (mantener compatibilidad)
+  { path: 'routes-list', redirectTo: '/routes', pathMatch: 'full' },
+  { path: 'route-detail', redirectTo: '/routes', pathMatch: 'full' },
+  
   { path: 'redirect', component: RedirectComponent, data: {titulo: 'Y-Toledo - Redirección'} },
   { path: 'files', component: FilesComponent, data: {titulo: 'Y-Toledo - Ficheros'} },
   { path: '404', component: RedirectComponent, data: {titulo: 'Y-Toledo - Redirección'} },

@@ -11,12 +11,13 @@ module.exports = {
         "permission_permissions_manager": 1,
         "permission_users_manager": 2,
         "permission_files_manager": 3,
-        "JMD": {
-            "username": process.env.JMD_BD_USER,
-            "password": process.env.JMD_BD_PASSWORD,
+        "permission_routes_manager": 4,
+        "YTO": {
+            "username": process.env.YTO_BD_USER,
+            "password": process.env.YTO_BD_PASSWORD,
             "database": `y-toledo`,
             "options": {
-                "host": process.env.JMD_BD_HOST,
+                "host": process.env.YTO_BD_HOST,
                 "port": "3306",
                 "dialect": "mysql",
                 "logging": false,
@@ -30,7 +31,7 @@ module.exports = {
         }
     },
     "production": {
-        "url": `http://194.164.165.161:${process.env.JMD_SERVER_PORT}`,
+        "url": `http://194.164.165.161:${process.env.YTO_SERVER_PORT}`,
         "autocommit": false,
         "roleAdmin": 1,
         "userIdAdmin": 1,
@@ -41,12 +42,13 @@ module.exports = {
         "permission_permissions_manager": 1,
         "permission_users_manager": 2,
         "permission_files_manager": 3,
-        "JMD": {
-            "username": process.env.JMD_BD_USER,
-            "password": process.env.JMD_BD_PASSWORD,
+        "permission_routes_manager": 4,
+        "YTO": {
+            "username": process.env.YTO_BD_USER,
+            "password": process.env.YTO_BD_PASSWORD,
             "database": "y-toledo",
             "options": {
-                "host": process.env.JMD_BD_HOST,
+                "host": process.env.YTO_BD_HOST,
                 "port": "3306",
                 "dialect": "mysql",
                 "logging": false,

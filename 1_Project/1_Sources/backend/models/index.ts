@@ -2,11 +2,11 @@ var fs = require('fs');
 var path = require('path');
 var Sequelize = require('sequelize');
 var basename = path.basename(__filename);
-var env = process.env.JMD_NODE_ENV || 'development';
+var env = process.env.YTO_NODE_ENV || 'development';
 var config = require('../config/config')[env];
 var db: any = {};
 
-var sequelize = new Sequelize(config.JMD.database, config.JMD.username, config.JMD.password, config.JMD.options);
+var sequelize = new Sequelize(config.YTO.database, config.YTO.username, config.YTO.password, config.YTO.options);
 
 fs
     .readdirSync(__dirname)

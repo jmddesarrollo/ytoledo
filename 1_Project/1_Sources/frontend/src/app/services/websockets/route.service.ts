@@ -9,8 +9,8 @@ export class RouteService {
   constructor(private wsService: WebsocketService) {
   }
 
-  getRoutes(): void {
-    this.wsService.emit('route/getRoutes', {});
+  getRoutes(filters?: any): void {
+    this.wsService.emit('route/getRoutes', { filters });
   }
   onGetRoutes(): Observable<RouteModel[]> {
     return this.wsService.listen('route/getRoutes');

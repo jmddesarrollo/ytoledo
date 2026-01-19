@@ -1,29 +1,197 @@
-<p-card header="Rutas de Invierno del 2026" class="custom-card">
-    <p-table
-        [value]="routes"
-        [responsiveLayout]="'scroll'"
-        [tableStyle]="{ 'min-width': '60rem' }"
-        class="custom-table"
-        styleClass="p-datatable-striped"
-    >
-        <!-- Encabezado -->
-        <ng-template pTemplate="header">
-            <tr>
-                <th>Fecha</th>
-                <th>Ruta</th>
-            </tr>
-        </ng-template>
+<div class="routes-management">
+  <!-- Header con título y botón crear -->
+  <div class="w3-row w3-margin-bottom">
+    <div class="w3-col l8 m8 s12">
+      <h2>Gestión de Rutas</h2>
+    </div>
+    <div class="w3-col l4 m4 s12 w3-right-align">
+      <button class="w3-button w3-green w3-round" (click)="createRoute()">
+        <i class="fa fa-plus"></i> Nueva Ruta
+      </button>
+    </div>
+  </div>
 
-        <!-- Cuerpo -->
-        <ng-template pTemplate="body" let-route>
-            <tr>
+  <!-- Filtros -->
+  <div class="w3-card w3-white w3-margin-bottom">
+    <div class="w3-container w3-padding">
+      <h4>Filtros de Búsqueda</h4>
+      
+      <div class="w3-row-padding">
+        <!-- Búsqueda por texto -->
+        <div class="w3-col l3 m6 s12">
+          <label>Buscar:</label>
+          <input 
+            class="w3-input w3-border w3-round" 
+            type="text" 
+            [(ngModel)]="filters.search"
+            (input)="onFilterChange()"
+            placeholder="Nombre o descripción...">
+        </div>
+
+        <!-- Filtro por dificultad -->
+        <div class="w3-col l3 m6 s12">
+          <label>Dificultad:</label>
+          <select 
+            class="w3-select w3-border w3-round" 
+            [(ngModel)]="filters.difficulty"
+            (change)="onFilterChange()">
+            <option *ngFor="let diff of difficulties" [value]="diff.value">
+              {{ diff.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Distancia mínima -->
+        <div class="w3-col l2 m6 s12">
+          <label>Distancia mín (km):</label>
+          <input 
+            class="w3-input w3-border w3-round" 
+            type="number" 
+            [(ngModel)]="filters.minDistance"
+            (input)="onFilterChange()"
+            placeholder="0">
+        </div>
+
+        <!-- Distancia máxima -->
+        <div class="w3-col l2 m6 s12">
+          <label>Distancia máx (km):</label>
+          <input 
+            class="w3-input w3-border w3-round" 
+            type="number" 
+            [(ngModel)]="filters.maxDistance"
+            (input)="onFilterChange()"
+            placeholder="100">
+        </div>
+
+        <!-- Botón limpiar filtros -->
+        <div class="w3-col l2 m12 s12">
+          <label>&nbsp;</label>
+          <button 
+            class="w3-button w3-light-grey w3-round w3-block" 
+            (click)="clearFilters()">
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de rutas -->
+  <div class="w3-card w3-white">
+    <div class="w3-container w3-padding">
+      
+      <!-- Loading indicator -->
+      <div *ngIf="loading" class="w3-center w3-padding">
+        <i class="fa fa-spinner fa-spin fa-2x"></i>
+        <p>Cargando rutas...</p>
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="!loading">
+        <div class="w3-responsive">
+          <table class="w3-table-all w3-hoverable">
+            <thead>
+              <tr class="w3-blue">
+                <th>Fecha</th>
+                <th>Nombre</th>
+                <th>Punto de Inicio</th>
+                <th>Dificultad</th>
+                <th>Distancia</th>
+                <th>Duración</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let route of routes">
+                <td>{{ formatDate(route.date) }}</td>
                 <td>
-                    <span class="date">{{ route.date }}</span>
+                  <strong>{{ route.name }}</strong>
+                  <div *ngIf="route.description" class="w3-small w3-text-grey">
+                    {{ route.description.length > 100 ? (route.description | slice:0:100) + '...' : route.description }}
+                  </div>
                 </td>
+                <td>{{ route.startPoint || 'N/A' }}</td>
                 <td>
-                    <span class="route-name">{{ route.name }}</span>
+                  <span class="w3-tag w3-round" 
+                        [ngClass]="{
+                          'w3-green': route.difficulty === 'Fácil',
+                          'w3-yellow': route.difficulty === 'Moderada',
+                          'w3-orange': route.difficulty === 'Difícil',
+                          'w3-red': route.difficulty === 'Muy Difícil',
+                          'w3-grey': !route.difficulty
+                        }">
+                    {{ route.difficulty || 'N/A' }}
+                  </span>
                 </td>
-            </tr>
-        </ng-template>
-    </p-table>
-</p-card>
+                <td>{{ formatDistance(route.distanceKm) }}</td>
+                <td>{{ route.estimatedDurationHours }}:{{ route.estimatedDurationMinutes || 'N/A' }}</td>
+                <td>
+                  <button 
+                    class="w3-button w3-small w3-blue w3-round w3-margin-right" 
+                    (click)="viewRoute(route)"
+                    title="Ver detalles">
+                    <i class="fa fa-eye"></i>
+                  </button>
+                  <button 
+                    class="w3-button w3-small w3-orange w3-round w3-margin-right" 
+                    (click)="editRoute(route)"
+                    title="Editar">
+                    <i class="fa fa-edit"></i>
+                  </button>
+                  <button 
+                    class="w3-button w3-small w3-red w3-round" 
+                    (click)="deleteRoute(route)"
+                    title="Eliminar">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              
+              <!-- Mensaje cuando no hay rutas -->
+              <tr *ngIf="routes.length === 0">
+                <td colspan="7" class="w3-center w3-padding">
+                  <p>No se encontraron rutas con los filtros aplicados.</p>
+                  <button class="w3-button w3-green w3-round" (click)="createRoute()">
+                    Crear Primera Ruta
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        <div *ngIf="totalPages > 1" class="w3-center w3-margin-top">
+          <div class="w3-bar">
+            <button 
+              class="w3-button w3-hover-blue" 
+              [disabled]="currentPage === 1"
+              (click)="onPageChange(currentPage - 1)">
+              « Anterior
+            </button>
+            
+            <button 
+              *ngFor="let page of [].constructor(totalPages); let i = index"
+              class="w3-button w3-hover-blue"
+              [ngClass]="{'w3-blue': currentPage === i + 1}"
+              (click)="onPageChange(i + 1)">
+              {{ i + 1 }}
+            </button>
+            
+            <button 
+              class="w3-button w3-hover-blue" 
+              [disabled]="currentPage === totalPages"
+              (click)="onPageChange(currentPage + 1)">
+              Siguiente »
+            </button>
+          </div>
+          
+          <p class="w3-small w3-text-grey w3-margin-top">
+            Página {{ currentPage }} de {{ totalPages }} 
+            ({{ totalRecords }} rutas en total)
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

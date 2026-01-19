@@ -2,7 +2,7 @@ import ControlException from '../../utils/controlException';
 
 // EMAIL
 import mailSMTPClass from '../../server/mail/sendSMTP.mail';
-const env = process.env.JMD_NODE_ENV || 'development';
+const env = process.env.YTO_NODE_ENV || 'development';
 const config = require('../../config/config')[env];
 const path = require('path');
 //

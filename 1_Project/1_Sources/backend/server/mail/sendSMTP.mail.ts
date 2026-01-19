@@ -27,8 +27,8 @@ export default class mailSMTPClass {
             port: process.env.JMD_MAILER_PORT,
             secure: false,
             auth: {
-                user: process.env.JMD_MAILER_USER,
-                pass: process.env.JMD_MAILER_PASSWORD
+                user: process.env.YTO_MAILER_USER,
+                pass: process.env.YTO_MAILER_PASSWORD
             },
             connectionTimeout: 120000
         };

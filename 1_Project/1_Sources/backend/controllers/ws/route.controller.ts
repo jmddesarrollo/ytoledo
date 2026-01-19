@@ -6,7 +6,7 @@ import { RouteService } from '../../services/route';
 
 import AuthorizedMiddleware from '../../server/middlewares/authorized.middleware';
 
-const env = process.env.JMD_NODE_ENV || 'development';
+const env = process.env.YTO_NODE_ENV || 'development';
 const config = require('../../config/config')[env];
 
 const sequelize = require('../../models').sequelize;
@@ -25,7 +25,10 @@ export class RouteController {
 
     public async getRoutes(req: any, socket: Socket ) {
         try {
-            const data = await this.routeService.getRoutes();
+            // Extraer filtros de la request
+            const filters = req.filters || {};
+            
+            const data = await this.routeService.getRoutes(filters);
             
             socket.emit("route/getRoutes", { data, message: 'Las rutas se han consultado correctamente' });
         } catch(error) {

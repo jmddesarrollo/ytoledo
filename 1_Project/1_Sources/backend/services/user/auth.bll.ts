@@ -53,7 +53,7 @@ export default class AuthService {
         user.password = undefined;
     
         // Crear token: objeto, contraseña secreta general de encriptación, tiempo de expiración
-        var token = jwt.sign({ user }, process.env.JMD_SEED, { expiresIn: process.env.JMD_EXPIRATION_TOKEN });
+        var token = jwt.sign({ user }, process.env.YTO_SEED, { expiresIn: process.env.YTO_EXPIRATION_TOKEN });
     
         let data = new Object;
         data = {
@@ -71,7 +71,7 @@ export default class AuthService {
         const user = await this.usersDAL.getUser(req.user.id); 
         user.password = undefined;
 
-        var token = jwt.sign({ user }, process.env.JMD_SEED, { expiresIn: process.env.JMD_EXPIRATION_TOKEN });
+        var token = jwt.sign({ user }, process.env.YTO_SEED, { expiresIn: process.env.YTO_EXPIRATION_TOKEN });
 
         let data = new Object;
         data = {
@@ -86,7 +86,7 @@ export default class AuthService {
     // Token para recuperar contraseña
     // =====================================
     public recoveryToken(req: any) {
-        var token = jwt.sign({ user: req.user }, process.env.JMD_SEED, { expiresIn: process.env.JMD_EXPIRATION_TOKEN_RECOVERY });
+        var token = jwt.sign({ user: req.user }, process.env.YTO_SEED, { expiresIn: process.env.YTO_EXPIRATION_TOKEN_RECOVERY });
     
         return token;
     }

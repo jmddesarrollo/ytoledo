@@ -1,0 +1,181 @@
+/* Contenedor principal */
+.route-form-container {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Secciones del formulario */
+.form-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  color: #007ad9;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  border-left: 4px solid #007ad9;
+  padding-left: 0.75rem;
+}
+
+/* Etiquetas de campos */
+.field-label {
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Campos del formulario */
+.route-form-container input,
+.route-form-container select,
+.route-form-container textarea {
+  margin-bottom: 0.5rem;
+  transition: border-color 0.3s ease;
+}
+
+.route-form-container input:focus,
+.route-form-container select:focus,
+.route-form-container textarea:focus {
+  border-color: #007ad9 !important;
+  box-shadow: 0 0 5px rgba(0, 122, 217, 0.3);
+}
+
+/* Estados de validación */
+.w3-border-red {
+  border-color: #f44336 !important;
+}
+
+.error-message {
+  color: #f44336;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Botones de acción */
+.form-actions {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e5e5e5;
+}
+
+.form-actions button {
+  height: 45px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.form-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading spinner */
+.fa-spinner {
+  color: #007ad9;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .route-form-container {
+    padding: 0.5rem;
+  }
+  
+  .route-form-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .w3-right-align {
+    text-align: left !important;
+    margin-top: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+  }
+  
+  .form-actions .w3-col {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Mejoras visuales */
+.w3-card {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.w3-panel {
+  border-radius: 6px;
+}
+
+/* Placeholder styling */
+.route-form-container input::placeholder,
+.route-form-container textarea::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+/* Campos numéricos */
+input[type="number"] {
+  text-align: right;
+}
+
+/* Textarea específico */
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Estilos para campos requeridos */
+.field-label::after {
+  content: "";
+}
+
+.field-label:has(+ input[required])::after,
+.field-label:has(+ select[required])::after,
+.field-label:has(+ textarea[required])::after {
+  content: " *";
+  color: #f44336;
+}
+
+/* Animaciones suaves */
+.route-form-container * {
+  transition: all 0.2s ease;
+}
+
+/* Estilos para campos válidos */
+.w3-input:valid:not(:placeholder-shown) {
+  border-color: #4caf50;
+}
+
+/* Hover effects */
+.route-form-container input:hover,
+.route-form-container select:hover,
+.route-form-container textarea:hover {
+  border-color: #007ad9;
+}
+
+/* Focus states mejorados */
+.route-form-container input:focus,
+.route-form-container select:focus,
+.route-form-container textarea:focus {
+  outline: none;
+  border-width: 2px;
+}

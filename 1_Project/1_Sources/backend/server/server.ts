@@ -34,13 +34,13 @@ export default class Server {
     // y evitar otras instancias accidentales en la aplicación
     private constructor() {
         this.app = express();
-        this.port = Number(process.env.JMD_SERVER_PORT);
-        this.url = process.env.JMD_SERVER_URL || '0.0.0.0';
+        this.port = Number(process.env.YTO_SERVER_PORT);
+        this.url = process.env.YTO_SERVER_URL || '0.0.0.0';
 
         this.httpServer = new http.Server(this.app);
 
         // Conexión Socket como Servidor
-        this.io = require("socket.io")(this.httpServer, { path: "/" + process.env.JMD_SERVICE_NAME });
+        this.io = require("socket.io")(this.httpServer, { path: "/" + process.env.YTO_SERVICE_NAME });
 
         this.listenSockets();
 
@@ -56,8 +56,8 @@ export default class Server {
 
     private listenSockets() {
         console.log('*********');
-        console.log('ENTORNO: ' + process.env.JMD_NODE_ENV);
-        console.log('PUERTO: ' + process.env.JMD_SERVER_PORT);
+        console.log('ENTORNO: ' + process.env.YTO_NODE_ENV);
+        console.log('PUERTO: ' + process.env.YTO_SERVER_PORT);
         console.log('VERSION NODE: ' + process.version);
         console.log('*********');
         console.log('Escuchando conexiones');
@@ -80,6 +80,6 @@ export default class Server {
     }
 
     public start(callback: any) {
-        this.httpServer.listen(this.port, process.env.JMD_SERVER_URL, callback);
+        this.httpServer.listen(this.port, process.env.YTO_SERVER_URL, callback);
     }
 }

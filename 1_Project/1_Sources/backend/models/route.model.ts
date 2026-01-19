@@ -26,6 +26,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
             type: DataTypes.DECIMAL(5,2),
             allowNull: true
         },
+        distance_m: {
+            type: DataTypes.INTEGER(11),
+            allowNull: true
+        },
         elevation_gain: {
             type: DataTypes.INTEGER(11),
             allowNull: true
@@ -38,8 +42,12 @@ module.exports = (sequelize: any, DataTypes: any) => {
             type: DataTypes.INTEGER(11),
             allowNull: true
         },
-        estimated_duration: {
-            type: DataTypes.STRING(5),
+        estimated_duration_hours: {
+            type: DataTypes.INTEGER(2),
+            allowNull: true
+        },
+        estimated_duration_minutes: {
+            type: DataTypes.INTEGER(2),
             allowNull: true
         },
         type: {

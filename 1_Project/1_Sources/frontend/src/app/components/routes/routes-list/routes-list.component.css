@@ -1,51 +1,78 @@
-/* Estilo para la tarjeta */
-.custom-card {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
+/* Contenedor principal */
+.routes-management {
+  padding: 1rem;
 }
 
-/* Tabla personalizada */
-.custom-table {
-    font-size: 1rem;
-    border-radius: 8px;
-    overflow: hidden;
+/* Estilos para filtros */
+.routes-management label {
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 0.25rem;
 }
 
-.custom-table thead th {
-    background-color: #007ad9; /* Color del encabezado */
-    color: white;
-    text-align: left;
-    padding: 0.75rem;
-    font-weight: bold;
-    font-size: 1.1rem;
-    border: none;
+.routes-management input,
+.routes-management select {
+  margin-bottom: 0.5rem;
 }
 
-.custom-table tbody tr {
-    background-color: white;
-    border-bottom: 1px solid #e5e5e5;
-    transition: background-color 0.3s;
+/* Tabla responsive */
+.w3-responsive {
+  overflow-x: auto;
 }
 
-.custom-table tbody tr:hover {
-    background-color: #f0f8ff; /* Color al pasar el cursor */
+/* Estilos para tags de dificultad */
+.w3-tag {
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 
-.custom-table tbody td {
-    padding: 0.75rem;
-    color: #333;
-    vertical-align: middle;
+/* Botones de acción */
+.routes-management button {
+  margin: 0.1rem;
 }
 
-/* Estilos específicos para las columnas */
-.date {
-    font-weight: bold;
-    color: #007ad9;
+/* Loading spinner */
+.fa-spinner {
+  color: #007ad9;
 }
 
-.route-name {
-    font-style: italic;
-    color: #555;
+/* Paginación */
+.w3-bar button {
+  margin: 0.1rem;
+}
+
+.w3-bar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .routes-management h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .w3-right-align {
+    text-align: left !important;
+    margin-top: 1rem;
+  }
+  
+  .w3-button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .w3-col.l2,
+  .w3-col.l3 {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Estilos para descripción truncada */
+.w3-small {
+  font-size: 0.85rem;
+  line-height: 1.2;
+  margin-top: 0.25rem;
 }

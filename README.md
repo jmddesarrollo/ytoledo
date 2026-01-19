@@ -1,4 +1,4 @@
-# TrailManager
+# Y-TOLEDO CLUB DE SENDERISMO
 Aplicación para la gestión de rutas de senderismo.
 
 # Descripción

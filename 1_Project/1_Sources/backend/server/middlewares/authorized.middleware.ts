@@ -30,7 +30,7 @@ export default class AuthorizedMiddleware {
             next(new Error('El usuario no ha iniciado sesión')); 
         }
     
-        jwt.verify(token, process.env.JMD_SEED, (err: any, decoded: any) => {
+        jwt.verify(token, process.env.YTO_SEED, (err: any, decoded: any) => {
             if (err) {
                 if (err.name && err.name === 'TokenExpiredError') {
                     next(new Error('El tiempo de conexión ha expirado'));                                      
@@ -55,7 +55,7 @@ export default class AuthorizedMiddleware {
             throw new ControlException('El usuario no tiene inicio de sesión', 401); 
         }
     
-        jwt.verify(token, process.env.JMD_SEED, (err: any, decoded: any) => {
+        jwt.verify(token, process.env.YTO_SEED, (err: any, decoded: any) => {
             if (err) {
                 if (err.name && err.name === 'TokenExpiredError') {
                     socket.emit("auth/logout", {});
