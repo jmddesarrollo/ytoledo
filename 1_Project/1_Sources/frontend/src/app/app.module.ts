@@ -68,9 +68,11 @@ import { PermissionsListComponent } from './components/permissions/permissions-l
 import { RecoveryComponent } from './components/session/recovery/recovery.component';
 import { RedirectComponent } from './components/redirect/redirect.component';
 import { RolesManagerComponent } from './components/permissions/roles-manager/roles-manager.component';
+import { NextRouteComponent } from './components/routes/next-route/next-route.component';
 import { RouteDetailComponent } from './components/routes/route-detail/route-detail.component';
 import { RouteFormComponent } from './components/routes/route-form/route-form.component';
 import { RoutesListComponent } from './components/routes/routes-list/routes-list.component';
+import { RoutesPublicComponent } from './components/routes/routes-public/routes-public.component';
 import { UserFormComponent } from './components/users/user-form/user-form.component';
 import { UserFormPasswordComponent } from './components/users/user-form-password/user-form-password.component';
 import { UserMyprofileComponent } from './components/users/user-myprofile/user-myprofile.component';
@@ -88,9 +90,11 @@ import { UsersListComponent } from './components/users/users-list/users-list.com
     RecoveryComponent,
     PermissionsListComponent,
     RolesManagerComponent,    
+    NextRouteComponent,
     ReversePipe,
     RedirectComponent,
     RoutesListComponent,
+    RoutesPublicComponent,
     RouteDetailComponent,
     RouteFormComponent    
   ],

@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { TitleShareService } from '../../../services/share/title.service';
 import { RouteService } from '../../../services/websockets/route.service';
 import { RouteModel } from '../../../models/route.model';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-routes-list',
@@ -44,7 +45,8 @@ export class RoutesListComponent implements OnInit, OnDestroy {
   constructor(
     private titleShareService: TitleShareService,
     private routeService: RouteService,
-    private router: Router
+    private router: Router,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -93,11 +95,60 @@ export class RoutesListComponent implements OnInit, OnDestroy {
     const deleteRouteSub = this.routeService.onDeleteRoute().subscribe(
       (response: any) => {
         console.log('Route deleted:', response);
-        this.loadRoutes(); // Recargar lista
+        
+        // Mostrar mensaje de éxito
+        if (response.message) {
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: 'Eliminación', 
+            detail: response.message, 
+            life: 2000 
+          });
+        }
+        
+        // Recargar lista para actualizar la tabla
+        this.loadRoutes();
+      },
+      (error) => {
+        console.error('Error deleting route:', error);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'Error al eliminar la ruta', 
+          life: 3000 
+        });
       }
     );
 
-    this.subscriptions.push(getRoutesSub, deleteRouteSub);
+    // Suscripción para escuchar eliminaciones de otros usuarios (websockets)
+    const broadcastDeleteSub = this.routeService.onDeleteRoute().subscribe(
+      (response: any) => {
+        // Solo recargar si no es la eliminación que iniciamos nosotros
+        if (response.data && response.data.route) {
+          this.loadRoutes(); // Actualizar lista en tiempo real
+        }
+      }
+    );
+
+    // Suscripción para escuchar creaciones de otros usuarios (websockets)
+    const addRouteSub = this.routeService.onAddRoute().subscribe(
+      (response: any) => {
+        if (response.data) {
+          this.loadRoutes(); // Actualizar lista cuando se crea una nueva ruta
+        }
+      }
+    );
+
+    // Suscripción para escuchar ediciones de otros usuarios (websockets)
+    const editRouteSub = this.routeService.onEditRoute().subscribe(
+      (response: any) => {
+        if (response.data) {
+          this.loadRoutes(); // Actualizar lista cuando se edita una ruta
+        }
+      }
+    );
+
+    this.subscriptions.push(getRoutesSub, deleteRouteSub, broadcastDeleteSub, addRouteSub, editRouteSub);
   }
 
   loadRoutes(): void {
@@ -159,8 +210,27 @@ export class RoutesListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/routes/create']);
   }
 
-  formatDistance(distance: number): string {
-    return distance ? `${distance} km` : 'N/A';
+  formatDistance(route: any): string {
+    const distance = route.distanceKm ?? route['distance_km'] ?? 0;
+    return (distance !== null && distance !== undefined) ? `${distance} km` : 'N/A';
+  }
+
+  formatDuration(route: any): string {
+    if (!route) return 'N/A';
+    
+    const hours = route.estimatedDurationHours ?? route['estimated_duration_hours'] ?? 0;
+    const minutes = route.estimatedDurationMinutes ?? route['estimated_duration_minutes'] ?? 0;
+    
+    if (hours > 0 || minutes > 0) {
+      const hoursStr = hours.toString().padStart(2, '0');
+      const minutesStr = minutes.toString().padStart(2, '0');
+      return `${hoursStr}:${minutesStr}`;
+    }
+    return 'N/A';
+  }
+
+  getStartPoint(route: any): string {
+    return route.startPoint || route['start_point'] || 'N/A';
   }
 
   formatDate(date: string): string {

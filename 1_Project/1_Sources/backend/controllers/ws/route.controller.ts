@@ -63,12 +63,17 @@ export class RouteController {
 
             console.log('RouteController - getNextRoute - data', data);
             
-            socket.emit("route/getNextRoute", { data, message: 'La próxima ruta se ha consultado correctamente' });
+            if (data) {
+                socket.emit("route/getNextRoute", { data, message: 'La próxima ruta se ha consultado correctamente' });
+            } else {
+                socket.emit("route/getNextRoute", { data: null, message: 'No hay rutas programadas próximamente' });
+            }
         } catch(error) {
+            console.error('Error en getNextRoute:', error);
             if (error instanceof ControlException) {
                 socket.emit("error_message", { message: error.message, code: error.code });
             } else {
-                socket.emit("error_message", { message: "Error no controlado" });
+                socket.emit("error_message", { message: "Error no controlado al obtener la próxima ruta" });
             }
         }
     }
@@ -85,7 +90,10 @@ export class RouteController {
             const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
             
-            const data = await this.routeService.addRoute(route, t);
+            // Obtener el user_id del token decodificado (está en tokenDecoded.user.id)
+            const userId = tokenDecoded.user.id;
+            
+            const data = await this.routeService.addRoute(route, t, userId);
     
             t.commit();
     
@@ -94,9 +102,11 @@ export class RouteController {
         } catch(error) {
             t.rollback();
 
+            console.error('RouteController.addRoute - Error:', error);
             if (error instanceof ControlException) {
                 socket.emit("error_message", { message: error.message, code: error.code });
             } else {
+                console.error('Error no controlado en addRoute:', error);
                 socket.emit("error_message", { message: "Error no controlado" });
             }
         }
@@ -116,7 +126,7 @@ export class RouteController {
 
             const routePrev = await this.routeService.getRoute(route.id);
 
-            const data     = await this.routeService.editRoute(route, t);
+            const data = await this.routeService.editRoute(route, t);
     
             t.commit();
     
@@ -125,6 +135,7 @@ export class RouteController {
         } catch(error) {
             t.rollback();
 
+            console.error('RouteController.editRoute - Error:', error);
             if (error instanceof ControlException) {
                 socket.emit("error_message", { message: error.message, code: error.code });
             } else {
@@ -157,6 +168,7 @@ export class RouteController {
         } catch(error) {
             t.rollback();
 
+            console.error('RouteController.deleteRoute - Error:', error);
             if (error instanceof ControlException) {
                 socket.emit("error_message", { message: error.message, code: error.code });
             } else {

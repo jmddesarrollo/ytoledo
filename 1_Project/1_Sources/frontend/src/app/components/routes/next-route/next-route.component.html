@@ -1,0 +1,207 @@
+<!-- Loading state -->
+<div *ngIf="loading" class="w3-container w3-center w3-padding-64">
+  <div class="w3-text-blue">
+    <i class="fa fa-spinner fa-spin fa-3x"></i>
+  </div>
+  <p class="w3-large w3-margin-top">Cargando próxima ruta...</p>
+</div>
+
+<!-- Error state -->
+<div *ngIf="!loading && errorMessage" class="w3-container w3-center w3-padding-64">
+  <div class="w3-panel w3-pale-red w3-border w3-round-large">
+    <h3><i class="fa fa-exclamation-triangle"></i> {{ errorMessage }}</h3>
+    <p>Inténtalo de nuevo más tarde o contacta con el administrador.</p>
+    <button class="w3-button w3-blue w3-round" (click)="loadNextRoute()">
+      <i class="fa fa-refresh"></i> Reintentar
+    </button>
+  </div>
+</div>
+
+<!-- Next route content -->
+<div *ngIf="!loading && !errorMessage && nextRoute" class="w3-container w3-padding">
+  
+  <!-- Header -->
+  <div class="w3-card w3-white w3-round-large w3-margin-bottom">
+    <header class="w3-container w3-blue w3-round-large">
+      <h2><i class="fa fa-map-marker"></i> {{ nextRoute.name }}</h2>
+      <p class="w3-opacity">{{ formatDate(nextRoute.date) }}</p>
+    </header>
+    
+    <div class="w3-container w3-padding">
+      <div class="w3-row-padding">
+        <!-- Punto de inicio -->
+        <div class="w3-col m6 l4">
+          <div class="w3-panel w3-leftbar w3-border-green">
+            <h4><i class="fa fa-play-circle w3-text-green"></i> Punto de Inicio</h4>
+            <p class="w3-large">{{ nextRoute.start_point }}</p>
+          </div>
+        </div>
+        
+        <!-- Fecha y hora -->
+        <div class="w3-col m6 l4">
+          <div class="w3-panel w3-leftbar w3-border-blue">
+            <h4><i class="fa fa-calendar w3-text-blue"></i> Fecha</h4>
+            <p class="w3-large">{{ formatDate(nextRoute.date) }}</p>
+          </div>
+        </div>
+        
+        <!-- Tipo de ruta -->
+        <div class="w3-col m6 l4">
+          <div class="w3-panel w3-leftbar w3-border-orange">
+            <h4><i class="fa fa-route w3-text-orange"></i> Tipo</h4>
+            <p class="w3-large">{{ getRouteTypeLabel(nextRoute.type) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="w3-row-padding w3-margin-bottom">
+    <!-- Distancia -->
+    <div class="w3-col m6 l3">
+      <div class="w3-card w3-white w3-round-large w3-center">
+        <div class="w3-container w3-blue w3-round-large">
+          <h3><i class="fa fa-road"></i></h3>
+        </div>
+        <div class="w3-container w3-padding">
+          <h4>Distancia</h4>
+          <p class="w3-xlarge w3-text-blue">{{ formatDistance(nextRoute.distance_km) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duración -->
+    <div class="w3-col m6 l3">
+      <div class="w3-card w3-white w3-round-large w3-center">
+        <div class="w3-container w3-green w3-round-large">
+          <h3><i class="fa fa-clock-o"></i></h3>
+        </div>
+        <div class="w3-container w3-padding">
+          <h4>Duración</h4>
+          <p class="w3-xlarge w3-text-green">{{ formatDuration() }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dificultad -->
+    <div class="w3-col m6 l3">
+      <div class="w3-card w3-white w3-round-large w3-center">
+        <div class="w3-container w3-round-large" [ngClass]="getDifficultyClass(nextRoute.difficulty)">
+          <h3><i class="fa fa-signal"></i></h3>
+        </div>
+        <div class="w3-container w3-padding">
+          <h4>Dificultad</h4>
+          <p class="w3-xlarge" [ngClass]="getDifficultyClass(nextRoute.difficulty)">
+            {{ nextRoute.difficulty || 'Por confirmar' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desnivel -->
+    <div class="w3-col m6 l3">
+      <div class="w3-card w3-white w3-round-large w3-center">
+        <div class="w3-container w3-orange w3-round-large">
+          <h3><i class="fa fa-mountain"></i></h3>
+        </div>
+        <div class="w3-container w3-padding">
+          <h4>Desnivel</h4>
+          <p class="w3-xlarge w3-text-orange">{{ formatHeight(nextRoute.elevation_gain) }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div *ngIf="nextRoute.description" class="w3-card w3-white w3-round-large w3-margin-bottom">
+    <header class="w3-container w3-light-grey w3-round-large">
+      <h3><i class="fa fa-info-circle"></i> Descripción</h3>
+    </header>
+    <div class="w3-container w3-padding">
+      <p class="w3-text-grey" style="white-space: pre-wrap;">{{ nextRoute.description }}</p>
+    </div>
+  </div>
+
+  <!-- Additional Information -->
+  <div class="w3-row-padding w3-margin-bottom">
+    <!-- Alturas -->
+    <div class="w3-col m6">
+      <div class="w3-card w3-white w3-round-large">
+        <header class="w3-container w3-light-grey w3-round-large">
+          <h3><i class="fa fa-bar-chart"></i> Altitudes</h3>
+        </header>
+        <div class="w3-container w3-padding">
+          <div class="w3-row-padding">
+            <div class="w3-col s6">
+              <p><strong>Máxima:</strong></p>
+              <p class="w3-text-blue w3-large">{{ formatHeight(nextRoute.max_height) }}</p>
+            </div>
+            <div class="w3-col s6">
+              <p><strong>Mínima:</strong></p>
+              <p class="w3-text-green w3-large">{{ formatHeight(nextRoute.min_height) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enlaces -->
+    <div class="w3-col m6">
+      <div class="w3-card w3-white w3-round-large">
+        <header class="w3-container w3-light-grey w3-round-large">
+          <h3><i class="fa fa-link"></i> Enlaces</h3>
+        </header>
+        <div class="w3-container w3-padding">
+          <div *ngIf="nextRoute.sign_up_link" class="w3-margin-bottom">
+            <button class="w3-button w3-blue w3-round w3-block" 
+                    (click)="openLink(nextRoute.sign_up_link)">
+              <i class="fa fa-user-plus"></i> Inscribirse
+            </button>
+          </div>
+          <div *ngIf="nextRoute.wikiloc_link" class="w3-margin-bottom">
+            <button class="w3-button w3-green w3-round w3-block" 
+                    (click)="openLink(nextRoute.wikiloc_link)">
+              <i class="fa fa-external-link"></i> Ver en Wikiloc
+            </button>
+          </div>
+          <div *ngIf="nextRoute.wikiloc_map_link">
+            <button class="w3-button w3-orange w3-round w3-block" 
+                    (click)="openLink(nextRoute.wikiloc_map_link)">
+              <i class="fa fa-map"></i> Ver Mapa
+            </button>
+          </div>
+          <div *ngIf="!nextRoute.sign_up_link && !nextRoute.wikiloc_link && !nextRoute.wikiloc_map_link">
+            <p class="w3-text-grey w3-center">No hay enlaces disponibles</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Call to Action -->
+  <div class="w3-card w3-white w3-round-large w3-center w3-margin-bottom">
+    <div class="w3-container w3-padding-large">
+      <h3 class="w3-text-blue">¡No te pierdas esta aventura!</h3>
+      <p class="w3-large w3-text-grey">
+        Únete a nosotros en esta increíble ruta de senderismo.
+      </p>
+      <div *ngIf="nextRoute.sign_up_link" class="w3-margin-top">
+        <button class="w3-button w3-blue w3-large w3-round w3-hover-shadow" 
+                (click)="openLink(nextRoute.sign_up_link)">
+          <i class="fa fa-user-plus"></i> Inscríbete Ahora
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- No route available -->
+<div *ngIf="!loading && !errorMessage && !nextRoute" class="w3-container w3-center w3-padding-64">
+  <div class="w3-panel w3-pale-yellow w3-border w3-round-large">
+    <h3><i class="fa fa-calendar-times-o"></i> No hay rutas programadas</h3>
+    <p class="w3-large">Actualmente no hay ninguna ruta programada próximamente.</p>
+    <p>¡Mantente atento a nuestras actualizaciones!</p>
+  </div>
+</div>

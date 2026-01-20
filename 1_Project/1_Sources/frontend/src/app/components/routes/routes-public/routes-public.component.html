@@ -1,0 +1,203 @@
+<!-- Header -->
+<div class="w3-container w3-padding">
+  <div class="w3-card w3-white w3-round-large">
+    <header class="w3-container w3-blue w3-round-large">
+      <h2><i class="fa fa-mountain"></i> Rutas de Senderismo</h2>
+      <p class="w3-opacity">Descubre nuestras próximas aventuras</p>
+    </header>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="w3-container w3-padding">
+  <div class="w3-card w3-white w3-round-large">
+    <div class="w3-container w3-padding">
+      <h3><i class="fa fa-filter"></i> Filtros</h3>
+      
+      <div class="w3-row-padding">
+        <!-- Search -->
+        <div class="w3-col m4">
+          <label class="w3-text-blue"><b>Buscar ruta</b></label>
+          <input class="w3-input w3-border w3-round" 
+                 type="text" 
+                 placeholder="Nombre de la ruta..."
+                 [(ngModel)]="filters.search"
+                 (keyup.enter)="onFilterChange()">
+        </div>
+
+        <!-- Difficulty -->
+        <div class="w3-col m4">
+          <label class="w3-text-blue"><b>Dificultad</b></label>
+          <select class="w3-select w3-border w3-round" 
+                  [(ngModel)]="filters.difficulty"
+                  (change)="onFilterChange()">
+            <option *ngFor="let diff of difficulties" [value]="diff.value">
+              {{ diff.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Actions -->
+        <div class="w3-col m4">
+          <label class="w3-text-blue"><b>Acciones</b></label><br>
+          <button class="w3-button w3-blue w3-round w3-margin-right" 
+                  (click)="onFilterChange()">
+            <i class="fa fa-search"></i> Buscar
+          </button>
+          <button class="w3-button w3-light-grey w3-round" 
+                  (click)="clearFilters()">
+            <i class="fa fa-times"></i> Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading state -->
+<div *ngIf="loading" class="w3-container w3-center w3-padding-64">
+  <div class="w3-text-blue">
+    <i class="fa fa-spinner fa-spin fa-3x"></i>
+  </div>
+  <p class="w3-large w3-margin-top">Cargando rutas...</p>
+</div>
+
+<!-- Routes Grid -->
+<div *ngIf="!loading" class="w3-container w3-padding">
+  
+  <!-- No routes message -->
+  <div *ngIf="routes.length === 0" class="w3-center w3-padding-64">
+    <div class="w3-panel w3-pale-yellow w3-border w3-round-large">
+      <h3><i class="fa fa-calendar-times-o"></i> No hay rutas disponibles</h3>
+      <p class="w3-large">No se encontraron rutas que coincidan con los filtros seleccionados.</p>
+      <button class="w3-button w3-blue w3-round" (click)="clearFilters()">
+        <i class="fa fa-refresh"></i> Ver todas las rutas
+      </button>
+    </div>
+  </div>
+
+  <!-- Routes Cards -->
+  <div *ngIf="routes.length > 0" class="w3-row-padding">
+    <div *ngFor="let route of routes; let i = index" 
+         class="w3-col l4 m6 s12 w3-margin-bottom">
+      
+      <div class="w3-card w3-white w3-round-large route-card">
+        
+        <!-- Route Header -->
+        <header class="w3-container w3-round-large"
+                [ngClass]="isUpcoming(route.date) ? 'w3-green' : (isFuture(route.date) ? 'w3-blue' : 'w3-grey')">
+          <h4 class="route-title">{{ route.name }}</h4>
+          <p class="w3-opacity">
+            <i class="fa fa-calendar"></i> {{ formatDate(route.date) }}
+          </p>
+          <div *ngIf="isUpcoming(route.date)" class="w3-tag w3-white w3-text-green w3-round">
+            <i class="fa fa-clock-o"></i> ¡Próximamente!
+          </div>
+        </header>
+
+        <!-- Route Info -->
+        <div class="w3-container w3-padding">
+          
+          <!-- Start Point -->
+          <p class="w3-margin-bottom">
+            <i class="fa fa-map-marker w3-text-green"></i>
+            <strong> Inicio:</strong> {{ route.start_point }}
+          </p>
+
+          <!-- Route Type -->
+          <p class="w3-margin-bottom">
+            <i class="fa fa-route w3-text-orange"></i>
+            <strong> Tipo:</strong> {{ getRouteTypeLabel(route.type) }}
+          </p>
+
+          <!-- Stats Row -->
+          <div class="w3-row-padding w3-margin-bottom">
+            <div class="w3-col s6">
+              <div class="w3-center">
+                <i class="fa fa-road w3-text-blue"></i>
+                <p class="w3-small w3-margin-top">Distancia</p>
+                <p class="w3-large w3-text-blue"><strong>{{ formatDistance(route.distance_km) }}</strong></p>
+              </div>
+            </div>
+            <div class="w3-col s6">
+              <div class="w3-center">
+                <i class="fa fa-clock-o w3-text-green"></i>
+                <p class="w3-small w3-margin-top">Duración</p>
+                <p class="w3-large w3-text-green"><strong>{{ formatDuration(route) }}</strong></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Difficulty -->
+          <div class="w3-center w3-margin-bottom">
+            <span class="w3-tag w3-round w3-large" [ngClass]="getDifficultyClass(route.difficulty)">
+              <i class="fa fa-signal"></i> {{ route.difficulty || 'Por confirmar' }}
+            </span>
+          </div>
+
+          <!-- Description Preview -->
+          <div *ngIf="route.description" class="w3-margin-bottom">
+            <p class="w3-text-grey w3-small">
+              {{ route.description.length > 100 ? (route.description.substring(0, 100) + '...') : route.description }}
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="w3-row-padding">
+            <div class="w3-col s6">
+              <button class="w3-button w3-blue w3-round w3-block w3-small" 
+                      (click)="viewRoute(route)">
+                <i class="fa fa-eye"></i> Ver Detalles
+              </button>
+            </div>
+            <div class="w3-col s6">
+              <button *ngIf="route.sign_up_link" 
+                      class="w3-button w3-green w3-round w3-block w3-small" 
+                      (click)="openSignUpLink(route.sign_up_link)">
+                <i class="fa fa-user-plus"></i> Inscribirse
+              </button>
+              <button *ngIf="!route.sign_up_link" 
+                      class="w3-button w3-grey w3-round w3-block w3-small" 
+                      disabled>
+                <i class="fa fa-info-circle"></i> Sin inscripción
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="routes.length > 0 && totalPages > 1" class="w3-center w3-margin-top">
+    <div class="w3-bar">
+      <!-- Previous button -->
+      <button class="w3-button w3-hover-blue" 
+              [disabled]="currentPage === 1"
+              (click)="onPageChange(currentPage - 1)">
+        <i class="fa fa-chevron-left"></i> Anterior
+      </button>
+
+      <!-- Page numbers -->
+      <button *ngFor="let page of [].constructor(totalPages); let i = index"
+              class="w3-button w3-hover-blue"
+              [ngClass]="{'w3-blue': currentPage === i + 1}"
+              (click)="onPageChange(i + 1)">
+        {{ i + 1 }}
+      </button>
+
+      <!-- Next button -->
+      <button class="w3-button w3-hover-blue" 
+              [disabled]="currentPage === totalPages"
+              (click)="onPageChange(currentPage + 1)">
+        Siguiente <i class="fa fa-chevron-right"></i>
+      </button>
+    </div>
+    
+    <p class="w3-text-grey w3-margin-top">
+      Página {{ currentPage }} de {{ totalPages }} ({{ totalRecords }} rutas en total)
+    </p>
+  </div>
+
+</div>

@@ -52,4 +52,9 @@ export class RouteService {
   onDeleteRoute(): Observable<number> {
     return this.wsService.listen('route/deleteRoute');
   }
+
+  // Método para escuchar errores del servidor
+  onError(): Observable<any> {
+    return this.wsService.listen('error_message');
+  }
 }

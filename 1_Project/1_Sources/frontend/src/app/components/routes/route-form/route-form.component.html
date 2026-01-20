@@ -77,14 +77,18 @@
 
             <!-- Dificultad -->
             <div class="w3-col l6 m6 s12">
-              <label class="field-label">Dificultad</label>
+              <label class="field-label">Dificultad *</label>
               <select 
-                class="w3-select w3-border w3-round" 
+                class="w3-select w3-border w3-round"
+                [ngClass]="{'w3-border-red': isFieldInvalid('difficulty')}"
                 formControlName="difficulty">
                 <option *ngFor="let diff of difficulties" [value]="diff.value">
                   {{ diff.label }}
                 </option>
               </select>
+              <div *ngIf="isFieldInvalid('difficulty')" class="error-message">
+                {{ getFieldError('difficulty') }}
+              </div>
             </div>
           </div>
 
@@ -110,9 +114,9 @@
           <h4 class="section-title">Características Técnicas</h4>
           
           <div class="w3-row-padding">
-            <!-- Distancia -->
+            <!-- Distancia km -->
             <div class="w3-col l3 m6 s12">
-              <label class="field-label">Distancia (km)</label>
+              <label class="field-label">Distancia (km) *</label>
               <input 
                 class="w3-input w3-border w3-round"
                 [ngClass]="{'w3-border-red': isFieldInvalid('distance_km')}"
@@ -126,35 +130,40 @@
               </div>
             </div>
 
-            <!-- Duración estimada -->
+            <!-- Distancia metros -->
             <div class="w3-col l3 m6 s12">
-              <label class="field-label">Duración Estimada</label>
+              <label class="field-label">Distancia (m) *</label>
               <input 
                 class="w3-input w3-border w3-round"
-                [ngClass]="{'w3-border-red': isFieldInvalid('estimated_duration')}"
-                type="text" 
-                formControlName="estimated_duration"
-                placeholder="HH:MM (ej: 03:30)">
-              <div *ngIf="isFieldInvalid('estimated_duration')" class="error-message">
-                {{ getFieldError('estimated_duration') }}
+                [ngClass]="{'w3-border-red': isFieldInvalid('distance_m')}"
+                type="number" 
+                min="1"
+                formControlName="distance_m"
+                placeholder="0">
+              <div *ngIf="isFieldInvalid('distance_m')" class="error-message">
+                {{ getFieldError('distance_m') }}
               </div>
             </div>
 
             <!-- Tipo de ruta -->
             <div class="w3-col l3 m6 s12">
-              <label class="field-label">Tipo de Ruta</label>
+              <label class="field-label">Tipo de Ruta *</label>
               <select 
-                class="w3-select w3-border w3-round" 
+                class="w3-select w3-border w3-round"
+                [ngClass]="{'w3-border-red': isFieldInvalid('type')}"
                 formControlName="type">
                 <option *ngFor="let type of routeTypes" [value]="type.value">
                   {{ type.label }}
                 </option>
               </select>
+              <div *ngIf="isFieldInvalid('type')" class="error-message">
+                {{ getFieldError('type') }}
+              </div>
             </div>
 
             <!-- Desnivel positivo -->
             <div class="w3-col l3 m6 s12">
-              <label class="field-label">Desnivel Positivo (m)</label>
+              <label class="field-label">Desnivel Positivo (m) *</label>
               <input 
                 class="w3-input w3-border w3-round"
                 [ngClass]="{'w3-border-red': isFieldInvalid('elevation_gain')}"
@@ -169,9 +178,41 @@
           </div>
 
           <div class="w3-row-padding">
+            <!-- Duración horas -->
+            <div class="w3-col l3 m6 s12">
+              <label class="field-label">Duración Horas *</label>
+              <input 
+                class="w3-input w3-border w3-round"
+                [ngClass]="{'w3-border-red': isFieldInvalid('estimated_duration_hours')}"
+                type="number" 
+                min="0"
+                max="23"
+                formControlName="estimated_duration_hours"
+                placeholder="0">
+              <div *ngIf="isFieldInvalid('estimated_duration_hours')" class="error-message">
+                {{ getFieldError('estimated_duration_hours') }}
+              </div>
+            </div>
+
+            <!-- Duración minutos -->
+            <div class="w3-col l3 m6 s12">
+              <label class="field-label">Duración Minutos *</label>
+              <input 
+                class="w3-input w3-border w3-round"
+                [ngClass]="{'w3-border-red': isFieldInvalid('estimated_duration_minutes')}"
+                type="number" 
+                min="0"
+                max="59"
+                formControlName="estimated_duration_minutes"
+                placeholder="0">
+              <div *ngIf="isFieldInvalid('estimated_duration_minutes')" class="error-message">
+                {{ getFieldError('estimated_duration_minutes') }}
+              </div>
+            </div>
+
             <!-- Altura máxima -->
-            <div class="w3-col l6 m6 s12">
-              <label class="field-label">Altura Máxima (m)</label>
+            <div class="w3-col l3 m6 s12">
+              <label class="field-label">Altura Máxima (m) *</label>
               <input 
                 class="w3-input w3-border w3-round"
                 [ngClass]="{'w3-border-red': isFieldInvalid('max_height')}"
@@ -185,8 +226,8 @@
             </div>
 
             <!-- Altura mínima -->
-            <div class="w3-col l6 m6 s12">
-              <label class="field-label">Altura Mínima (m)</label>
+            <div class="w3-col l3 m6 s12">
+              <label class="field-label">Altura Mínima (m) *</label>
               <input 
                 class="w3-input w3-border w3-round"
                 [ngClass]="{'w3-border-red': isFieldInvalid('min_height')}"

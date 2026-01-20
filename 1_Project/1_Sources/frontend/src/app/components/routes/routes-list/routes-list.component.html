@@ -110,7 +110,7 @@
                     {{ route.description.length > 100 ? (route.description | slice:0:100) + '...' : route.description }}
                   </div>
                 </td>
-                <td>{{ route.startPoint || 'N/A' }}</td>
+                <td>{{ getStartPoint(route) }}</td>
                 <td>
                   <span class="w3-tag w3-round" 
                         [ngClass]="{
@@ -123,8 +123,8 @@
                     {{ route.difficulty || 'N/A' }}
                   </span>
                 </td>
-                <td>{{ formatDistance(route.distanceKm) }}</td>
-                <td>{{ route.estimatedDurationHours }}:{{ route.estimatedDurationMinutes || 'N/A' }}</td>
+                <td>{{ formatDistance(route) }}</td>
+                <td>{{ formatDuration(route) }}</td>
                 <td>
                   <button 
                     class="w3-button w3-small w3-blue w3-round w3-margin-right" 

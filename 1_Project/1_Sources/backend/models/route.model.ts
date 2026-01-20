@@ -24,39 +24,39 @@ module.exports = (sequelize: any, DataTypes: any) => {
         },
         distance_km: {
             type: DataTypes.DECIMAL(5,2),
-            allowNull: true
+            allowNull: false
         },
         distance_m: {
             type: DataTypes.INTEGER(11),
-            allowNull: true
+            allowNull: false
         },
         elevation_gain: {
             type: DataTypes.INTEGER(11),
-            allowNull: true
+            allowNull: false
         },
         max_height: {
             type: DataTypes.INTEGER(11),
-            allowNull: true
+            allowNull: false
         },
         min_height: {
             type: DataTypes.INTEGER(11),
-            allowNull: true
+            allowNull: false
         },
         estimated_duration_hours: {
             type: DataTypes.INTEGER(2),
-            allowNull: true
+            allowNull: false
         },
         estimated_duration_minutes: {
             type: DataTypes.INTEGER(2),
-            allowNull: true
+            allowNull: false
         },
         type: {
             type: DataTypes.TINYINT(1),
-            allowNull: true
+            allowNull: false
         },
         difficulty: {
             type: DataTypes.STRING(50),
-            allowNull: true
+            allowNull: false
         },
         sign_up_link: {
             type: DataTypes.STRING(255),
@@ -72,7 +72,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         },
         user_id: {
             type: DataTypes.INTEGER(11),
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'users',
                 key: 'id'

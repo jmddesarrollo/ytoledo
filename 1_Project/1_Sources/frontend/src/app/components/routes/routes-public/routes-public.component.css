@@ -1,0 +1,195 @@
+/* Routes Public Component Styles */
+
+.route-card {
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.route-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.route-title {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  line-height: 1.3;
+  min-height: 2.6rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Card animations */
+.w3-col .route-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.w3-col:nth-child(3n+1) .route-card { animation-delay: 0.1s; }
+.w3-col:nth-child(3n+2) .route-card { animation-delay: 0.2s; }
+.w3-col:nth-child(3n+3) .route-card { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Difficulty colors */
+.w3-green { background-color: #4CAF50 !important; }
+.w3-yellow { background-color: #ff9800 !important; }
+.w3-orange { background-color: #ff5722 !important; }
+.w3-red { background-color: #f44336 !important; }
+.w3-grey { background-color: #9e9e9e !important; }
+
+/* Button styles */
+.w3-button {
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.w3-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.w3-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Stats styling */
+.w3-col .w3-center i {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.w3-col .w3-center .w3-large {
+  margin: 4px 0;
+  font-weight: bold;
+}
+
+/* Tag styling */
+.w3-tag {
+  font-weight: bold;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+
+/* Filter section */
+.w3-select, .w3-input {
+  transition: border-color 0.3s ease;
+}
+
+.w3-select:focus, .w3-input:focus {
+  border-color: #2196F3 !important;
+  box-shadow: 0 0 5px rgba(33, 150, 243, 0.3);
+}
+
+/* Pagination */
+.w3-bar .w3-button {
+  margin: 0 2px;
+  min-width: 40px;
+}
+
+.w3-bar .w3-button.w3-blue {
+  background-color: #2196F3 !important;
+  color: white !important;
+}
+
+/* Loading spinner */
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Header gradients */
+.w3-blue {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+}
+
+.w3-green {
+  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+}
+
+.w3-grey {
+  background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .route-title {
+    font-size: 1.1rem;
+    min-height: 2.2rem;
+  }
+  
+  .w3-large {
+    font-size: 1.1rem !important;
+  }
+  
+  .w3-button.w3-small {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+  
+  .w3-col .w3-center i {
+    font-size: 1.2rem;
+  }
+}
+
+/* Card content spacing */
+.route-card .w3-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.route-card .w3-row-padding:last-child {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+/* Info panels */
+.w3-pale-yellow {
+  background-color: #fffde7 !important;
+  border-color: #ff9800 !important;
+}
+
+/* Text truncation for descriptions */
+.w3-text-grey.w3-small {
+  line-height: 1.4;
+  max-height: 3.6rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* Upcoming route highlight */
+.w3-tag.w3-white.w3-text-green {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Header positioning for tags */
+.route-card header {
+  position: relative;
+  overflow: visible;
+}

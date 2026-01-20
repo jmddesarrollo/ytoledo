@@ -106,17 +106,31 @@ export class AppComponent implements OnInit, OnDestroy {
         items: [
           {
             label: 'Próxima ruta',
-            icon: 'pi pi-fw pi-key',
-            routerLink: ['/route-detail']
+            icon: 'pi pi-fw pi-calendar',
+            routerLink: ['/next-route']
           },
           {
-            label: 'Todas las Rutas',
-            icon: 'pi pi-fw pi-sitemap',
-            routerLink: ['/routes-list']
+            label: 'Rutas públicas',
+            icon: 'pi pi-fw pi-map',
+            routerLink: ['/routes-public']
           },
+          {
+            label: 'Gestión de rutas',
+            icon: 'pi pi-fw pi-sitemap',
+            routerLink: ['/routes']
+          },
+          {
+            separator: true,
+          }
+        ],
+      },
+      {
+        label: 'Gestión de Socios',
+        icon: 'pi pi-fw pi-users',
+        items: [
           {
             label: 'Inscripción',
-            icon: 'pi pi-fw pi-file',
+            icon: 'pi pi-fw pi-file-pdf',
             command: () => {
               const base = document.getElementsByTagName('base')[0]?.getAttribute('href') || '/';
               window.open(base + 'assets/inscripcion.html', '_blank', 'noopener,noreferrer');
@@ -264,6 +278,11 @@ export class AppComponent implements OnInit, OnDestroy {
       this.menuItemVisible('Sesión', 'Cerrar', true);
       this.menuItemVisible('Acceso', null, true);
       this.menuItemVisible('Gestión rutas', null, true);
+      this.menuItemVisible('Gestión rutas', 'Próxima ruta', true);
+      this.menuItemVisible('Gestión rutas', 'Rutas públicas', true);
+      this.menuItemVisible('Gestión rutas', 'Gestión de rutas', true);
+      this.menuItemVisible('Gestión de Socios', null, true);
+      this.menuItemVisible('Gestión de Socios', 'Inscripción', true);
       this.menuItemVisible('Archivos', null, true);
 
       return false;
@@ -273,6 +292,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.menuItemVisible('Sesión', 'Cerrar', false);
     this.menuItemVisible('Acceso', null, false);
     this.menuItemVisible('Gestión rutas', null, true);
+    this.menuItemVisible('Gestión rutas', 'Próxima ruta', true);
+    this.menuItemVisible('Gestión rutas', 'Rutas públicas', true);
+    this.menuItemVisible('Gestión rutas', 'Gestión de rutas', false); // Solo para usuarios logueados
+    this.menuItemVisible('Gestión de Socios', null, true);
+    this.menuItemVisible('Gestión de Socios', 'Inscripción', true);
     this.menuItemVisible('Archivos', null, false);
   }
 

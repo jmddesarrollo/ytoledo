@@ -1,0 +1,133 @@
+/* Next Route Component Styles */
+
+.w3-card {
+  box-shadow: 0 4px 10px 0 rgba(0,0,0,0.2), 0 4px 20px 0 rgba(0,0,0,0.19);
+  transition: all 0.3s ease;
+}
+
+.w3-card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  transform: translateY(-2px);
+}
+
+.w3-panel {
+  margin: 16px 0;
+  padding: 16px;
+}
+
+.w3-leftbar {
+  border-left: 6px solid #ccc;
+}
+
+.w3-border-green {
+  border-color: #4CAF50 !important;
+}
+
+.w3-border-blue {
+  border-color: #2196F3 !important;
+}
+
+.w3-border-orange {
+  border-color: #ff9800 !important;
+}
+
+/* Statistics cards animation */
+.w3-col .w3-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.w3-col:nth-child(1) .w3-card { animation-delay: 0.1s; }
+.w3-col:nth-child(2) .w3-card { animation-delay: 0.2s; }
+.w3-col:nth-child(3) .w3-card { animation-delay: 0.3s; }
+.w3-col:nth-child(4) .w3-card { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button styles */
+.w3-button {
+  transition: all 0.3s ease;
+}
+
+.w3-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Loading spinner */
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .w3-xlarge {
+    font-size: 1.5rem !important;
+  }
+  
+  .w3-large {
+    font-size: 1.2rem !important;
+  }
+  
+  .w3-padding-64 {
+    padding: 32px 16px !important;
+  }
+}
+
+/* Difficulty colors */
+.difficulty-easy { color: #4CAF50; }
+.difficulty-moderate { color: #ff9800; }
+.difficulty-hard { color: #f44336; }
+.difficulty-very-hard { color: #9c27b0; }
+
+/* Custom spacing */
+.w3-margin-bottom {
+  margin-bottom: 24px !important;
+}
+
+/* Header gradient effect */
+.w3-blue {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+}
+
+.w3-green {
+  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+}
+
+.w3-orange {
+  background: linear-gradient(135deg, #ff9800 0%, #F57C00 100%);
+}
+
+/* Text shadow for better readability */
+.w3-blue h2, .w3-blue h3, .w3-blue p {
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Call to action section */
+.w3-container.w3-padding-large {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Error and info panels */
+.w3-pale-red {
+  background-color: #ffebee !important;
+  border-color: #f44336 !important;
+}
+
+.w3-pale-yellow {
+  background-color: #fffde7 !important;
+  border-color: #ff9800 !important;
+}

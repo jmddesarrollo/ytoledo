@@ -45,12 +45,22 @@ export default class RouteService {
         return route;
     }
 
-    public async addRoute(route: any, t: any) {
+    public async addRoute(route: any, t: any, userId?: number) {
         // Validaciones básicas
         this.validateRouteData(route);
         
         // Verificar que el nombre sea único
         await this.validateUniqueRouteName(route.name);
+
+        // Asignar el user_id si se proporciona
+        if (userId) {
+            route.user_id = userId;
+        }
+
+        // Validar que user_id esté presente
+        if (!route.user_id) {
+            throw new ControlException('El ID del usuario es obligatorio para crear una ruta', 400);
+        }
 
         const routeDb = await this.routeDAL.addRoute(route, t);
 
@@ -122,11 +132,41 @@ export default class RouteService {
             throw new ControlException('El punto de inicio es obligatorio', 400);
         }
 
-        // Validar distancia si se proporciona
-        if (route.distance_km !== undefined && route.distance_km !== null) {
-            if (isNaN(route.distance_km) || route.distance_km < 0) {
-                throw new ControlException('La distancia debe ser un número positivo', 400);
-            }
+        // Validar campos numéricos obligatorios
+        if (route.distance_km === undefined || route.distance_km === null || isNaN(route.distance_km) || route.distance_km < 0) {
+            throw new ControlException('La distancia en kilómetros es obligatoria y debe ser un número positivo', 400);
+        }
+
+        if (route.distance_m === undefined || route.distance_m === null || isNaN(route.distance_m) || route.distance_m < 0) {
+            throw new ControlException('La distancia en metros es obligatoria y debe ser un número positivo', 400);
+        }
+
+        if (route.elevation_gain === undefined || route.elevation_gain === null || isNaN(route.elevation_gain) || route.elevation_gain < 0) {
+            throw new ControlException('El desnivel acumulado es obligatorio y debe ser un número positivo', 400);
+        }
+
+        if (route.max_height === undefined || route.max_height === null || isNaN(route.max_height)) {
+            throw new ControlException('La altura máxima es obligatoria', 400);
+        }
+
+        if (route.min_height === undefined || route.min_height === null || isNaN(route.min_height)) {
+            throw new ControlException('La altura mínima es obligatoria', 400);
+        }
+
+        if (route.estimated_duration_hours === undefined || route.estimated_duration_hours === null || isNaN(route.estimated_duration_hours) || route.estimated_duration_hours < 0 || route.estimated_duration_hours > 23) {
+            throw new ControlException('Las horas de duración son obligatorias y deben estar entre 0 y 23', 400);
+        }
+        
+        if (route.estimated_duration_minutes === undefined || route.estimated_duration_minutes === null || isNaN(route.estimated_duration_minutes) || route.estimated_duration_minutes < 0 || route.estimated_duration_minutes > 59) {
+            throw new ControlException('Los minutos de duración son obligatorios y deben estar entre 0 y 59', 400);
+        }
+
+        if (route.type === undefined || route.type === null || ![1, 2, 3].includes(route.type)) {
+            throw new ControlException('El tipo de ruta es obligatorio (1=Circular, 2=Lineal, 3=Travesía)', 400);
+        }
+
+        if (!route.difficulty || route.difficulty.trim().length === 0) {
+            throw new ControlException('La dificultad es obligatoria', 400);
         }
 
         // Validar descripción si se proporciona
@@ -134,25 +174,15 @@ export default class RouteService {
             throw new ControlException('La descripción no puede exceder 1000 caracteres', 400);
         }
 
-        // Validar dificultad si se proporciona
-        if (route.difficulty) {
-            const validDifficulties = ['Fácil', 'Moderada', 'Difícil', 'Muy Difícil'];
-            if (!validDifficulties.includes(route.difficulty)) {
-                throw new ControlException('La dificultad debe ser: Fácil, Moderada, Difícil o Muy Difícil', 400);
-            }
+        // Validar dificultad
+        const validDifficulties = ['Fácil', 'Moderada', 'Difícil', 'Muy Difícil'];
+        if (!validDifficulties.includes(route.difficulty)) {
+            throw new ControlException('La dificultad debe ser: Fácil, Moderada, Difícil o Muy Difícil', 400);
         }
 
-        // Validar duración estimada si se proporciona
-        if (route.estimated_duration_hours !== undefined && route.estimated_duration_hours !== null) {
-            if (isNaN(route.estimated_duration_hours) || route.estimated_duration_hours < 0 || route.estimated_duration_hours > 23) {
-                throw new ControlException('Las horas de duración deben estar entre 0 y 23', 400);
-            }
-        }
-        
-        if (route.estimated_duration_minutes !== undefined && route.estimated_duration_minutes !== null) {
-            if (isNaN(route.estimated_duration_minutes) || route.estimated_duration_minutes < 0 || route.estimated_duration_minutes > 59) {
-                throw new ControlException('Los minutos de duración deben estar entre 0 y 59', 400);
-            }
+        // Validar que min_height <= max_height
+        if (route.min_height > route.max_height) {
+            throw new ControlException('La altura mínima no puede ser mayor que la altura máxima', 400);
         }
     }
 

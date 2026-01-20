@@ -122,17 +122,24 @@ export default class RouteDAL {
         return route;
     }
 
-    public getNextRoute() {
+    public async getNextRoute() {
         const today = new Date();
-        const route = Routes.findOne({
+        today.setHours(0, 0, 0, 0); // Establecer a medianoche para comparar solo fechas
+        
+        const route = await Routes.findOne({
             where: {
                 date: {
                     [Op.gte]: today
                 }
             },
-            order: [['date', 'ASC']]
+            order: [['date', 'ASC']],
+            raw: false // Para obtener el objeto Sequelize completo
         })
-            .catch(() => { throw new ControlException('Ha ocurrido un error al buscar la ruta próxima', 500); });
+            .catch((err: any) => { 
+                console.error('Error en getNextRoute DAL:', err);
+                throw new ControlException('Ha ocurrido un error al buscar la próxima ruta', 500); 
+            });
+        
         return route;
     }
 

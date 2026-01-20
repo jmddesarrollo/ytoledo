@@ -5,10 +5,12 @@ import { FilesComponent } from './components/files/files-upload/files.component'
 import { LoginComponent } from './components/session/login/login.component';
 import { PermissionsListComponent } from './components/permissions/permissions-list/permissions-list.component';
 import { RecoveryComponent } from './components/session/recovery/recovery.component';
+import { NextRouteComponent } from './components/routes/next-route/next-route.component';
 import { RedirectComponent } from './components/redirect/redirect.component';
 import { RouteDetailComponent } from './components/routes/route-detail/route-detail.component';
 import { RouteFormComponent } from './components/routes/route-form/route-form.component';
 import { RoutesListComponent } from './components/routes/routes-list/routes-list.component';
+import { RoutesPublicComponent } from './components/routes/routes-public/routes-public.component';
 import { UserMyprofileComponent } from './components/users/user-myprofile/user-myprofile.component';
 import { UsersListComponent } from './components/users/users-list/users-list.component';
 
@@ -23,7 +25,11 @@ const routes: Routes = [
   { path: 'my-profile', component: UserMyprofileComponent, data: {titulo: 'Y-Toledo - Perfil del usuario'} },
   { path: 'permissions', component: PermissionsListComponent, data: {titulo: 'Y-Toledo - Permisos'} },
   
-  // Rutas de gestión de rutas
+  // Rutas públicas de senderismo
+  { path: 'next-route', component: NextRouteComponent, data: {titulo: 'Y-Toledo - Próxima Ruta'} },
+  { path: 'routes-public', component: RoutesPublicComponent, data: {titulo: 'Y-Toledo - Rutas de Senderismo'} },
+  
+  // Rutas de gestión administrativa de rutas
   { path: 'routes', component: RoutesListComponent, data: {titulo: 'Y-Toledo - Gestión de Rutas'} },
   { path: 'routes/create', component: RouteFormComponent, data: {titulo: 'Y-Toledo - Nueva Ruta'} },
   { path: 'routes/edit/:id', component: RouteFormComponent, data: {titulo: 'Y-Toledo - Editar Ruta'} },

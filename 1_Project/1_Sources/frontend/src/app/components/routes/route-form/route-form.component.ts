@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { TitleShareService } from '../../../services/share/title.service';
 import { RouteService } from '../../../services/websockets/route.service';
 import { RouteModel } from '../../../models/route.model';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-route-form',
@@ -44,7 +45,8 @@ export class RouteFormComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private titleShareService: TitleShareService,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private messageService: MessageService
   ) {
     this.initializeForm();
   }
@@ -64,13 +66,15 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       date: ['', Validators.required],
       start_point: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', Validators.maxLength(1000)],
-      distance_km: ['', [Validators.min(0.1), Validators.max(999.99)]],
-      elevation_gain: ['', [Validators.min(0)]],
-      max_height: ['', [Validators.min(0)]],
-      min_height: ['', [Validators.min(0)]],
-      estimated_duration: ['', Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)],
-      type: [null],
-      difficulty: [''],
+      distance_km: ['', [Validators.required, Validators.min(0.1), Validators.max(999.99)]],
+      distance_m: ['', [Validators.required, Validators.min(1)]],
+      elevation_gain: ['', [Validators.required, Validators.min(0)]],
+      max_height: ['', [Validators.required, Validators.min(0)]],
+      min_height: ['', [Validators.required, Validators.min(0)]],
+      estimated_duration_hours: ['', [Validators.required, Validators.min(0), Validators.max(23)]],
+      estimated_duration_minutes: ['', [Validators.required, Validators.min(0), Validators.max(59)]],
+      type: [null, Validators.required],
+      difficulty: ['', Validators.required],
       sign_up_link: ['', Validators.maxLength(255)],
       wikiloc_link: ['', Validators.maxLength(255)],
       wikiloc_map_link: ['', Validators.maxLength(255)]
@@ -116,13 +120,33 @@ export class RouteFormComponent implements OnInit, OnDestroy {
         this.saving = false;
         if (response.data) {
           console.log('Route created successfully:', response);
-          this.router.navigate(['/routes']);
+          
+          // Mostrar mensaje de éxito
+          if (response.message) {
+            this.messageService.add({ 
+              severity: 'success', 
+              summary: 'Alta', 
+              detail: response.message, 
+              life: 2000 
+            });
+          }
+          
+          // Navegar de vuelta a la lista después de un breve delay para que se vea el mensaje
+          setTimeout(() => {
+            this.router.navigate(['/routes']);
+          }, 1000);
         }
       },
       (error) => {
         this.saving = false;
         this.errorMessage = 'Error al crear la ruta';
         console.error('Error creating route:', error);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'Error al crear la ruta', 
+          life: 3000 
+        });
       }
     );
 
@@ -132,17 +156,53 @@ export class RouteFormComponent implements OnInit, OnDestroy {
         this.saving = false;
         if (response.data) {
           console.log('Route updated successfully:', response);
-          this.router.navigate(['/routes']);
+          
+          // Mostrar mensaje de éxito
+          if (response.message) {
+            this.messageService.add({ 
+              severity: 'success', 
+              summary: 'Edición', 
+              detail: response.message, 
+              life: 2000 
+            });
+          }
+          
+          // Navegar de vuelta a la lista después de un breve delay para que se vea el mensaje
+          setTimeout(() => {
+            this.router.navigate(['/routes']);
+          }, 1000);
         }
       },
       (error) => {
         this.saving = false;
         this.errorMessage = 'Error al actualizar la ruta';
         console.error('Error updating route:', error);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'Error al actualizar la ruta', 
+          life: 3000 
+        });
       }
     );
 
-    this.subscriptions.push(getRouteSub, addRouteSub, editRouteSub);
+    // Suscripción para manejar errores del servidor
+    const errorSub = this.routeService.onError().subscribe(
+      (error: any) => {
+        this.saving = false;
+        this.loading = false;
+        this.errorMessage = error.message || 'Error desconocido';
+        console.error('Server error:', error);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: error.message || 'Error desconocido', 
+          life: 3000 
+        });
+      }
+    );
+
+    this.subscriptions.push(getRouteSub, addRouteSub, editRouteSub, errorSub);
   }
 
   private loadRoute(): void {
@@ -166,10 +226,12 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       start_point: route.start_point || '',
       description: route.description || '',
       distance_km: route.distance_km || '',
+      distance_m: route.distance_m || '',
       elevation_gain: route.elevation_gain || '',
       max_height: route.max_height || '',
       min_height: route.min_height || '',
-      estimated_duration: route.estimated_duration || '',
+      estimated_duration_hours: route.estimated_duration_hours || '',
+      estimated_duration_minutes: route.estimated_duration_minutes || '',
       type: route.type || null,
       difficulty: route.difficulty || '',
       sign_up_link: route.sign_up_link || '',
@@ -191,9 +253,13 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       
       // Convertir valores numéricos
       if (formData.distance_km) formData.distance_km = parseFloat(formData.distance_km);
+      if (formData.distance_m) formData.distance_m = parseInt(formData.distance_m);
       if (formData.elevation_gain) formData.elevation_gain = parseInt(formData.elevation_gain);
       if (formData.max_height) formData.max_height = parseInt(formData.max_height);
       if (formData.min_height) formData.min_height = parseInt(formData.min_height);
+      if (formData.estimated_duration_hours) formData.estimated_duration_hours = parseInt(formData.estimated_duration_hours);
+      if (formData.estimated_duration_minutes) formData.estimated_duration_minutes = parseInt(formData.estimated_duration_minutes);
+      if (formData.type) formData.type = parseInt(formData.type);
       
       if (this.isEditMode && this.routeId) {
         formData.id = this.routeId;
@@ -226,10 +292,14 @@ export class RouteFormComponent implements OnInit, OnDestroy {
   get start_point() { return this.routeForm.get('start_point'); }
   get description() { return this.routeForm.get('description'); }
   get distance_km() { return this.routeForm.get('distance_km'); }
+  get distance_m() { return this.routeForm.get('distance_m'); }
   get elevation_gain() { return this.routeForm.get('elevation_gain'); }
   get max_height() { return this.routeForm.get('max_height'); }
   get min_height() { return this.routeForm.get('min_height'); }
-  get estimated_duration() { return this.routeForm.get('estimated_duration'); }
+  get estimated_duration_hours() { return this.routeForm.get('estimated_duration_hours'); }
+  get estimated_duration_minutes() { return this.routeForm.get('estimated_duration_minutes'); }
+  get type() { return this.routeForm.get('type'); }
+  get difficulty() { return this.routeForm.get('difficulty'); }
   get sign_up_link() { return this.routeForm.get('sign_up_link'); }
   get wikiloc_link() { return this.routeForm.get('wikiloc_link'); }
   get wikiloc_map_link() { return this.routeForm.get('wikiloc_map_link'); }
@@ -259,11 +329,15 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       'date': 'Fecha',
       'start_point': 'Punto de inicio',
       'description': 'Descripción',
-      'distance_km': 'Distancia',
+      'distance_km': 'Distancia (km)',
+      'distance_m': 'Distancia (m)',
       'elevation_gain': 'Desnivel positivo',
       'max_height': 'Altura máxima',
       'min_height': 'Altura mínima',
-      'estimated_duration': 'Duración estimada',
+      'estimated_duration_hours': 'Horas de duración',
+      'estimated_duration_minutes': 'Minutos de duración',
+      'type': 'Tipo de ruta',
+      'difficulty': 'Dificultad',
       'sign_up_link': 'Enlace de inscripción',
       'wikiloc_link': 'Enlace Wikiloc',
       'wikiloc_map_link': 'Enlace mapa Wikiloc'

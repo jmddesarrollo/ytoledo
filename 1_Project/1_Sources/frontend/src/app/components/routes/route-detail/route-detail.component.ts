@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { TitleShareService } from '../../../services/share/title.service';
 import { RouteService } from '../../../services/websockets/route.service';
 import { RouteModel } from '../../../models/route.model';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-route-detail',
@@ -25,7 +26,8 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private titleShareService: TitleShareService,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -69,11 +71,29 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
     const deleteRouteSub = this.routeService.onDeleteRoute().subscribe(
       (response: any) => {
         console.log('Route deleted:', response);
+        
+        // Mostrar mensaje de éxito
+        if (response.message) {
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: 'Eliminación', 
+            detail: response.message, 
+            life: 2000 
+          });
+        }
+        
+        // Navegar de vuelta a la lista de rutas
         this.router.navigate(['/routes']);
       },
       (error) => {
         this.errorMessage = 'Error al eliminar la ruta';
         console.error('Error deleting route:', error);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'Error al eliminar la ruta', 
+          life: 3000 
+        });
       }
     );
 
@@ -119,15 +139,67 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
   }
 
   formatDistance(distance: number): string {
-    return distance ? `${distance} km` : 'No especificada';
+    return (distance !== null && distance !== undefined) ? `${distance} km` : 'No especificada';
   }
 
   formatHeight(height: number): string {
-    return height ? `${height} m` : 'No especificada';
+    return (height !== null && height !== undefined) ? `${height} m` : 'No especificada';
   }
 
-  formatDuration(duration: string): string {
-    return duration || 'No especificada';
+  formatDuration(): string {
+    if (!this.route) return 'No especificada';
+    
+    // Intentar con ambos formatos: camelCase y snake_case
+    // Usar nullish coalescing para manejar correctamente el valor 0
+    const hours = this.route.estimatedDurationHours ?? this.route['estimated_duration_hours'] ?? 0;
+    const minutes = this.route.estimatedDurationMinutes ?? this.route['estimated_duration_minutes'] ?? 0;
+    
+    if (hours > 0 || minutes > 0) {
+      return `${hours}h ${minutes}min`;
+    }
+    return 'No especificada';
+  }
+
+  // Métodos helper para obtener valores con compatibilidad de formatos
+  getStartPoint(): string {
+    if (!this.route) return 'No especificado';
+    return this.route.startPoint || this.route['start_point'] || 'No especificado';
+  }
+
+  getDistanceKm(): number {
+    if (!this.route) return 0;
+    // Usar nullish coalescing para manejar correctamente el valor 0
+    return this.route.distanceKm ?? this.route['distance_km'] ?? 0;
+  }
+
+  getElevationGain(): number {
+    if (!this.route) return 0;
+    return this.route.elevationGain ?? this.route['elevation_gain'] ?? 0;
+  }
+
+  getMaxHeight(): number {
+    if (!this.route) return 0;
+    return this.route.maxHeight ?? this.route['max_height'] ?? 0;
+  }
+
+  getMinHeight(): number {
+    if (!this.route) return 0;
+    return this.route.minHeight ?? this.route['min_height'] ?? 0;
+  }
+
+  getSignUpLink(): string {
+    if (!this.route) return '';
+    return this.route.signUpLink || this.route['sign_up_link'] || '';
+  }
+
+  getWikilocLink(): string {
+    if (!this.route) return '';
+    return this.route.wikilocLink || this.route['wikiloc_link'] || '';
+  }
+
+  getWikilocMapLink(): string {
+    if (!this.route) return '';
+    return this.route.wikilocMapLink || this.route['wikiloc_map_link'] || '';
   }
 
   getDifficultyClass(difficulty: string): string {
