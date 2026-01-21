@@ -88,6 +88,19 @@
   white-space: pre-wrap;
 }
 
+/* Contenido de descripción en panel separado */
+.description-content {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #007ad9;
+  line-height: 1.7;
+  color: #444;
+  white-space: pre-wrap;
+  font-size: 1rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 /* Tags de dificultad */
 .detail-tag {
   font-size: 0.9rem;
@@ -152,6 +165,22 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Contenedor del mapa de Wikiloc */
+.wikiloc-map-container {
+  text-align: center;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.wikiloc-map-container iframe {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Loading spinner */
 .fa-spinner {
   color: #007ad9;
@@ -213,6 +242,16 @@
   .detail-item {
     margin-bottom: 0.75rem;
   }
+  
+  /* Responsive para el mapa de Wikiloc */
+  .wikiloc-map-container {
+    padding: 0.5rem;
+  }
+  
+  .wikiloc-map-container iframe {
+    width: 100% !important;
+    height: 300px !important;
+  }
 }
 
 /* Mejoras visuales adicionales */
@@ -261,4 +300,25 @@
 /* Iconos en botones */
 .route-detail-container button i {
   margin-right: 0.5rem;
+}
+
+/* Animaciones para las tarjetas de estadísticas */
+.w3-col .stat-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.w3-col:nth-child(1) .stat-card { animation-delay: 0.1s; }
+.w3-col:nth-child(2) .stat-card { animation-delay: 0.2s; }
+.w3-col:nth-child(3) .stat-card { animation-delay: 0.3s; }
+.w3-col:nth-child(4) .stat-card { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

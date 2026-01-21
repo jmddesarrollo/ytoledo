@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { TitleShareService } from '../../../services/share/title.service';
 import { RouteService } from '../../../services/websockets/route.service';
@@ -42,7 +43,8 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private myPermissionShareService: MyPermissionShareService,
     private wrPermissionShareService: WRPermissionShareService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -219,9 +221,19 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
     return this.route.wikilocLink || this.route['wikiloc_link'] || '';
   }
 
-  getWikilocMapLink(): string {
+  getWikilocMapLink(): SafeHtml {
     if (!this.route) return '';
-    return this.route.wikilocMapLink || this.route['wikiloc_map_link'] || '';
+    const mapLink = this.route.wikilocMapLink || this.route['wikiloc_map_link'] || '';
+    if (!mapLink) return '';
+    
+    // Sanitizar el HTML para permitir el iframe
+    return this.sanitizer.bypassSecurityTrustHtml(mapLink);
+  }
+
+  hasWikilocMapLink(): boolean {
+    if (!this.route) return false;
+    const mapLink = this.route.wikilocMapLink || this.route['wikiloc_map_link'] || '';
+    return !!mapLink.trim();
   }
 
   getDifficultyClass(difficulty: string): string {

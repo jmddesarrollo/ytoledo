@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { TitleShareService } from '../../../services/share/title.service';
 import { RouteService } from '../../../services/websockets/route.service';
@@ -21,7 +22,8 @@ export class NextRouteComponent implements OnInit, OnDestroy {
 
   constructor(
     private titleShareService: TitleShareService,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -57,7 +59,7 @@ export class NextRouteComponent implements OnInit, OnDestroy {
     this.subscriptions.push(getNextRouteSub);
   }
 
-  private loadNextRoute(): void {
+  public loadNextRoute(): void {
     this.loading = true;
     this.routeService.getNextRoute();
   }
@@ -78,24 +80,77 @@ export class NextRouteComponent implements OnInit, OnDestroy {
   }
 
   formatDistance(distance: number): string {
-    return distance ? `${distance} km` : 'Distancia por confirmar';
+    return (distance !== null && distance !== undefined) ? `${distance} km` : 'No especificada';
   }
 
   formatHeight(height: number): string {
-    return height ? `${height} m` : 'No especificada';
+    return (height !== null && height !== undefined) ? `${height} m` : 'No especificada';
   }
 
   formatDuration(): string {
     if (!this.nextRoute) return 'No especificada';
     
     // Intentar con ambos formatos: camelCase y snake_case
-    const hours = this.nextRoute.estimatedDurationHours || this.nextRoute['estimated_duration_hours'] || 0;
-    const minutes = this.nextRoute.estimatedDurationMinutes || this.nextRoute['estimated_duration_minutes'] || 0;
+    // Usar nullish coalescing para manejar correctamente el valor 0
+    const hours = this.nextRoute.estimatedDurationHours ?? this.nextRoute['estimated_duration_hours'] ?? 0;
+    const minutes = this.nextRoute.estimatedDurationMinutes ?? this.nextRoute['estimated_duration_minutes'] ?? 0;
     
     if (hours > 0 || minutes > 0) {
       return `${hours}h ${minutes}min`;
     }
-    return 'Duración por confirmar';
+    return 'No especificada';
+  }
+
+  // Métodos helper para obtener valores con compatibilidad de formatos
+  getStartPoint(): string {
+    if (!this.nextRoute) return 'No especificado';
+    return this.nextRoute.startPoint || this.nextRoute['start_point'] || 'No especificado';
+  }
+
+  getDistanceKm(): number {
+    if (!this.nextRoute) return 0;
+    // Usar nullish coalescing para manejar correctamente el valor 0
+    return this.nextRoute.distanceKm ?? this.nextRoute['distance_km'] ?? 0;
+  }
+
+  getElevationGain(): number {
+    if (!this.nextRoute) return 0;
+    return this.nextRoute.elevationGain ?? this.nextRoute['elevation_gain'] ?? 0;
+  }
+
+  getMaxHeight(): number {
+    if (!this.nextRoute) return 0;
+    return this.nextRoute.maxHeight ?? this.nextRoute['max_height'] ?? 0;
+  }
+
+  getMinHeight(): number {
+    if (!this.nextRoute) return 0;
+    return this.nextRoute.minHeight ?? this.nextRoute['min_height'] ?? 0;
+  }
+
+  getSignUpLink(): string {
+    if (!this.nextRoute) return '';
+    return this.nextRoute.signUpLink || this.nextRoute['sign_up_link'] || '';
+  }
+
+  getWikilocLink(): string {
+    if (!this.nextRoute) return '';
+    return this.nextRoute.wikilocLink || this.nextRoute['wikiloc_link'] || '';
+  }
+
+  getWikilocMapLink(): SafeHtml {
+    if (!this.nextRoute) return '';
+    const mapLink = this.nextRoute.wikilocMapLink || this.nextRoute['wikiloc_map_link'] || '';
+    if (!mapLink) return '';
+    
+    // Sanitizar el HTML para permitir el iframe
+    return this.sanitizer.bypassSecurityTrustHtml(mapLink);
+  }
+
+  hasWikilocMapLink(): boolean {
+    if (!this.nextRoute) return false;
+    const mapLink = this.nextRoute.wikilocMapLink || this.nextRoute['wikiloc_map_link'] || '';
+    return !!mapLink.trim();
   }
 
   getDifficultyClass(difficulty: string): string {
@@ -113,7 +168,7 @@ export class NextRouteComponent implements OnInit, OnDestroy {
       case 1: return 'Circular';
       case 2: return 'Lineal';
       case 3: return 'Travesía';
-      default: return 'Tipo por confirmar';
+      default: return 'No especificado';
     }
   }
 

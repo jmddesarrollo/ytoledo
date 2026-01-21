@@ -34,6 +34,16 @@
   font-size: 0.9rem;
 }
 
+/* Texto de ayuda */
+.field-help {
+  color: #666;
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-top: 0.25rem;
+  display: block;
+  line-height: 1.3;
+}
+
 /* Campos del formulario */
 .route-form-container input,
 .route-form-container select,
@@ -60,6 +70,10 @@
   margin-top: 0.25rem;
   margin-bottom: 0.5rem;
   display: block;
+}
+
+.warning-message {
+  color: #ff9800 !important;
 }
 
 /* Botones de acción */

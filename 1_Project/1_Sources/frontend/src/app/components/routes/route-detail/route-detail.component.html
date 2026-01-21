@@ -75,11 +75,18 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Descripción -->
+    <div *ngIf="route.description" class="w3-card w3-white w3-margin-bottom">
+      <div class="w3-container w3-padding">
+        <h4 class="section-title">
+          <i class="fa fa-file-text-o"></i> Descripción
+        </h4>
         
-        <!-- Descripción -->
-        <div *ngIf="route.description" class="detail-item description-item">
-          <label class="detail-label">Descripción:</label>
-          <div class="detail-description">{{ route.description }}</div>
+        <div class="description-content">
+          {{ route.description }}
         </div>
       </div>
     </div>
@@ -143,32 +150,23 @@
       </div>
     </div>
 
-    <!-- Enlaces adicionales -->
-    <div *ngIf="getSignUpLink() || getWikilocLink() || getWikilocMapLink()" 
-         class="w3-card w3-white w3-margin-bottom">
+    <!-- Mapa de Wikiloc embebido -->
+    <div *ngIf="hasWikilocMapLink() || getWikilocLink()" class="w3-card w3-white w3-margin-bottom">
       <div class="w3-container w3-padding">
         <h4 class="section-title">
-          <i class="fa fa-link"></i> Enlaces Adicionales
+          <i class="fa fa-map"></i> Mapa de la Ruta
         </h4>
         
-        <div class="links-container">
-          <div *ngIf="getSignUpLink()" class="link-item">
-            <button class="w3-button w3-green w3-round" (click)="openLink(getSignUpLink())">
-              <i class="fa fa-user-plus"></i> Inscripción
-            </button>
-          </div>
-          
-          <div *ngIf="getWikilocLink()" class="link-item">
-            <button class="w3-button w3-blue w3-round" (click)="openLink(getWikilocLink())">
-              <i class="fa fa-map-marker"></i> Ver en Wikiloc
-            </button>
-          </div>
-          
-          <div *ngIf="getWikilocMapLink()" class="link-item">
-            <button class="w3-button w3-teal w3-round" (click)="openLink(getWikilocMapLink())">
-              <i class="fa fa-map"></i> Mapa Wikiloc
-            </button>
-          </div>
+        <!-- Iframe del mapa si existe -->
+        <div *ngIf="hasWikilocMapLink()" class="wikiloc-map-container">
+          <div [innerHTML]="getWikilocMapLink()"></div>
+        </div>
+        
+        <!-- Botón centrado para ver en Wikiloc -->
+        <div *ngIf="getWikilocLink()" class="w3-center" [ngClass]="{'w3-margin-top': hasWikilocMapLink()}">
+          <button class="w3-button w3-blue w3-round w3-large" (click)="openLink(getWikilocLink())">
+            <i class="fa fa-map-marker"></i> Ver en Wikiloc
+          </button>
         </div>
       </div>
     </div>

@@ -68,6 +68,28 @@ export class RouteFormComponent implements OnInit, OnDestroy {
     this.checkRouteMode();
     this.setupSubscriptions();
     this._changeMyPermissions();
+    this.setupDescriptionListener();
+  }
+
+  private setupDescriptionListener(): void {
+    // Escuchar cambios en el campo descripción para mostrar advertencias
+    this.routeForm.get('description')?.valueChanges.subscribe(value => {
+      if (value) {
+        const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+        if (emojiRegex.test(value)) {
+          // Marcar el campo como que tiene emojis para mostrar la advertencia
+          this.routeForm.get('description')?.setErrors({ containsEmojis: true });
+        } else {
+          // Limpiar el error de emojis si no los hay
+          const currentErrors = this.routeForm.get('description')?.errors;
+          if (currentErrors && currentErrors['containsEmojis']) {
+            delete currentErrors['containsEmojis'];
+            const hasOtherErrors = Object.keys(currentErrors).length > 0;
+            this.routeForm.get('description')?.setErrors(hasOtherErrors ? currentErrors : null);
+          }
+        }
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -91,8 +113,63 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       difficulty: ['', Validators.required],
       sign_up_link: ['', Validators.maxLength(255)],
       wikiloc_link: ['', Validators.maxLength(255)],
-      wikiloc_map_link: ['', Validators.maxLength(255)]
+      wikiloc_map_link: ['', [Validators.maxLength(2000), this.iframeValidator]]
     });
+  }
+
+  // Validador personalizado para iframe
+  private iframeValidator(control: any) {
+    if (!control.value) {
+      return null; // Campo opcional, no validar si está vacío
+    }
+    
+    const value = control.value.trim();
+    
+    // Verificar que contenga las etiquetas iframe básicas
+    const iframeRegex = /<iframe[^>]*>.*<\/iframe>/i;
+    
+    if (!iframeRegex.test(value)) {
+      return { invalidIframe: true };
+    }
+    
+    // Verificar que contenga src con wikiloc
+    const srcRegex = /src\s*=\s*["'][^"']*wikiloc[^"']*["']/i;
+    
+    if (!srcRegex.test(value)) {
+      return { invalidWikilocSrc: true };
+    }
+    
+    return null;
+  }
+
+  // Validador para caracteres Unicode/emojis - Modo advertencia
+  private unicodeValidator(control: any) {
+    if (!control.value) {
+      return null; // Campo opcional, no validar si está vacío
+    }
+    
+    const value = control.value;
+    
+    // Verificar si contiene emojis o caracteres especiales que podrían causar problemas
+    const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+    
+    if (emojiRegex.test(value)) {
+      // En lugar de bloquear, solo advertir
+      return { containsEmojis: true };
+    }
+    
+    return null;
+  }
+
+  // Función para limpiar emojis del texto
+  private cleanEmojis(text: string): string {
+    if (!text) return text;
+    
+    // Regex para detectar emojis
+    const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+    
+    // Reemplazar emojis con texto descriptivo o eliminarlos
+    return text.replace(emojiRegex, '[emoji]');
   }
 
   private checkRouteMode(): void {
@@ -269,6 +346,11 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       
       const formData = { ...this.routeForm.value };
       
+      // Limpiar emojis de la descripción si los hay
+      if (formData.description) {
+        formData.description = this.cleanEmojis(formData.description);
+      }
+      
       // Convertir valores numéricos
       if (formData.distance_km) formData.distance_km = parseFloat(formData.distance_km);
       if (formData.distance_m) formData.distance_m = parseInt(formData.distance_m);
@@ -337,6 +419,9 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       if (field.errors['min']) return `${this.getFieldLabel(fieldName)} debe ser mayor a ${field.errors['min'].min}`;
       if (field.errors['max']) return `${this.getFieldLabel(fieldName)} debe ser menor a ${field.errors['max'].max}`;
       if (field.errors['pattern']) return `${this.getFieldLabel(fieldName)} tiene un formato inválido`;
+      if (field.errors['invalidIframe']) return 'Debe ser un código iframe válido (debe contener <iframe>...</iframe>)';
+      if (field.errors['invalidWikilocSrc']) return 'El iframe debe contener una URL de Wikiloc en el atributo src';
+      if (field.errors['containsEmojis']) return 'Los emojis serán convertidos a texto al guardar para evitar problemas de codificación';
     }
     return '';
   }
@@ -358,7 +443,7 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       'difficulty': 'Dificultad',
       'sign_up_link': 'Enlace de inscripción',
       'wikiloc_link': 'Enlace Wikiloc',
-      'wikiloc_map_link': 'Enlace mapa Wikiloc'
+      'wikiloc_map_link': 'Código iframe mapa Wikiloc'
     };
     return labels[fieldName] || fieldName;
   }

@@ -102,9 +102,13 @@
                 formControlName="description"
                 rows="4"
                 placeholder="Describe la ruta, puntos de interés, características especiales..."></textarea>
-              <div *ngIf="isFieldInvalid('description')" class="error-message">
+              <div *ngIf="isFieldInvalid('description')" class="error-message" 
+                   [ngClass]="{'warning-message': routeForm.get('description')?.errors?.['containsEmojis']}">
                 {{ getFieldError('description') }}
               </div>
+              <small class="field-help">
+                Evita usar emojis o caracteres especiales que puedan causar problemas de codificación
+              </small>
             </div>
           </div>
         </div>
@@ -264,7 +268,7 @@
 
           <div class="w3-row-padding">
             <!-- Enlace Wikiloc -->
-            <div class="w3-col l6 m6 s12">
+            <div class="w3-col s12">
               <label class="field-label">Enlace Wikiloc</label>
               <input 
                 class="w3-input w3-border w3-round"
@@ -276,19 +280,26 @@
                 {{ getFieldError('wikiloc_link') }}
               </div>
             </div>
+          </div>
+
+          <div class="w3-row-padding">
 
             <!-- Enlace mapa Wikiloc -->
-            <div class="w3-col l6 m6 s12">
-              <label class="field-label">Enlace Mapa Wikiloc</label>
-              <input 
+            <div class="w3-col s12">
+              <label class="field-label">Código Iframe Mapa Wikiloc</label>
+              <textarea 
                 class="w3-input w3-border w3-round"
                 [ngClass]="{'w3-border-red': isFieldInvalid('wikiloc_map_link')}"
-                type="url" 
                 formControlName="wikiloc_map_link"
-                placeholder="https://wikiloc.com/...">
+                rows="4"
+                placeholder="<iframe frameBorder=&quot;0&quot; scrolling=&quot;no&quot; src=&quot;https://es.wikiloc.com/wikiloc/embedv2.do?id=17328354&elevation=on&images=off&maptype=H&quot; width=&quot;600&quot; height=&quot;500&quot;></iframe>">
+              </textarea>
               <div *ngIf="isFieldInvalid('wikiloc_map_link')" class="error-message">
                 {{ getFieldError('wikiloc_map_link') }}
               </div>
+              <small class="field-help">
+                Pega aquí el código iframe que proporciona Wikiloc para embeber el mapa de la ruta
+              </small>
             </div>
           </div>
         </div>
