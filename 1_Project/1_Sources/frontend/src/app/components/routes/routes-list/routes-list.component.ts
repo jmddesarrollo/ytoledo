@@ -6,6 +6,10 @@ import { TitleShareService } from '../../../services/share/title.service';
 import { RouteService } from '../../../services/websockets/route.service';
 import { RouteModel } from '../../../models/route.model';
 import { MessageService } from 'primeng/api';
+import { MyPermissionShareService } from '../../../services/share/my-permission.service';
+import { WRPermissionShareService } from '../../../services/share/wr-permission';
+import { RoleHasPermission } from '../../../models/roleHasPermission.model';
+import { GLOBAL } from '../../../services/global';
 
 @Component({
   selector: 'app-routes-list',
@@ -20,6 +24,13 @@ export class RoutesListComponent implements OnInit, OnDestroy {
   public currentPage: number = 1;
   public pageSize: number = 20;
   public totalPages: number = 0;
+
+  // Control de permisos
+  public permission: RoleHasPermission | undefined;
+  public permissionWriting: boolean = false;
+  public wrPermission: string = 'U';
+  public loadingPermission: boolean = false;
+  private permissionViewId: number = GLOBAL.permission_routes_manager;
 
   // Filtros
   public filters = {
@@ -46,12 +57,15 @@ export class RoutesListComponent implements OnInit, OnDestroy {
     private titleShareService: TitleShareService,
     private routeService: RouteService,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private myPermissionShareService: MyPermissionShareService,
+    private wrPermissionShareService: WRPermissionShareService
   ) {}
 
   ngOnInit(): void {
     this.changeTitle();
     this.setupSubscriptions();
+    this._changeMyPermissions();
     this.loadRoutes();
   }
 
@@ -236,6 +250,61 @@ export class RoutesListComponent implements OnInit, OnDestroy {
   formatDate(date: string): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('es-ES');
+  }
+
+  // Métodos de control de permisos
+  changeWRPermission(): void {
+    this.wrPermissionShareService.changeWRPermission(this.wrPermission);
+  }
+
+  _changeMyPermissions(): void {
+    const ob = this.myPermissionShareService.currentMyPermissions.subscribe((myPermissions: RoleHasPermission[]) => {
+      this.permission = myPermissions.find(mp => mp.permissions_id === this.permissionViewId);
+      this.permissionWriting = false;
+
+      // Se da un tiempo de 2s por si se producen cambios rápidos antes de echar al usuario,
+      // además el permiso al inicio de la vista llega 'undefined' y echa al usuario, aunque al regresar datos del backend tenga realmente permisos
+      if (!this.loadingPermission) {
+        this.loadingPermission = true;
+        setTimeout(() => {
+          if (!this.permission) {
+            this.messageService.add({ 
+              severity: 'warn', 
+              summary: 'Permiso', 
+              detail: 'El usuario no tiene permisos para acceder a "' + this.title + '"', 
+              life: 4000 
+            });
+            this.router.navigate(['/my-profile']);
+            return false;
+          }
+          this.loadingPermission = false;
+        }, 2000);
+      }
+
+      if (this.permission) {
+        if (this.permission.writing) {
+          this.permissionWriting = true;
+          this.wrPermission = 'W';
+          this.changeWRPermission();
+        } else {
+          if (this.permission.reading) {
+            this.wrPermission = 'R';
+            this.changeWRPermission();
+          }
+        }
+      }
+    });
+
+    this.subscriptions.push(ob);
+  }
+
+  // Métodos para verificar permisos
+  canEdit(): boolean {
+    return this.permissionWriting;
+  }
+
+  canCreate(): boolean {
+    return this.permissionWriting;
   }
 
 }

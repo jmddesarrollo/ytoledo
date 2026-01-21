@@ -6,6 +6,11 @@ import { TitleShareService } from '../../../services/share/title.service';
 import { RouteService } from '../../../services/websockets/route.service';
 import { RouteModel } from '../../../models/route.model';
 import { MessageService } from 'primeng/api';
+import { MyPermissionShareService } from '../../../services/share/my-permission.service';
+import { WRPermissionShareService } from '../../../services/share/wr-permission';
+import { RoleHasPermission } from '../../../models/roleHasPermission.model';
+import { GLOBAL } from '../../../services/global';
+import { WebsocketService } from '../../../services/websocket.service';
 
 @Component({
   selector: 'app-route-detail',
@@ -19,6 +24,13 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
   public routeId: number | null = null;
   public errorMessage: string = '';
 
+  // Control de permisos
+  public permission: RoleHasPermission | undefined;
+  public permissionWriting: boolean = false;
+  public wrPermission: string = 'U';
+  public loadingPermission: boolean = false;
+  private permissionViewId: number = GLOBAL.permission_routes_manager;
+
   private subscriptions: Subscription[] = [];
   private title: string = 'Detalle de Ruta';
 
@@ -27,13 +39,22 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private titleShareService: TitleShareService,
     private routeService: RouteService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private myPermissionShareService: MyPermissionShareService,
+    private wrPermissionShareService: WRPermissionShareService,
+    private websocketService: WebsocketService
   ) {}
 
   ngOnInit(): void {
     this.changeTitle();
     this.getRouteId();
     this.setupSubscriptions();
+    
+    // Solo verificar permisos si hay sesión activa
+    if (this.websocketService.sessionOn) {
+      this._changeMyPermissions();
+    }
+    
     this.loadRoute();
   }
 
@@ -50,7 +71,7 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
   }
 
   private setupSubscriptions(): void {
-    // Suscripción para obtener ruta específica
+    // Suscripción para obtener ruta específica (ahora pública)
     const getRouteSub = this.routeService.onGetRoute().subscribe(
       (response: any) => {
         this.loading = false;
@@ -67,7 +88,7 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
       }
     );
 
-    // Suscripción para eliminar ruta
+    // Suscripción para eliminar ruta (solo para usuarios autenticados con permisos)
     const deleteRouteSub = this.routeService.onDeleteRoute().subscribe(
       (response: any) => {
         console.log('Route deleted:', response);
@@ -112,7 +133,8 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/routes']);
+    // Navegación inteligente basada en el referrer o contexto
+    this.router.navigate(['/routes-public']);
   }
 
   editRoute(): void {
@@ -225,5 +247,58 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
     if (url) {
       window.open(url, '_blank');
     }
+  }
+
+  // Métodos de control de permisos
+  changeWRPermission(): void {
+    this.wrPermissionShareService.changeWRPermission(this.wrPermission);
+  }
+
+  _changeMyPermissions(): void {
+    const ob = this.myPermissionShareService.currentMyPermissions.subscribe((myPermissions: RoleHasPermission[]) => {
+      this.permission = myPermissions.find(mp => mp.permissions_id === this.permissionViewId);
+      this.permissionWriting = false;
+
+      // Solo aplicar lógica de permisos si hay sesión activa
+      if (this.websocketService.sessionOn) {
+        // Se da un tiempo de 2s por si se producen cambios rápidos antes de echar al usuario,
+        // además el permiso al inicio de la vista llega 'undefined' y echa al usuario, aunque al regresar datos del backend tenga realmente permisos
+        if (!this.loadingPermission) {
+          this.loadingPermission = true;
+          setTimeout(() => {
+            if (!this.permission) {
+              this.messageService.add({ 
+                severity: 'warn', 
+                summary: 'Permiso', 
+                detail: 'El usuario no tiene permisos para gestionar rutas', 
+                life: 4000 
+              });
+              // No redirigir, solo ocultar botones de gestión
+            }
+            this.loadingPermission = false;
+          }, 2000);
+        }
+
+        if (this.permission) {
+          if (this.permission.writing) {
+            this.permissionWriting = true;
+            this.wrPermission = 'W';
+            this.changeWRPermission();
+          } else {
+            if (this.permission.reading) {
+              this.wrPermission = 'R';
+              this.changeWRPermission();
+            }
+          }
+        }
+      }
+    });
+
+    this.subscriptions.push(ob);
+  }
+
+  // Método para verificar si el usuario puede editar/eliminar
+  canEdit(): boolean {
+    return this.websocketService.sessionOn && this.permissionWriting;
   }
 }

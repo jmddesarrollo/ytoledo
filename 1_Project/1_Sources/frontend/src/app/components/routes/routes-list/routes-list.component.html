@@ -5,7 +5,7 @@
       <h2>Gestión de Rutas</h2>
     </div>
     <div class="w3-col l4 m4 s12 w3-right-align">
-      <button class="w3-button w3-green w3-round" (click)="createRoute()">
+      <button *ngIf="canCreate()" class="w3-button w3-green w3-round" (click)="createRoute()">
         <i class="fa fa-plus"></i> Nueva Ruta
       </button>
     </div>
@@ -133,12 +133,14 @@
                     <i class="fa fa-eye"></i>
                   </button>
                   <button 
+                    *ngIf="canEdit()"
                     class="w3-button w3-small w3-orange w3-round w3-margin-right" 
                     (click)="editRoute(route)"
                     title="Editar">
                     <i class="fa fa-edit"></i>
                   </button>
                   <button 
+                    *ngIf="canEdit()"
                     class="w3-button w3-small w3-red w3-round" 
                     (click)="deleteRoute(route)"
                     title="Eliminar">
@@ -151,7 +153,7 @@
               <tr *ngIf="routes.length === 0">
                 <td colspan="7" class="w3-center w3-padding">
                   <p>No se encontraron rutas con los filtros aplicados.</p>
-                  <button class="w3-button w3-green w3-round" (click)="createRoute()">
+                  <button *ngIf="canCreate()" class="w3-button w3-green w3-round" (click)="createRoute()">
                     Crear Primera Ruta
                   </button>
                 </td>

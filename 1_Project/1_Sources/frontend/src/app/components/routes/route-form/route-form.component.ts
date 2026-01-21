@@ -7,6 +7,10 @@ import { TitleShareService } from '../../../services/share/title.service';
 import { RouteService } from '../../../services/websockets/route.service';
 import { RouteModel } from '../../../models/route.model';
 import { MessageService } from 'primeng/api';
+import { MyPermissionShareService } from '../../../services/share/my-permission.service';
+import { WRPermissionShareService } from '../../../services/share/wr-permission';
+import { RoleHasPermission } from '../../../models/roleHasPermission.model';
+import { GLOBAL } from '../../../services/global';
 
 @Component({
   selector: 'app-route-form',
@@ -21,6 +25,13 @@ export class RouteFormComponent implements OnInit, OnDestroy {
   public isEditMode: boolean = false;
   public routeId: number | null = null;
   public errorMessage: string = '';
+
+  // Control de permisos
+  public permission: RoleHasPermission | undefined;
+  public permissionWriting: boolean = false;
+  public wrPermission: string = 'U';
+  public loadingPermission: boolean = false;
+  private permissionViewId: number = GLOBAL.permission_routes_manager;
 
   public difficulties = [
     { label: 'Seleccionar dificultad', value: '' },
@@ -46,7 +57,9 @@ export class RouteFormComponent implements OnInit, OnDestroy {
     private router: Router,
     private titleShareService: TitleShareService,
     private routeService: RouteService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private myPermissionShareService: MyPermissionShareService,
+    private wrPermissionShareService: WRPermissionShareService
   ) {
     this.initializeForm();
   }
@@ -54,6 +67,7 @@ export class RouteFormComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.checkRouteMode();
     this.setupSubscriptions();
+    this._changeMyPermissions();
   }
 
   ngOnDestroy(): void {
@@ -244,6 +258,10 @@ export class RouteFormComponent implements OnInit, OnDestroy {
     this.titleShareService.changeTitle(this.title);
   }
 
+  changeWRPermission(): void {
+    this.wrPermissionShareService.changeWRPermission(this.wrPermission);
+  }
+
   onSubmit(): void {
     if (this.routeForm.valid) {
       this.saving = true;
@@ -343,5 +361,59 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       'wikiloc_map_link': 'Enlace mapa Wikiloc'
     };
     return labels[fieldName] || fieldName;
+  }
+
+  /**
+   * Control de permisos
+   */
+  _changeMyPermissions(): void {
+    const ob = this.myPermissionShareService.currentMyPermissions.subscribe((myPermissions: RoleHasPermission[]) => {
+      this.permission = myPermissions.find(mp => mp.permissions_id === this.permissionViewId);
+
+      this.permissionWriting = false;
+
+      // Se da un tiempo de 2s por si se producen cambios rápidos antes de echar al usuario,
+      // además el permiso al inicio de la vista llega 'undefined' y echa al usuario, aunque al regresar datos del backend tenga realmente permisos
+      if (!this.loadingPermission) {
+        this.loadingPermission = true;
+        setTimeout(() => {
+          if (!this.permission) {
+            this.messageService.add({ 
+              severity: 'warn', 
+              summary: 'Permiso', 
+              detail: 'El usuario no tiene permisos para acceder a "' + this.title + '"', 
+              life: 4000 
+            });
+            this.router.navigate(['/my-profile']);
+            return false;
+          }
+
+          this.loadingPermission = false;
+        }, 2000);
+      }
+
+      if (this.permission) {
+        if (this.permission.writing) {
+          this.permissionWriting = true;
+          this.wrPermission = 'W';
+          this.changeWRPermission();
+        } else {
+          if (this.permission.reading) {
+            this.wrPermission = 'R';
+            this.changeWRPermission();
+            // Si solo tiene permisos de lectura, redirigir a la lista
+            this.messageService.add({ 
+              severity: 'warn', 
+              summary: 'Permiso', 
+              detail: 'No tiene permisos para crear o editar rutas', 
+              life: 3000 
+            });
+            this.router.navigate(['/routes']);
+          }
+        }
+      }
+    });
+
+    this.subscriptions.push(ob);
   }
 }

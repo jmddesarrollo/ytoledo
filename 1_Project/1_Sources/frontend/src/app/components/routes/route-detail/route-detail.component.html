@@ -8,10 +8,10 @@
       <button class="w3-button w3-light-grey w3-round w3-margin-right" (click)="goBack()">
         <i class="fa fa-arrow-left"></i> Volver
       </button>
-      <button *ngIf="route" class="w3-button w3-orange w3-round w3-margin-right" (click)="editRoute()">
+      <button *ngIf="route && canEdit()" class="w3-button w3-orange w3-round w3-margin-right" (click)="editRoute()">
         <i class="fa fa-edit"></i> Editar
       </button>
-      <button *ngIf="route" class="w3-button w3-red w3-round" (click)="deleteRoute()">
+      <button *ngIf="route && canEdit()" class="w3-button w3-red w3-round" (click)="deleteRoute()">
         <i class="fa fa-trash"></i> Eliminar
       </button>
     </div>
