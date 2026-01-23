@@ -73,6 +73,7 @@ import { RouteDetailComponent } from './components/routes/route-detail/route-det
 import { RouteFormComponent } from './components/routes/route-form/route-form.component';
 import { RoutesListComponent } from './components/routes/routes-list/routes-list.component';
 import { RoutesPublicComponent } from './components/routes/routes-public/routes-public.component';
+import { FileAttachmentComponent } from './components/routes/file-attachment/file-attachment.component';
 import { UserFormComponent } from './components/users/user-form/user-form.component';
 import { UserFormPasswordComponent } from './components/users/user-form-password/user-form-password.component';
 import { UserMyprofileComponent } from './components/users/user-myprofile/user-myprofile.component';
@@ -96,7 +97,8 @@ import { UsersListComponent } from './components/users/users-list/users-list.com
     RoutesListComponent,
     RoutesPublicComponent,
     RouteDetailComponent,
-    RouteFormComponent    
+    RouteFormComponent,
+    FileAttachmentComponent
   ],
   imports: [
     BrowserModule,

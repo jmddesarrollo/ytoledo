@@ -1,0 +1,119 @@
+<div class="file-attachment-container">
+  <!-- Input file oculto -->
+  <input 
+    #fileInput 
+    type="file" 
+    style="display: none;" 
+    (change)="onFileSelected($event)"
+    [disabled]="disabled">
+
+  <!-- Área de upload (drag & drop) -->
+  <div 
+    *ngIf="showUploadArea"
+    #dropZone
+    class="drop-zone"
+    [class.drag-over]="isDragOver"
+    [class.disabled]="disabled"
+    (click)="openFileSelector()">
+    
+    <div class="drop-zone-content">
+      <i class="pi pi-cloud-upload drop-zone-icon"></i>
+      <h4 class="drop-zone-title">Adjuntar archivo</h4>
+      <p class="drop-zone-text">
+        Arrastra y suelta un archivo aquí o 
+        <span class="drop-zone-link">haz clic para seleccionar</span>
+      </p>
+      <div class="drop-zone-info">
+        <small>
+          <span *ngIf="maxFileSize">Tamaño máximo: {{ formatFileSize(maxFileSize) }}</span>
+          <span *ngIf="acceptedTypes.length > 0"> | Tipos: {{ acceptedTypes.join(', ') }}</span>
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicador de progreso -->
+  <div *ngIf="isUploading" class="upload-progress">
+    <div class="upload-progress-header">
+      <i class="pi pi-spin pi-spinner"></i>
+      <span>Procesando archivo...</span>
+    </div>
+    <p-progressBar 
+      [value]="uploadProgress" 
+      [showValue]="true"
+      styleClass="upload-progress-bar">
+    </p-progressBar>
+  </div>
+
+  <!-- Información del archivo -->
+  <div *ngIf="showFileInfo && !isUploading" class="file-info">
+    <!-- Archivo actual (ya guardado) -->
+    <div *ngIf="hasCurrentFile" class="file-info-header current-file">
+      <i [class]="getFileIcon(displayFileName)" class="file-icon"></i>
+      <div class="file-details">
+        <div class="file-name">{{ displayFileName }}</div>
+        <div class="file-size">{{ displayFileSize }}</div>
+        <div class="file-date">
+          Subido: {{ currentFile.uploadDate | date:'dd/MM/yyyy HH:mm' }}
+        </div>
+        <div class="file-status current">
+          <i class="pi pi-check-circle" style="color: #4CAF50;"></i>
+          <span>Archivo actual</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archivo seleccionado (pendiente de subir) -->
+    <div *ngIf="hasSelectedFile && !hasCurrentFile" class="file-info-header selected-file">
+      <i [class]="getFileIcon(displayFileName)" class="file-icon"></i>
+      <div class="file-details">
+        <div class="file-name">{{ displayFileName }}</div>
+        <div class="file-size">{{ displayFileSize }}</div>
+        <div class="file-status selected">
+          <i class="pi pi-clock" style="color: #FF9800;"></i>
+          <span>Listo para subir</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-actions">
+      <button 
+        type="button" 
+        class="w3-btn w3-small w3-red w3-margin-right"
+        (click)="removeFile($event)"
+        [disabled]="disabled"
+        title="Quitar archivo">
+        <i class="pi pi-times"></i>
+        Quitar
+      </button>
+      
+      <button 
+        *ngIf="hasCurrentFile && !hasSelectedFile"
+        type="button" 
+        class="w3-btn w3-small w3-blue"
+        (click)="openFileSelector()"
+        [disabled]="disabled"
+        title="Cambiar archivo">
+        <i class="pi pi-refresh"></i>
+        Cambiar
+      </button>
+    </div>
+  </div>
+
+  <!-- Error de validación -->
+  <div *ngIf="validationError" class="validation-error">
+    <i class="pi pi-exclamation-triangle"></i>
+    <span>{{ validationError }}</span>
+  </div>
+
+  <!-- Mensaje informativo -->
+  <div class="file-attachment-help">
+    <small>
+      <i class="pi pi-info-circle"></i>
+      El archivo se adjuntará a la ruta y estará disponible para descarga desde la página de detalle.
+    </small>
+  </div>
+</div>
+
+<!-- Popup de confirmación -->
+<p-confirmPopup></p-confirmPopup>

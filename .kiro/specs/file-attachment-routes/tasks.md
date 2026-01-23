@@ -32,13 +32,13 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
   - _Requirements: 1.3, 2.2, 2.4, 4.1, 4.2_
 
 - [ ] 4. Crear FileAttachmentComponent
-  - [ ] 4.1 Implementar componente de upload de archivos
+  - [x] 4.1 Implementar componente de upload de archivos
     - Crear interfaz de selección de archivos con drag & drop
     - Implementar indicadores de progreso y estados de carga
     - Manejar validación de archivos (tamaño, tipo si es necesario)
     - _Requirements: 1.1, 2.1_
   
-  - [ ] 4.2 Implementar funcionalidad de quitar archivo
+  - [x] 4.2 Implementar funcionalidad de quitar archivo
     - Mostrar archivo actual cuando existe
     - Proporcionar opción para quitar archivo adjunto
     - Manejar confirmación de eliminación
