@@ -1,6 +1,8 @@
 import ControlException from '../../utils/controlException';
 
 import RouteDAL from './route.dal';
+import FileAttachmentService from '../file/file-attachment.bll';
+import { FileData, RouteWithFile, AttachedFileWithRoute } from '../../models/file-attachment.model';
 
 const env = process.env.YTO_NODE_ENV || 'development';
 const config = require('../../config/config')[env];
@@ -8,6 +10,7 @@ const config = require('../../config/config')[env];
 
 export default class RouteService {
     private routeDAL = new RouteDAL();
+    private fileAttachmentService = new FileAttachmentService();
 
     constructor() { }
 
@@ -45,7 +48,7 @@ export default class RouteService {
         return route;
     }
 
-    public async addRoute(route: any, t: any, userId?: number) {
+    public async addRoute(route: any, t: any, userId?: number, fileData?: FileData) {
         // Validaciones básicas
         this.validateRouteData(route);
         
@@ -62,12 +65,24 @@ export default class RouteService {
             throw new ControlException('El ID del usuario es obligatorio para crear una ruta', 400);
         }
 
+        // Crear la ruta primero
         const routeDb = await this.routeDAL.addRoute(route, t);
+
+        // Si hay datos de archivo, procesarlos después de crear la ruta
+        if (fileData && fileData.file) {
+            try {
+                await this.fileAttachmentService.attachFileToRoute(routeDb.id, fileData.file);
+            } catch (fileError) {
+                // Si falla la subida del archivo, eliminar la ruta creada
+                await this.routeDAL.deleteRoute(routeDb.id, t);
+                throw new ControlException('Error al adjuntar el archivo: ' + (fileError as Error).message, 500);
+            }
+        }
 
         return routeDb;
     }
 
-    public async editRoute(route: any, t: any) {
+    public async editRoute(route: any, t: any, fileData?: FileData) {
         const routeDB = await this.getRoute(route.id);
 
         if (!routeDB) throw new ControlException('La ruta no ha sido encontrada', 412);
@@ -78,6 +93,35 @@ export default class RouteService {
         // Verificar que el nombre sea único (excluyendo la ruta actual)
         if (route.name && route.name !== routeDB.name) {
             await this.validateUniqueRouteName(route.name, route.id);
+        }
+
+        // Procesar operaciones de archivo antes de actualizar otros campos
+        if (fileData) {
+            if (fileData.removeExisting) {
+                // Eliminar archivo existente si se solicita
+                try {
+                    await this.fileAttachmentService.removeFileFromRoute(route.id);
+                } catch (fileError) {
+                    // Si no hay archivo para eliminar, continuar normalmente
+                    console.warn('No se pudo eliminar el archivo:', (fileError as Error).message);
+                }
+            } else if (fileData.file) {
+                // Si hay un archivo existente, eliminarlo primero
+                if (routeDB.file_track && routeDB.file_track.trim() !== '') {
+                    try {
+                        await this.fileAttachmentService.removeFileFromRoute(route.id);
+                    } catch (fileError) {
+                        console.warn('No se pudo eliminar el archivo anterior:', (fileError as Error).message);
+                    }
+                }
+                
+                // Adjuntar el nuevo archivo
+                try {
+                    await this.fileAttachmentService.attachFileToRoute(route.id, fileData.file);
+                } catch (fileError) {
+                    throw new ControlException('Error al adjuntar el archivo: ' + (fileError as Error).message, 500);
+                }
+            }
         }
 
         // Actualizar campos de la ruta
@@ -108,9 +152,102 @@ export default class RouteService {
 
         if (!routeDB) throw new ControlException('La ruta no ha sido encontrada', 412);
 
+        // Si la ruta tiene un archivo adjunto, eliminarlo primero
+        if (routeDB.file_track && routeDB.file_track.trim() !== '') {
+            try {
+                await this.fileAttachmentService.removeFileFromRoute(routeId);
+            } catch (fileError) {
+                console.warn('No se pudo eliminar el archivo adjunto:', (fileError as Error).message);
+                // Continuar con la eliminación de la ruta aunque falle la eliminación del archivo
+            }
+        }
+
         await this.routeDAL.deleteRoute(routeId, t);
 
         return true;
+    }
+
+    /**
+     * Remove file from route - clears file_track and filename_track fields
+     * Requirements: 2.2, 2.4
+     */
+    public async removeFileFromRoute(routeId: number): Promise<void> {
+        try {
+            await this.fileAttachmentService.removeFileFromRoute(routeId);
+        } catch (error) {
+            if (error instanceof ControlException) {
+                throw error;
+            }
+            throw new ControlException('Ha ocurrido un error al eliminar el archivo de la ruta', 500);
+        }
+    }
+
+    /**
+     * Get routes with their attached files for management page
+     * Requirements: 4.1, 4.2
+     */
+    public async getRoutesWithFiles(): Promise<RouteWithFile[]> {
+        try {
+            // Get all routes that have attached files
+            const routes = await this.routeDAL.getRoutes();
+            
+            const routesWithFiles: RouteWithFile[] = routes
+                .filter((route: any) => route.file_track && route.file_track.trim() !== '')
+                .map((route: any) => ({
+                    id: route.id,
+                    name: route.name,
+                    date: route.date,
+                    start_point: route.start_point,
+                    description: route.description,
+                    distance_km: route.distance_km,
+                    distance_m: route.distance_m,
+                    elevation_gain: route.elevation_gain,
+                    max_height: route.max_height,
+                    min_height: route.min_height,
+                    estimated_duration_hours: route.estimated_duration_hours,
+                    estimated_duration_minutes: route.estimated_duration_minutes,
+                    type: route.type,
+                    difficulty: route.difficulty,
+                    sign_up_link: route.sign_up_link,
+                    wikiloc_link: route.wikiloc_link,
+                    wikiloc_map_link: route.wikiloc_map_link,
+                    user_id: route.user_id,
+                    file_track: route.file_track,
+                    filename_track: route.filename_track,
+                    created_at: route.created_at,
+                    updated_at: route.updated_at,
+                    attachedFile: {
+                        fileTrack: route.file_track,
+                        filenameTrack: route.filename_track,
+                        uploadDate: route.updated_at || route.created_at,
+                        fileSize: 0, // Would need to be calculated from actual file
+                        mimeType: 'application/octet-stream' // Would need to be determined from file extension
+                    }
+                }));
+
+            return routesWithFiles;
+
+        } catch (error) {
+            throw new ControlException('Ha ocurrido un error al obtener las rutas con archivos adjuntos', 500);
+        }
+    }
+
+    /**
+     * Create route with optional file attachment
+     * Requirements: 1.3
+     */
+    public async createRouteWithFile(routeData: any, fileData: FileData | undefined, t: any, userId?: number): Promise<any> {
+        return this.addRoute(routeData, t, userId, fileData);
+    }
+
+    /**
+     * Update route with optional file operations
+     * Requirements: 1.3, 2.2
+     */
+    public async updateRouteWithFile(routeId: number, routeData: any, fileData: FileData | undefined, t: any): Promise<any> {
+        // Ensure the route ID is set in the route data
+        routeData.id = routeId;
+        return this.editRoute(routeData, t, fileData);
     }
 
     // Métodos de validación

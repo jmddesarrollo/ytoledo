@@ -24,7 +24,7 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
     - Integrar con File_Manager.delFiles() y actualización de base de datos
     - _Requirements: 4.4, 5.3_
 
-- [ ] 3. Extender RouteService existente
+- [x] 3. Extender RouteService existente
   - Modificar createRoute() para manejar FileData opcional
   - Modificar updateRoute() para manejar adjuntar/quitar archivos
   - Implementar removeFileFromRoute() para limpiar campos de base de datos
