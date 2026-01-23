@@ -18,6 +18,8 @@ export class RouteModel {
         public wikilocLink?: string,     
         public wikilocMapLink?: string,
         public userId?: number,
+        public fileTrack?: string,
+        public filenameTrack?: string,
         public createdAt?: Date,
         public updatedAt?: Date
     ) {}
@@ -43,4 +45,12 @@ export class RouteModel {
         this.estimatedDurationHours = parseInt(parts[0]) || 0;
         this.estimatedDurationMinutes = parseInt(parts[1]) || 0;
     }
+
+    // Helper method to check if route has an attached file
+    get hasAttachedFile(): boolean {
+        return !!(this.fileTrack && this.fileTrack.trim() !== '');
+    }
 }
+
+// Re-export file attachment interfaces for convenience
+export * from './file-attachment.model';

@@ -126,6 +126,8 @@ CREATE TABLE IF NOT EXISTS `y-toledo`.`routes` (
   `wikiloc_link` VARCHAR(255),
   `wikiloc_map_link` VARCHAR(255),
   `user_id` INT(11) NULL,
+  `file_track` VARCHAR(255) DEFAULT '' COMMENT 'Unique identifier for attached file',
+  `filename_track` VARCHAR(255) DEFAULT '' COMMENT 'Original filename with extension for download',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

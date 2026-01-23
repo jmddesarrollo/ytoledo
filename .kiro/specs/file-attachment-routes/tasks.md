@@ -6,7 +6,7 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
 
 ## Tasks
 
-- [ ] 1. Extender base de datos y modelos de datos
+- [x] 1. Extender base de datos y modelos de datos
   - Agregar campos file_track y filename_track a la tabla routes
   - Crear interfaces TypeScript para AttachedFile, RouteWithFile, AttachedFileWithRoute
   - Actualizar modelo Route existente para incluir campos de archivo

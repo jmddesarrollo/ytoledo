@@ -78,6 +78,16 @@ module.exports = (sequelize: any, DataTypes: any) => {
                 key: 'id'
             }
         },
+        file_track: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+            defaultValue: ''
+        },
+        filename_track: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+            defaultValue: ''
+        },
         created_at: {
             type: DataTypes.DATE,
             allowNull: false,
