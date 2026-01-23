@@ -1,527 +1,281 @@
-# Adjuntar Archivos a Rutas - Diseño
+# Design Document: File Attachment Routes
 
-## 1. Arquitectura General
+## Overview
 
-### 1.1 Visión de la Arquitectura
-El sistema de archivos adjuntos extiende la arquitectura existente del sistema de rutas, manteniendo el patrón de capas establecido:
-- **Presentación**: Componentes Angular extendidos con funcionalidad de archivos
-- **Controladores**: WebSocket controllers extendidos para manejo de archivos
-- **Lógica de Negocio**: Services (BLL) para reglas de negocio de archivos
-- **Acceso a Datos**: DAL extendido para operaciones con archivos
-- **Persistencia**: Modelo Route extendido + nuevo modelo FileAttachment
-- **Almacenamiento**: Sistema de archivos existente con estructura de carpetas
+Esta funcionalidad integra directamente la capacidad de adjuntar archivos a las rutas dentro del flujo existente de creación y edición de rutas. La solución aprovecha completamente la infraestructura existente de `file.bll.ts` y sigue la arquitectura establecida Controller/Service/Model con BLL/DAL.
 
-### 1.2 Flujo de Datos Extendido
-```
-Frontend (Angular) ↔ WebSocket ↔ Controller ↔ BLL Service ↔ DAL Service ↔ Database
-                                      ↓
-                              File System (Existing)
-```
+La integración es transparente para el usuario: durante la creación o edición de una ruta, puede opcionalmente subir un archivo que quedará asociado a esa ruta. Los archivos se pueden descargar desde la página de detalle de la ruta y gestionar desde una página administrativa dedicada.
 
-### 1.3 Integración con Sistema Existente
-- Extiende el modelo Route con campo `file_track`
-- Reutiliza sistema de subida de archivos existente
-- Mantiene compatibilidad total con funcionalidades de rutas
-- Sigue patrones WebSocket establecidos
+## Architecture
 
-## 2. Modelo de Datos
+### Database Schema Extensions
 
-### 2.1 Extensión del Modelo Route
-
-```typescript
-interface RouteExtended extends Route {
-  file_track?: string; // Identificador único del archivo adjunto
-}
-```
-
-### 2.2 Nuevo Modelo FileAttachment
-
-```typescript
-interface FileAttachment {
-  id: string; // Identificador único generado por sistema existente
-  originalName: string; // Nombre original del archivo
-  fileName: string; // Nombre del archivo en el sistema
-  filePath: string; // Ruta completa del archivo
-  fileSize: number; // Tamaño en bytes
-  mimeType: string; // Tipo MIME del archivo
-  isLinked: boolean; // Si está vinculado a una ruta
-  linkedRouteId?: number; // ID de la ruta vinculada
-  uploadedAt: Date;
-  uploadedBy: number; // FK a users
-}
-```
-
-### 2.3 Extensión del Esquema de Base de Datos
+Se extiende la tabla de rutas existente con dos nuevos campos:
 
 ```sql
--- Extensión de tabla routes existente
-ALTER TABLE routes 
-ADD COLUMN file_track VARCHAR(255) NULL,
-ADD INDEX idx_file_track (file_track);
-
--- Nueva tabla para gestión de archivos (opcional, para tracking)
-CREATE TABLE file_attachments (
-  id VARCHAR(255) PRIMARY KEY, -- Mismo ID que genera el sistema existente
-  original_name VARCHAR(255) NOT NULL,
-  file_name VARCHAR(255) NOT NULL,
-  file_path VARCHAR(500) NOT NULL,
-  file_size BIGINT NOT NULL,
-  mime_type VARCHAR(100) NOT NULL,
-  is_linked BOOLEAN DEFAULT FALSE,
-  linked_route_id INT NULL,
-  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  uploaded_by INT NOT NULL,
-  FOREIGN KEY (linked_route_id) REFERENCES routes(id),
-  FOREIGN KEY (uploaded_by) REFERENCES users(id),
-  INDEX idx_is_linked (is_linked),
-  INDEX idx_linked_route (linked_route_id)
-);
+ALTER TABLE routes ADD COLUMN file_track VARCHAR(255) DEFAULT '';
+ALTER TABLE routes ADD COLUMN filename_track VARCHAR(255) DEFAULT '';
 ```
 
-## 3. Componentes del Sistema
+- `file_track`: Identificador único generado por `generateIdentifier()` del File_Manager
+- `filename_track`: Nombre original del archivo con extensión para descarga
 
-### 3.1 Backend Components
+### Integration Points
 
-#### 3.1.1 Extensión Route Model (`models/route.model.ts`)
+1. **Route Form Integration**: El formulario de crear/editar ruta incluye componente de upload de archivos
+2. **File Manager Reuse**: Utiliza métodos existentes de `file.bll.ts` sin modificaciones
+3. **Route Detail Enhancement**: Página de detalle muestra botón de descarga cuando existe archivo
+4. **Management Interface**: Nueva página para gestión centralizada de archivos adjuntos
+
+## Components and Interfaces
+
+### Frontend Components
+
+#### FileAttachmentComponent
 ```typescript
-export class Route extends Model {
-  // ... campos existentes
-  public fileTrack?: string; // Nuevo campo
+interface FileAttachmentComponent {
+  // Propiedades
+  currentFile: AttachedFile | null;
+  isUploading: boolean;
+  uploadProgress: number;
+  
+  // Métodos
+  onFileSelected(file: File): void;
+  uploadFile(): Promise<void>;
+  removeFile(): void;
+  downloadFile(): void;
 }
-
-// Actualizar definición del modelo
-Route.init({
-  // ... campos existentes
-  fileTrack: {
-    type: DataTypes.STRING(255),
-    allowNull: true,
-    field: 'file_track'
-  }
-}, {
-  // ... configuración existente
-});
 ```
 
-#### 3.1.2 Nuevo FileAttachment Model (`models/fileAttachment.model.ts`)
+#### RouteFormComponent (Extended)
 ```typescript
-export class FileAttachment extends Model {
-  public id!: string;
-  public originalName!: string;
-  public fileName!: string;
-  public filePath!: string;
-  public fileSize!: number;
-  public mimeType!: string;
-  public isLinked!: boolean;
-  public linkedRouteId?: number;
-  public uploadedAt!: Date;
-  public uploadedBy!: number;
+interface RouteFormComponent {
+  // Propiedades existentes + nuevas
+  attachedFile: AttachedFile | null;
+  fileToRemove: string | null; // file_track a eliminar
+  
+  // Métodos nuevos
+  onFileAttached(file: AttachedFile): void;
+  onFileRemoved(): void;
+  handleFormSubmit(): void; // Extendido para manejar archivos
 }
 ```
 
-#### 3.1.3 Extensión Route Controller (`controllers/ws/route.controller.ts`)
-Nuevos eventos WebSocket:
-- `route:upload-file` - Subir archivo y mostrar rutas disponibles
-- `route:link-file` - Vincular archivo a ruta específica
-- `route:unlink-file` - Desvincular archivo de ruta
-- `route:download-file` - Descargar archivo vinculado
-- `file:list-orphaned` - Listar archivos huérfanos
-- `file:delete-orphaned` - Eliminar archivo huérfano
-
-#### 3.1.4 Nuevo FileAttachment BLL (`services/fileAttachment/fileAttachment.bll.ts`)
-Lógica de negocio:
-- Validación de tipos de archivo permitidos
-- Gestión de vinculación/desvinculación
-- Lógica de archivos huérfanos
-- Integración con sistema de archivos existente
-
-#### 3.1.5 Nuevo FileAttachment DAL (`services/fileAttachment/fileAttachment.dal.ts`)
-Acceso a datos:
-- CRUD de registros de archivos
-- Consultas de archivos huérfanos
-- Actualización de estado de vinculación
-- Integración con Route DAL
-
-### 3.2 Frontend Components
-
-#### 3.2.1 Extensión Route Form Component
-- Nuevo campo para mostrar archivo vinculado
-- Botón para desvincular archivo
-- Indicador visual de estado de archivo
-
-#### 3.2.2 Extensión Route Detail Component
-- Botón de descarga cuando hay archivo vinculado
-- Mensaje explicativo sobre uso del archivo
-- Integración con botón de Wikiloc existente
-
-#### 3.2.3 Nuevo File Upload Component (`components/files/file-upload/`)
-- Subida de archivos con validación
-- Lista de rutas disponibles para vinculación
-- Confirmación de vinculación exitosa
-
-#### 3.2.4 Nuevo File Management Component (`components/files/file-management/`)
-- Lista de archivos huérfanos
-- Información detallada de archivos
-- Funcionalidad de eliminación con confirmación
-
-#### 3.2.5 Extensión Route Service (`services/websockets/route.service.ts`)
-Nuevos métodos:
-- `uploadAndLinkFile(file: File, routeId: number)`
-- `unlinkFile(routeId: number)`
-- `downloadFile(fileId: string)`
-- `getOrphanedFiles()`
-- `deleteOrphanedFile(fileId: string)`
-
-## 4. Permisos y Seguridad
-
-### 4.1 Permisos Requeridos
+#### FileManagementComponent
 ```typescript
-enum FileAttachmentPermissions {
-  FILE_UPLOAD = 'file:upload',
-  FILE_LINK = 'file:link',
-  FILE_UNLINK = 'file:unlink',
-  FILE_DOWNLOAD = 'file:download', // Público
-  FILE_MANAGE = 'file:manage' // Solo administradores
+interface FileManagementComponent {
+  attachedFiles: AttachedFileWithRoute[];
+  selectedFiles: string[];
+  
+  loadAttachedFiles(): Promise<void>;
+  confirmDelete(fileTrack: string): void;
+  deleteFiles(fileTracks: string[]): Promise<void>;
 }
 ```
 
-### 4.2 Matriz de Permisos
-| Rol | Subir | Vincular | Desvincular | Descargar | Gestionar |
-|-----|-------|----------|-------------|-----------|-----------|
-| Administrador | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Editor | ✓ | ✓ | ✓* | ✓ | ✗ |
-| Consultor | ✗ | ✗ | ✗ | ✓ | ✗ |
-| Público | ✗ | ✗ | ✗ | ✓ | ✗ |
+### Backend Interfaces
 
-*Editor solo puede desvincular archivos de rutas propias
-
-### 4.3 Validaciones de Seguridad
-- Validación de tipos de archivo permitidos (GPX, KML, TCX, FIT)
-- Validación de tamaño máximo (10MB)
-- Sanitización de nombres de archivo
-- Verificación de existencia de archivos antes de descarga
-- Logs de auditoría para operaciones de archivos
-
-## 5. API Design (WebSocket Events)
-
-### 5.1 Eventos de Gestión de Archivos
-
-#### `route:upload-file`
+#### RouteService (Extended)
 ```typescript
-// Request
-{
-  event: 'route:upload-file',
-  data: {
-    file: File, // Archivo a subir
-    metadata: {
-      originalName: string,
-      size: number,
-      type: string
-    }
-  }
-}
-
-// Response
-{
-  success: boolean,
-  data: {
-    fileId: string,
-    availableRoutes: Route[] // Rutas sin archivo adjunto
-  },
-  message?: string
+interface RouteService {
+  // Métodos existentes + nuevos
+  createRouteWithFile(routeData: RouteData, fileData: FileData): Promise<Route>;
+  updateRouteWithFile(routeId: string, routeData: RouteData, fileData: FileData): Promise<Route>;
+  removeFileFromRoute(routeId: string): Promise<void>;
+  getRoutesWithFiles(): Promise<RouteWithFile[]>;
 }
 ```
 
-#### `route:link-file`
+#### FileAttachmentService
 ```typescript
-// Request
-{
-  event: 'route:link-file',
-  data: {
-    fileId: string,
-    routeId: number
-  }
-}
-
-// Response
-{
-  success: boolean,
-  data: {
-    route: Route, // Ruta actualizada con file_track
-    fileAttachment: FileAttachment
-  },
-  message?: string
+interface FileAttachmentService {
+  attachFileToRoute(routeId: string, file: File): Promise<AttachedFile>;
+  removeFileFromRoute(routeId: string): Promise<void>;
+  getAttachedFile(fileTrack: string): Promise<AttachedFile>;
+  getAllAttachedFiles(): Promise<AttachedFileWithRoute[]>;
+  deleteAttachedFiles(fileTracks: string[]): Promise<void>;
 }
 ```
 
-#### `route:unlink-file`
+## Data Models
+
+### AttachedFile
 ```typescript
-// Request
-{
-  event: 'route:unlink-file',
-  data: {
-    routeId: number
-  }
-}
-
-// Response
-{
-  success: boolean,
-  data: {
-    route: Route, // Ruta con file_track = null
-    orphanedFileId: string
-  },
-  message?: string
+interface AttachedFile {
+  fileTrack: string;        // Identificador único del archivo
+  filenameTrack: string;    // Nombre original con extensión
+  uploadDate: Date;         // Fecha de subida
+  fileSize: number;         // Tamaño en bytes
+  mimeType: string;         // Tipo MIME del archivo
 }
 ```
 
-#### `route:download-file`
+### RouteWithFile
 ```typescript
-// Request
-{
-  event: 'route:download-file',
-  data: {
-    routeId: number
-  }
-}
-
-// Response
-{
-  success: boolean,
-  data: {
-    downloadUrl: string, // URL temporal para descarga
-    fileName: string,
-    fileSize: number
-  }
+interface RouteWithFile extends Route {
+  attachedFile: AttachedFile | null;
 }
 ```
 
-### 5.2 Eventos de Gestión de Archivos Huérfanos
-
-#### `file:list-orphaned`
+### AttachedFileWithRoute
 ```typescript
-// Request
-{
-  event: 'file:list-orphaned',
-  data: {
-    page?: number,
-    limit?: number
-  }
-}
-
-// Response
-{
-  success: boolean,
-  data: {
-    files: FileAttachment[],
-    total: number,
-    page: number,
-    totalPages: number
-  }
+interface AttachedFileWithRoute extends AttachedFile {
+  routeId: string;
+  routeName: string;
+  routeDate: Date;
 }
 ```
 
-#### `file:delete-orphaned`
+### FileData
 ```typescript
-// Request
-{
-  event: 'file:delete-orphaned',
-  data: {
-    fileId: string
-  }
-}
-
-// Response
-{
-  success: boolean,
-  message: string
+interface FileData {
+  file?: File;              // Archivo a subir (opcional)
+  removeExisting?: boolean; // Flag para eliminar archivo existente
 }
 ```
 
-## 6. Interfaz de Usuario
+## Implementation Flow
 
-### 6.1 Wireframes Conceptuales
+### File Upload Flow
+1. Usuario selecciona archivo en RouteFormComponent
+2. FileAttachmentComponent valida el archivo
+3. Al guardar ruta, RouteService llama a FileAttachmentService
+4. FileAttachmentService usa File_Manager.generateIdentifier()
+5. FileAttachmentService usa File_Manager.uploadFile()
+6. RouteService guarda file_track y filename_track en base de datos
 
-#### 6.1.1 Subida y Vinculación de Archivos
-```
-┌─────────────────────────────────────────┐
-│ Subir Archivo de Track                  │
-├─────────────────────────────────────────┤
-│ [Seleccionar Archivo] archivo.gpx       │
-│                                         │
-│ Rutas disponibles para vincular:        │
-│ ○ Ruta del Pinar (5.2 km)              │
-│ ○ Sendero del Río (8.1 km)             │
-│ ○ Subida al Cerro (12.8 km)            │
-│                                         │
-│ [Cancelar] [Subir y Vincular]           │
-└─────────────────────────────────────────┘
-```
+### File Removal Flow
+1. Usuario hace clic en "Quitar archivo" en RouteFormComponent
+2. Se marca fileToRemove con el file_track actual
+3. Al guardar ruta, RouteService detecta fileToRemove
+4. FileAttachmentService usa File_Manager.delFiles()
+5. RouteService limpia file_track y filename_track en base de datos
 
-#### 6.1.2 Detalle de Ruta con Archivo
-```
-┌─────────────────────────────────────────┐
-│ Ruta del Pinar                          │
-├─────────────────────────────────────────┤
-│ Descripción: Ruta fácil por el pinar... │
-│ Dificultad: Fácil | Distancia: 5.2 km  │
-│                                         │
-│ [📥 Descargar Track] [🌐 Ver en Wikiloc]│
-│                                         │
-│ ℹ️ El archivo de descarga es el que se  │
-│   usará en la ruta. La ruta que aparece │
-│   en wikiloc es solo de referencia      │
-└─────────────────────────────────────────┘
-```
+### File Download Flow
+1. Usuario hace clic en "Descargar" en página de detalle
+2. RouteController recibe solicitud con file_track
+3. FileAttachmentService usa File_Manager.downloadFile()
+4. Archivo se sirve con filename_track como nombre de descarga
 
-#### 6.1.3 Formulario de Edición con Archivo
-```
-┌─────────────────────────────────────────┐
-│ Editar Ruta                             │
-├─────────────────────────────────────────┤
-│ Nombre: [Ruta del Pinar____________]    │
-│ Descripción: [___________________]      │
-│                                         │
-│ Archivo adjunto: 📎 ruta_pinar.gpx     │
-│ [🗑️ Desvincular archivo]                │
-│                                         │
-│ [Cancelar] [Guardar Cambios]            │
-└─────────────────────────────────────────┘
-```
+### File Management Flow
+1. Usuario accede a página de gestión de archivos
+2. FileManagementComponent carga lista de AttachedFileWithRoute
+3. Usuario selecciona archivos y confirma eliminación
+4. FileAttachmentService elimina archivos del servidor y base de datos
 
-#### 6.1.4 Gestión de Archivos Huérfanos
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ Gestión de Archivos                                             │
-├─────────────────────────────────────────────────────────────────┤
-│ Archivos no vinculados:                                         │
-│                                                                 │
-│ 📄 track_montaña.gpx    │ 2.1 MB │ 15/01/26 │ [🗑️ Eliminar]    │
-│ 📄 ruta_costera.kml     │ 1.8 MB │ 12/01/26 │ [🗑️ Eliminar]    │
-│ 📄 sendero_bosque.tcx   │ 3.2 MB │ 10/01/26 │ [🗑️ Eliminar]    │
-│                                                                 │
-│ Total: 3 archivos (7.1 MB)                                     │
-└─────────────────────────────────────────────────────────────────┘
-```
+## Correctness Properties
 
-### 6.2 Flujos de Usuario
+*A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
-#### 6.2.1 Subir y Vincular Archivo
-1. Usuario accede a página de subida de archivos
-2. Selecciona archivo del sistema
-3. Sistema valida tipo y tamaño
-4. Sistema muestra rutas disponibles (sin archivo)
-5. Usuario selecciona ruta específica
-6. Confirma vinculación
-7. Sistema sube archivo y actualiza ruta
-8. Confirmación de éxito
+### Property 1: File upload form availability
+*For any* route creation or editing form, when accessed by an authorized user, the form should include file attachment functionality
+**Validates: Requirements 1.1**
 
-#### 6.2.2 Descargar Archivo de Ruta
-1. Usuario (público) accede a detalle de ruta
-2. Sistema verifica si ruta tiene archivo vinculado
-3. Si existe, muestra botón de descarga
-4. Usuario hace clic en descargar
-5. Sistema genera URL temporal
-6. Descarga se inicia automáticamente
+### Property 2: Unique identifier generation
+*For any* file upload operation, the File_Manager should generate a unique identifier using generateIdentifier()
+**Validates: Requirements 1.2, 5.1**
 
-#### 6.2.3 Desvincular Archivo
-1. Usuario edita ruta con archivo vinculado
-2. Sistema muestra archivo actual
-3. Usuario hace clic en "Desvincular"
-4. Sistema solicita confirmación
-5. Usuario confirma
-6. Sistema actualiza ruta (file_track = null)
-7. Archivo queda como huérfano
+### Property 3: File data persistence
+*For any* route saved with an attached file, the database should contain non-empty file_track and filename_track values
+**Validates: Requirements 1.3**
 
-## 7. Validaciones y Reglas de Negocio
+### Property 4: File upload integration
+*For any* completed file upload, the File_Manager should use uploadFile() to store the file on the server
+**Validates: Requirements 1.4, 5.2**
 
-### 7.1 Validaciones de Archivos
-```typescript
-const fileValidationRules = {
-  allowedTypes: ['application/gpx+xml', 'application/vnd.google-earth.kml+xml', 'application/tcx+xml', 'application/fit'],
-  allowedExtensions: ['.gpx', '.kml', '.tcx', '.fit'],
-  maxSize: 10 * 1024 * 1024, // 10MB
-  maxNameLength: 255
-};
-```
+### Property 5: File removal option availability
+*For any* route editing form where the route has an attached file, the form should display an option to remove the file
+**Validates: Requirements 2.1**
 
-### 7.2 Reglas de Negocio
-- Un archivo solo puede estar vinculado a una ruta
-- Una ruta solo puede tener un archivo vinculado
-- Solo usuarios autenticados pueden subir archivos
-- Archivos huérfanos pueden ser eliminados por administradores
-- Descargas son públicas para rutas con archivos vinculados
-- Nombres de archivo se sanitizan al subir
+### Property 6: File data cleanup
+*For any* route where the attached file is removed, the file_track and filename_track fields should be emptied in the database
+**Validates: Requirements 2.2**
 
-### 7.3 Validaciones de Integración
-- Verificar que ruta existe antes de vincular
-- Verificar que archivo existe antes de descargar
-- Verificar permisos antes de operaciones de gestión
-- Mantener consistencia entre Route.file_track y FileAttachment.linkedRouteId
+### Property 7: File deletion integration
+*For any* route saved without a file (after having one), the File_Manager should use delFiles() to remove the file from the server
+**Validates: Requirements 2.3, 5.3**
 
-## 8. Manejo de Errores
+### Property 8: Route data integrity during file removal
+*For any* route where the attached file is removed, all other route data should remain unchanged
+**Validates: Requirements 2.4**
 
-### 8.1 Tipos de Errores
-```typescript
-enum FileAttachmentErrorCodes {
-  FILE_TOO_LARGE = 'FILE_TOO_LARGE',
-  INVALID_FILE_TYPE = 'INVALID_FILE_TYPE',
-  FILE_NOT_FOUND = 'FILE_NOT_FOUND',
-  ROUTE_NOT_FOUND = 'ROUTE_NOT_FOUND',
-  ROUTE_ALREADY_HAS_FILE = 'ROUTE_ALREADY_HAS_FILE',
-  FILE_ALREADY_LINKED = 'FILE_ALREADY_LINKED',
-  UPLOAD_FAILED = 'UPLOAD_FAILED',
-  PERMISSION_DENIED = 'PERMISSION_DENIED'
-}
-```
+### Property 9: Download button availability
+*For any* route detail page where the route has an attached file, a download button should appear next to the 'Ver en Wikiloc' button
+**Validates: Requirements 3.1**
 
-### 8.2 Manejo de Errores Frontend
-- Validación de archivos antes de subida
-- Mensajes de error específicos por tipo
-- Indicadores de progreso durante subida
-- Recuperación graceful de errores de red
+### Property 10: File download integration
+*For any* file download request, the File_Manager should use downloadFile() to serve the file
+**Validates: Requirements 3.3, 5.4**
 
-### 8.3 Manejo de Errores Backend
-- Validación exhaustiva de archivos
-- Rollback de operaciones fallidas
-- Logging de errores de archivo
-- Limpieza de archivos huérfanos en caso de error
+### Property 11: Download filename preservation
+*For any* file download, the served file should use the filename_track value as the download name
+**Validates: Requirements 3.4**
 
-## 9. Integración con Sistema Existente
+### Property 12: Management page file listing
+*For any* file management page access by an authorized user, the page should display all attached files with their associated route information
+**Validates: Requirements 4.1, 4.2**
 
-### 9.1 Reutilización de Componentes
-- Sistema de subida de archivos existente
-- Controladores de descarga existentes
-- Sistema de permisos y autenticación
-- Patrones de validación y error handling
+### Property 13: Deletion confirmation requirement
+*For any* file deletion request in the management page, a confirmation dialog should be displayed before proceeding
+**Validates: Requirements 4.3**
 
-### 9.2 Extensiones Necesarias
-- Nuevo campo en modelo Route
-- Nuevos eventos WebSocket
-- Nuevos componentes de UI
-- Nueva tabla FileAttachment (opcional)
+### Property 14: Management deletion integration
+*For any* confirmed file deletion from the management page, the system should use delFiles() and update the corresponding route fields
+**Validates: Requirements 4.4**
 
-### 9.3 Compatibilidad
-- Rutas existentes sin archivo siguen funcionando
-- No se rompe funcionalidad existente
-- Migración transparente de datos
-- Rollback posible si es necesario
+### Property 15: Default empty values
+*For any* route without an attached file, both file_track and filename_track should contain empty strings
+**Validates: Requirements 6.3, 6.4**
 
-## 10. Testing Strategy
+## Error Handling
 
-### 10.1 Unit Tests
-- Validaciones de archivo
-- Lógica de vinculación/desvinculación
-- Transformaciones de datos
-- Servicios de gestión de archivos
+### File Upload Errors
+- **File size limits**: Validate file size before upload, show user-friendly error messages
+- **File type restrictions**: Validate file types if needed, reject unsupported formats
+- **Upload failures**: Handle network errors, server errors, and storage failures gracefully
+- **Duplicate identifiers**: Retry identifier generation if collision occurs (unlikely but possible)
 
-### 10.2 Integration Tests
-- Flujo completo de subida y vinculación
-- Descarga de archivos vinculados
-- Gestión de archivos huérfanos
-- Integración con sistema de rutas existente
+### File Access Errors
+- **Missing files**: Handle cases where file_track exists but physical file is missing
+- **Permission errors**: Handle server permission issues for file operations
+- **Corrupted files**: Detect and handle corrupted file scenarios
 
-### 10.3 Property-Based Tests
-- Invariantes de vinculación (un archivo = una ruta)
-- Consistencia de datos entre modelos
-- Comportamiento con diferentes tipos de archivo
-- Propiedades de limpieza de archivos huérfanos
+### Database Consistency
+- **Transaction rollback**: Ensure file operations and database updates are atomic
+- **Orphaned files**: Implement cleanup for files without corresponding database records
+- **Orphaned records**: Handle database records pointing to non-existent files
+
+### User Experience
+- **Loading states**: Show progress indicators during file operations
+- **Error messages**: Provide clear, actionable error messages in Spanish
+- **Graceful degradation**: System should work normally even if file operations fail
+
+## Testing Strategy
+
+### Unit Testing Approach
+Given the user's specification that no testing tasks should be included, this section serves as documentation for future testing considerations:
+
+**Core Functionality Tests**:
+- File upload, removal, and download operations
+- Database field updates and cleanup
+- Integration with existing File_Manager methods
+- Form validation and user interaction flows
+
+**Integration Tests**:
+- End-to-end file attachment workflow
+- Route creation/editing with file operations
+- File management page functionality
+- Error handling and recovery scenarios
+
+**Property-Based Testing Configuration**:
+- Would use appropriate testing framework for TypeScript/Angular
+- Each correctness property would be implemented as automated tests
+- Minimum 100 iterations per property test for comprehensive coverage
+- Tests would be tagged with feature name and property references
+
+### Manual Testing Considerations
+- Cross-browser compatibility for file upload functionality
+- File type and size validation
+- User permission verification
+- UI/UX validation for Spanish language interface
+- Performance testing with various file sizes

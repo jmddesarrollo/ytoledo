@@ -1,168 +1,85 @@
-# Adjuntar Archivos a Rutas - Requerimientos
+# Requirements Document
 
-## 1. Visión General
+## Introduction
 
-Extender el sistema existente de gestión de rutas para permitir adjuntar archivos de track (GPX, KML, etc.) a las rutas, proporcionando funcionalidad de carga, vinculación, descarga y gestión de archivos para mejorar la experiencia de los usuarios del club de senderismo.
+Esta funcionalidad permite adjuntar archivos directamente a las rutas durante su creación o edición, proporcionando una integración simple y directa con el sistema de gestión de archivos existente. Los usuarios podrán subir, quitar y descargar archivos asociados a rutas, así como gestionar todos los archivos adjuntos desde una página dedicada.
 
-## 2. Objetivos
+## Glossary
 
-- Permitir adjuntar archivos de track a rutas existentes
-- Proporcionar descarga pública de archivos vinculados a rutas
-- Implementar gestión de archivos no vinculados para administradores
-- Mantener compatibilidad total con el sistema de rutas existente
-- Seguir la arquitectura y patrones establecidos en el proyecto
+- **Route_System**: Sistema de gestión de rutas existente
+- **File_Manager**: Sistema robusto de gestión de archivos (file.bll.ts) existente
+- **File_Track**: Identificador único del archivo adjunto a una ruta
+- **Filename_Track**: Nombre original del archivo con extensión
+- **Attachment_Form**: Formulario integrado para adjuntar archivos en crear/editar ruta
+- **Management_Page**: Página dedicada para gestionar archivos adjuntos
+- **Authorized_User**: Usuario con permisos para crear/editar rutas
+- **Any_User**: Cualquier usuario del sistema
 
-## 3. Usuarios del Sistema
+## Requirements
 
-### 3.1 Usuario con Permisos (Administrador/Editor)
-- **Descripción**: Usuario autenticado con permisos de gestión de rutas
-- **Responsabilidades**: Subir archivos, vincular/desvincular archivos a rutas, gestionar archivos huérfanos
+### Requirement 1
 
-### 3.2 Usuario Público
-- **Descripción**: Cualquier visitante del sitio web
-- **Responsabilidades**: Descargar archivos vinculados a rutas desde páginas de detalle
+**User Story:** Como usuario autorizado, quiero adjuntar archivos al crear o editar una ruta, para que los usuarios puedan descargar el archivo de la ruta real.
 
-### 3.3 Administrador de Archivos
-- **Descripción**: Usuario con permisos administrativos
-- **Responsabilidades**: Gestionar archivos no vinculados, eliminar archivos huérfanos
+#### Acceptance Criteria
 
-## 4. Glosario
+1. WHEN un usuario autorizado crea o edita una ruta, THE Attachment_Form SHALL permitir subir un archivo con su track
+2. WHEN se sube un archivo, THE File_Manager SHALL generar un identificador único usando generateIdentifier()
+3. WHEN se guarda la ruta con archivo, THE Route_System SHALL almacenar file_track y filename_track en la base de datos
+4. WHEN se completa la subida, THE File_Manager SHALL usar uploadFile() para almacenar el archivo en el servidor
 
-- **Archivo de Track**: Archivo digital (GPX, KML, etc.) que contiene información de coordenadas GPS de una ruta
-- **Archivo Vinculado**: Archivo que está asociado a una ruta específica mediante el campo file_track
-- **Archivo Huérfano**: Archivo subido al sistema pero no vinculado a ninguna ruta
-- **Sistema_Rutas**: El sistema existente de gestión de rutas
-- **Sistema_Archivos**: El nuevo subsistema de gestión de archivos de track
+### Requirement 2
 
-## 5. Requerimientos
+**User Story:** Como usuario autorizado, quiero quitar archivos adjuntos de una ruta, para que el archivo sea eliminado del servidor y la ruta quede sin archivo adjunto.
 
-### Requerimiento 1: Subida y Vinculación de Archivos
+#### Acceptance Criteria
 
-**Historia de Usuario:** Como usuario con permisos, quiero subir un archivo de track y vincularlo a una ruta específica, para que los usuarios puedan descargar el track real de la ruta.
+1. WHEN un usuario autorizado edita una ruta con archivo adjunto, THE Attachment_Form SHALL mostrar opción para quitar el archivo
+2. WHEN se quita un archivo adjunto, THE Route_System SHALL vaciar los campos file_track y filename_track
+3. WHEN se guarda la ruta sin archivo, THE File_Manager SHALL usar delFiles() para eliminar el archivo del servidor
+4. WHEN se elimina el archivo, THE Route_System SHALL mantener todos los demás datos de la ruta intactos
 
-#### Criterios de Aceptación
+### Requirement 3
 
-1. CUANDO un usuario con permisos sube un archivo, ENTONCES EL Sistema_Archivos DEBERÁ mostrar un listado de rutas que no tienen archivo adjunto
-2. CUANDO se muestra el listado de rutas disponibles, ENTONCES EL Sistema_Archivos DEBERÁ permitir seleccionar exactamente una ruta para vincular
-3. CUANDO se vincula un archivo a una ruta, ENTONCES EL Sistema_Rutas DEBERÁ actualizar el campo file_track con el identificador del archivo
-4. CUANDO se completa la vinculación, ENTONCES EL Sistema_Archivos DEBERÁ confirmar la operación exitosa
+**User Story:** Como cualquier usuario, quiero descargar archivos adjuntos de rutas, para que pueda usar el archivo real de la ruta en lugar de solo la referencia de Wikiloc.
 
-### Requerimiento 2: Desvinculación de Archivos
+#### Acceptance Criteria
 
-**Historia de Usuario:** Como usuario con permisos, quiero desvincular un archivo de una ruta durante la edición, para poder corregir vinculaciones incorrectas o actualizar archivos.
+1. WHEN un usuario consulta el detalle de una ruta con archivo adjunto, THE Route_System SHALL mostrar botón de descarga junto al botón 'Ver en Wikiloc'
+2. WHEN existe botón de descarga, THE Route_System SHALL mostrar mensaje: 'El archivo de descarga es el que se usará en la ruta. La ruta que aparece en wikiloc es solo de referencia'
+3. WHEN un usuario hace clic en descargar, THE File_Manager SHALL usar downloadFile() para servir el archivo
+4. WHEN se descarga el archivo, THE File_Manager SHALL usar filename_track como nombre de descarga
 
-#### Criterios de Aceptación
+### Requirement 4
 
-1. CUANDO un usuario edita una ruta que tiene archivo vinculado, ENTONCES EL Sistema_Rutas DEBERÁ mostrar la opción de desvincular el archivo
-2. CUANDO se desvincula un archivo de una ruta, ENTONCES EL Sistema_Rutas DEBERÁ establecer el campo file_track como vacío
-3. CUANDO se desvincula un archivo, ENTONCES EL Sistema_Archivos DEBERÁ marcar el archivo como huérfano
-4. CUANDO se completa la desvinculación, ENTONCES EL Sistema_Rutas DEBERÁ actualizar la interfaz para reflejar el cambio
+**User Story:** Como usuario autorizado, quiero gestionar todos los archivos adjuntos desde una página dedicada, para que pueda ver y eliminar archivos de manera centralizada.
 
-### Requerimiento 3: Descarga Pública de Archivos
+#### Acceptance Criteria
 
-**Historia de Usuario:** Como usuario público, quiero descargar el archivo de track de una ruta desde su página de detalle, para poder usar el track en mi dispositivo GPS o aplicación de senderismo.
+1. WHEN un usuario autorizado accede a la página de gestión, THE Management_Page SHALL mostrar listado de archivos con nombre y fecha de ruta
+2. WHEN se muestra el listado, THE Management_Page SHALL incluir información de la ruta asociada a cada archivo
+3. WHEN un usuario solicita eliminar un archivo, THE Management_Page SHALL mostrar confirmación antes de proceder
+4. WHEN se confirma la eliminación, THE File_Manager SHALL usar delFiles() y THE Route_System SHALL actualizar los campos correspondientes
 
-#### Criterios de Aceptación
+### Requirement 5
 
-1. CUANDO un usuario consulta el detalle de una ruta con archivo vinculado, ENTONCES EL Sistema_Rutas DEBERÁ mostrar un botón de descarga junto al botón de Wikiloc
-2. CUANDO un usuario hace clic en el botón de descarga, ENTONCES EL Sistema_Archivos DEBERÁ servir el archivo para descarga directa
-3. CUANDO existe botón de descarga, ENTONCES EL Sistema_Rutas DEBERÁ mostrar el mensaje explicativo sobre el uso del archivo
-4. CUANDO una ruta no tiene archivo vinculado, ENTONCES EL Sistema_Rutas NO DEBERÁ mostrar el botón de descarga ni el mensaje explicativo
+**User Story:** Como desarrollador del sistema, quiero aprovechar la infraestructura existente de file.bll.ts, para que la integración sea consistente y mantenga la arquitectura actual.
 
-### Requerimiento 4: Gestión de Archivos Huérfanos
+#### Acceptance Criteria
 
-**Historia de Usuario:** Como administrador, quiero gestionar archivos que no están vinculados a ninguna ruta, para mantener limpio el sistema de archivos y liberar espacio de almacenamiento.
+1. THE File_Manager SHALL usar generateIdentifier() para crear identificadores únicos de archivos
+2. THE File_Manager SHALL usar uploadFile() para almacenar archivos en el servidor
+3. THE File_Manager SHALL usar delFiles() para eliminar archivos del servidor
+4. THE File_Manager SHALL usar downloadFile() para servir archivos a los usuarios
+5. THE Route_System SHALL seguir la arquitectura Controller/Service/Model con BLL/DAL existente
 
-#### Criterios de Aceptación
+### Requirement 6
 
-1. CUANDO un administrador accede a la página de gestión de archivos, ENTONCES EL Sistema_Archivos DEBERÁ mostrar todos los archivos no vinculados
-2. CUANDO se muestra la lista de archivos huérfanos, ENTONCES EL Sistema_Archivos DEBERÁ incluir información del archivo (nombre, fecha, tamaño)
-3. CUANDO un administrador selecciona eliminar un archivo huérfano, ENTONCES EL Sistema_Archivos DEBERÁ solicitar confirmación
-4. CUANDO se confirma la eliminación, ENTONCES EL Sistema_Archivos DEBERÁ eliminar físicamente el archivo del sistema
+**User Story:** Como administrador de base de datos, quiero que se agreguen los campos necesarios para el tracking de archivos, para que el sistema pueda asociar archivos con rutas de manera eficiente.
 
-### Requerimiento 5: Extensión del Modelo de Rutas
+#### Acceptance Criteria
 
-**Historia de Usuario:** Como desarrollador del sistema, quiero extender el modelo de rutas para soportar archivos adjuntos, manteniendo la compatibilidad con el sistema existente.
-
-#### Criterios de Aceptación
-
-1. CUANDO se extiende la tabla de rutas, ENTONCES EL Sistema_Rutas DEBERÁ incluir el campo file_track como VARCHAR opcional
-2. CUANDO una ruta no tiene archivo vinculado, ENTONCES EL campo file_track DEBERÁ ser NULL o cadena vacía
-3. CUANDO una ruta tiene archivo vinculado, ENTONCES EL campo file_track DEBERÁ contener el identificador único del archivo
-4. CUANDO se consultan rutas existentes, ENTONCES EL Sistema_Rutas DEBERÁ mantener compatibilidad total con funcionalidades previas
-
-### Requerimiento 6: Integración con Sistema de Archivos Existente
-
-**Historia de Usuario:** Como desarrollador del sistema, quiero aprovechar la funcionalidad de subida de archivos existente, para mantener consistencia y evitar duplicación de código.
-
-#### Criterios de Aceptación
-
-1. CUANDO se sube un archivo de track, ENTONCES EL Sistema_Archivos DEBERÁ usar el sistema de subida existente que genera identificadores únicos
-2. CUANDO se almacena un archivo, ENTONCES EL Sistema_Archivos DEBERÁ seguir la estructura de carpetas existente con identificador único
-3. CUANDO se sirve un archivo para descarga, ENTONCES EL Sistema_Archivos DEBERÁ usar las rutas y controladores de archivos existentes
-4. CUANDO se elimina un archivo, ENTONCES EL Sistema_Archivos DEBERÁ usar los métodos de eliminación física existentes
-
-### Requerimiento 7: Validación y Seguridad de Archivos
-
-**Historia de Usuario:** Como administrador del sistema, quiero asegurar que solo se suban archivos válidos de track, para mantener la seguridad y calidad del sistema.
-
-#### Criterios de Aceptación
-
-1. CUANDO se sube un archivo, ENTONCES EL Sistema_Archivos DEBERÁ validar que sea un tipo de archivo permitido (GPX, KML, etc.)
-2. CUANDO se valida un archivo, ENTONCES EL Sistema_Archivos DEBERÁ verificar el tamaño máximo permitido
-3. CUANDO se detecta un archivo inválido, ENTONCES EL Sistema_Archivos DEBERÁ rechazar la subida con mensaje descriptivo
-4. CUANDO se sirve un archivo para descarga, ENTONCES EL Sistema_Archivos DEBERÁ verificar que el archivo existe y es accesible
-
-### Requerimiento 8: Interfaz de Usuario Integrada
-
-**Historia de Usuario:** Como usuario del sistema, quiero que la funcionalidad de archivos se integre naturalmente con la interfaz existente de rutas, para una experiencia de usuario consistente.
-
-#### Criterios de Aceptación
-
-1. CUANDO se accede a la funcionalidad de archivos, ENTONCES EL Sistema_Rutas DEBERÁ mantener el diseño y estilo visual existente
-2. CUANDO se muestran controles de archivos, ENTONCES EL Sistema_Rutas DEBERÁ seguir los patrones de UI establecidos
-3. CUANDO se muestran mensajes de estado, ENTONCES EL Sistema_Rutas DEBERÁ usar el sistema de notificaciones existente
-4. CUANDO se navega entre funcionalidades, ENTONCES EL Sistema_Rutas DEBERÁ mantener la estructura de navegación actual
-
-## 6. Restricciones Técnicas
-
-### 6.1 Tecnológicas
-- Debe extender el modelo Route existente sin romper compatibilidad
-- Debe utilizar el sistema de subida de archivos existente
-- Debe seguir la arquitectura WebSocket establecida
-- Debe mantener compatibilidad con la base de datos MySQL existente
-- Debe seguir los patrones TypeScript del proyecto
-
-### 6.2 De Rendimiento
-- La descarga de archivos debe ser eficiente para archivos de hasta 10MB
-- La lista de archivos huérfanos debe cargar en menos de 2 segundos
-- Las operaciones de vinculación/desvinculación deben completarse en menos de 1 segundo
-
-### 6.3 De Seguridad
-- Solo usuarios autenticados pueden subir y gestionar archivos
-- Los archivos deben validarse antes de almacenarse
-- Las descargas públicas deben ser seguras y no exponer rutas del sistema
-- Debe mantener logs de auditoría para operaciones de archivos
-
-### 6.4 De Almacenamiento
-- Tipos de archivo permitidos: GPX, KML, TCX, FIT
-- Tamaño máximo por archivo: 10MB
-- Los archivos deben almacenarse en la estructura existente de carpetas
-
-## 7. Criterios de Éxito
-
-- **Funcionalidad**: Todas las operaciones de archivos funcionan correctamente
-- **Integración**: Se integra seamlessly con el sistema de rutas existente
-- **Usabilidad**: Los usuarios pueden gestionar archivos de forma intuitiva
-- **Rendimiento**: El sistema mantiene el rendimiento con archivos adjuntos
-- **Compatibilidad**: No rompe funcionalidades existentes del sistema de rutas
-
-## 8. Fuera del Alcance
-
-- Visualización o parsing del contenido de archivos GPX/KML
-- Conversión entre formatos de archivos
-- Validación de la calidad o precisión de los datos GPS
-- Integración con servicios externos de mapas para mostrar tracks
-- Versionado de archivos o historial de cambios
-- Compresión automática de archivos
-- Sincronización con dispositivos GPS externos
+1. THE Route_System SHALL agregar campo file_track (VARCHAR) para identificador único del archivo
+2. THE Route_System SHALL agregar campo filename_track (VARCHAR) para nombre original con extensión
+3. WHEN no hay archivo adjunto, THE Route_System SHALL mantener file_track como cadena vacía
+4. WHEN no hay archivo adjunto, THE Route_System SHALL mantener filename_track como cadena vacía
