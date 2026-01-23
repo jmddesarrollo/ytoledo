@@ -13,13 +13,13 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
   - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
 - [ ] 2. Implementar FileAttachmentService
-  - [ ] 2.1 Crear servicio para gestión de archivos adjuntos
+  - [x] 2.1 Crear servicio para gestión de archivos adjuntos
     - Implementar attachFileToRoute() usando File_Manager.generateIdentifier() y uploadFile()
     - Implementar removeFileFromRoute() usando File_Manager.delFiles()
     - Implementar getAttachedFile() y getAllAttachedFiles()
     - _Requirements: 1.2, 1.4, 2.3, 5.1, 5.2, 5.3_
   
-  - [ ] 2.2 Implementar deleteAttachedFiles() para gestión masiva
+  - [x] 2.2 Implementar deleteAttachedFiles() para gestión masiva
     - Crear método para eliminar múltiples archivos
     - Integrar con File_Manager.delFiles() y actualización de base de datos
     - _Requirements: 4.4, 5.3_

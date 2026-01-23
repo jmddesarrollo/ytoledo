@@ -55,7 +55,7 @@ export interface AttachedFileWithRoute extends AttachedFile {
  * Interface for file data used in API operations
  */
 export interface FileData {
-  file?: Express.Multer.File;  // Archivo subido via multer
+  file?: any;  // Archivo subido (compatible con multer)
   removeExisting?: boolean;    // Flag para eliminar archivo existente
 }
 
