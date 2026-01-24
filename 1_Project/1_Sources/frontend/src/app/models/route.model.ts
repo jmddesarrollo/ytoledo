@@ -48,7 +48,9 @@ export class RouteModel {
 
     // Helper method to check if route has an attached file
     get hasAttachedFile(): boolean {
-        return !!(this.fileTrack && this.fileTrack.trim() !== '');
+        // Support both camelCase and snake_case field names for compatibility
+        const fileTrack = this.fileTrack || (this as any)['file_track'];
+        return !!(fileTrack && fileTrack.trim() !== '');
     }
 }
 

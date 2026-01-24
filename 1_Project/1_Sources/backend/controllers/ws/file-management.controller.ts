@@ -329,6 +329,59 @@ export class FileManagementController {
     }
 
     /**
+     * Download attached file via WebSocket
+     * Requirements: 5.4
+     */
+    public async downloadAttachedFile(req: any, socket: Socket) {
+        const fileTrack: string = req.fileTrack;
+
+        try {
+            this.mode = 'reading';
+
+            // Check authorization
+            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
+
+            // Validate input
+            if (!fileTrack || typeof fileTrack !== 'string' || fileTrack.trim() === '') {
+                throw new ControlException('El identificador del archivo es obligatorio', 400);
+            }
+
+            // Sanitize file track to prevent path traversal
+            const sanitizedFileTrack = fileTrack.replace(/[^a-zA-Z0-9\-_]/g, '');
+            if (sanitizedFileTrack !== fileTrack) {
+                throw new ControlException('El identificador del archivo contiene caracteres no válidos', 400);
+            }
+
+            // Download the file
+            const downloadResult = await this.fileAttachmentService.downloadAttachedFile(sanitizedFileTrack);
+
+            // Convert buffer to base64 for WebSocket transmission
+            const fileData = downloadResult.buffer.toString('base64');
+
+            socket.emit("fileAttachment/downloadAttachedFile", { 
+                success: true,
+                data: {
+                    filename: downloadResult.filename,
+                    fileData: fileData
+                },
+                message: 'Archivo descargado correctamente' 
+            });
+
+        } catch (error) {
+            console.error('FileManagementController.downloadAttachedFile - Error:', error);
+            if (error instanceof ControlException) {
+                socket.emit("error_message", { message: error.message, code: error.code });
+            } else {
+                socket.emit("error_message", { 
+                    message: "Error no controlado al descargar el archivo", 
+                    code: 500 
+                });
+            }
+        }
+    }
+
+    /**
      * Cleanup orphaned files (files without database records)
      * Requirements: Error Handling section
      */

@@ -80,7 +80,11 @@ export class FileValidator {
             throw new ControlException('El archivo debe tener un nombre válido', 400);
         }
 
-        if (!file.data && !file.buffer && file.size === undefined) {
+        // Check for file data in different formats
+        const hasData = !!(file.data || file.buffer);
+        const hasSize = file.size !== undefined && file.size !== null;
+        
+        if (!hasData && !hasSize) {
             throw new ControlException('El archivo no contiene datos válidos', 400);
         }
     }
@@ -120,7 +124,16 @@ export class FileValidator {
      * Validate file size
      */
     private validateFileSize(file: any): void {
-        const fileSize = file.size || (file.data ? file.data.length : 0);
+        let fileSize = 0;
+        
+        // Try to get file size from different properties
+        if (file.size !== undefined && file.size !== null) {
+            fileSize = file.size;
+        } else if (file.data && file.data.byteLength !== undefined) {
+            fileSize = file.data.byteLength;
+        } else if (file.buffer && file.buffer.length !== undefined) {
+            fileSize = file.buffer.length;
+        }
         
         if (fileSize === 0) {
             throw new ControlException('El archivo está vacío', 400);

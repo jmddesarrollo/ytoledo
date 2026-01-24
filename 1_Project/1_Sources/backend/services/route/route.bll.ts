@@ -97,10 +97,22 @@ export default class RouteService {
 
         // Procesar operaciones de archivo antes de actualizar otros campos
         if (fileData) {
+            // Debug: Log fileData to understand its structure
+            console.log('RouteService.editRoute - FileData object:', {
+                fileData: fileData,
+                hasFile: !!fileData.file,
+                fileKeys: fileData.file ? Object.keys(fileData.file) : 'no file',
+                fileName: fileData.file?.name,
+                removeExisting: fileData.removeExisting
+            });
+            
+            // Convertir route.id a número entero para las operaciones de archivo
+            const routeIdNumber = parseInt(route.id, 10);
+            
             if (fileData.removeExisting) {
                 // Eliminar archivo existente si se solicita
                 try {
-                    await this.fileAttachmentService.removeFileFromRoute(route.id);
+                    await this.fileAttachmentService.removeFileFromRoute(routeIdNumber);
                 } catch (fileError) {
                     // Si no hay archivo para eliminar, continuar normalmente
                     console.warn('No se pudo eliminar el archivo:', (fileError as Error).message);
@@ -109,7 +121,7 @@ export default class RouteService {
                 // Si hay un archivo existente, eliminarlo primero
                 if (routeDB.file_track && routeDB.file_track.trim() !== '') {
                     try {
-                        await this.fileAttachmentService.removeFileFromRoute(route.id);
+                        await this.fileAttachmentService.removeFileFromRoute(routeIdNumber);
                     } catch (fileError) {
                         console.warn('No se pudo eliminar el archivo anterior:', (fileError as Error).message);
                     }
@@ -117,7 +129,7 @@ export default class RouteService {
                 
                 // Adjuntar el nuevo archivo
                 try {
-                    await this.fileAttachmentService.attachFileToRoute(route.id, fileData.file);
+                    await this.fileAttachmentService.attachFileToRoute(routeIdNumber, fileData.file);
                 } catch (fileError) {
                     throw new ControlException('Error al adjuntar el archivo: ' + (fileError as Error).message, 500);
                 }

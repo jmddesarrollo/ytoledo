@@ -151,10 +151,10 @@
     </div>
 
     <!-- Mapa de Wikiloc embebido -->
-    <div *ngIf="hasWikilocMapLink() || getWikilocLink()" class="w3-card w3-white w3-margin-bottom">
+    <div *ngIf="hasWikilocMapLink() || getWikilocLink() || hasAttachedFile()" class="w3-card w3-white w3-margin-bottom">
       <div class="w3-container w3-padding">
         <h4 class="section-title">
-          <i class="fa fa-map"></i> Mapa de la Ruta
+          <i class="fa fa-map"></i> Mapa y Archivos de la Ruta
         </h4>
         
         <!-- Iframe del mapa si existe -->
@@ -163,20 +163,20 @@
         </div>
         
         <!-- Botones centrados para ver en Wikiloc y descargar archivo -->
-        <div *ngIf="getWikilocLink() || route?.hasAttachedFile" class="w3-center" [ngClass]="{'w3-margin-top': hasWikilocMapLink()}">
+        <div *ngIf="getWikilocLink() || hasAttachedFile()" class="w3-center" [ngClass]="{'w3-margin-top': hasWikilocMapLink()}">
           <!-- Botón Ver en Wikiloc -->
           <button *ngIf="getWikilocLink()" class="w3-button w3-blue w3-round w3-large w3-margin-right" (click)="openLink(getWikilocLink())">
             <i class="fa fa-map-marker"></i> Ver en Wikiloc
           </button>
           
           <!-- Botón Descargar archivo -->
-          <button *ngIf="route?.hasAttachedFile" class="w3-button w3-green w3-round w3-large" (click)="downloadAttachedFile()">
-            <i class="fa fa-download"></i> Descargar
+          <button *ngIf="hasAttachedFile()" class="w3-button w3-green w3-round w3-large" (click)="downloadAttachedFile()">
+            <i class="fa fa-download"></i> Descargar Archivo GPX
           </button>
         </div>
         
         <!-- Mensaje explicativo cuando hay archivo adjunto -->
-        <div *ngIf="route?.hasAttachedFile" class="w3-center w3-margin-top">
+        <div *ngIf="hasAttachedFile()" class="w3-center w3-margin-top">
           <p class="w3-text-grey w3-small">
             <i class="fa fa-info-circle"></i> 
             El archivo de descarga es el que se usará en la ruta. La ruta que aparece en wikiloc es solo de referencia.

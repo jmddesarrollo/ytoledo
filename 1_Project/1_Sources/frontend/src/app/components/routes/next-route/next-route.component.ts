@@ -60,7 +60,7 @@ export class NextRouteComponent implements OnInit, OnDestroy {
       }
     );
 
-    // Suscripción para descarga de archivos
+    // Suscripción para descarga de archivos (legacy - kept for compatibility)
     const downloadFileSub = this.fileService._downFile().subscribe(
       (response: any) => {
         if (response.success) {
@@ -213,15 +213,34 @@ export class NextRouteComponent implements OnInit, OnDestroy {
   }
 
   downloadAttachedFile(): void {
-    if (this.nextRoute && this.nextRoute.hasAttachedFile && this.nextRoute.fileTrack && this.nextRoute.filenameTrack) {
-      // Use the existing file service to download the file
-      // Parameters: identifier, name, unique, productName
-      this.fileService.downFile(
-        `attachments/${this.nextRoute.fileTrack}`, // identifier (folder path)
-        this.nextRoute.filenameTrack, // name (filename)
-        true, // unique
-        'route-attachment' // productName
-      );
+    // Support both camelCase and snake_case field names for compatibility
+    const fileTrack = this.nextRoute?.fileTrack || this.nextRoute?.['file_track'];
+    const filenameTrack = this.nextRoute?.filenameTrack || this.nextRoute?.['filename_track'];
+    
+    if (this.nextRoute && fileTrack && filenameTrack) {
+      // Use HTTP endpoint for public download (no authentication required)
+      const downloadUrl = `/api/routes/${fileTrack}/download`;
+      
+      // Create a temporary link element to trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filenameTrack;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(link);
+      }, 100);
+      
+      this.messageService.add({ 
+        severity: 'info', 
+        summary: 'Descarga iniciada', 
+        detail: 'La descarga del archivo ha comenzado', 
+        life: 2000 
+      });
     } else {
       this.messageService.add({ 
         severity: 'warn', 
@@ -230,5 +249,14 @@ export class NextRouteComponent implements OnInit, OnDestroy {
         life: 3000 
       });
     }
+  }
+
+  // Helper method to check if route has an attached file
+  hasAttachedFile(): boolean {
+    if (!this.nextRoute) return false;
+    
+    // Support both camelCase and snake_case field names for compatibility
+    const fileTrack = this.nextRoute.fileTrack || this.nextRoute['file_track'];
+    return !!(fileTrack && fileTrack.trim() !== '');
   }
 }

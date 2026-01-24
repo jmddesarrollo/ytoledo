@@ -6,6 +6,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TitleShareService } from '../../../services/share/title.service';
 import { RouteService } from '../../../services/websockets/route.service';
 import { FileService } from '../../../services/websockets/file.service';
+import { FileAttachmentService } from '../../../services/websockets/file-attachment.service';
 import { RouteModel } from '../../../models/route.model';
 import { MessageService } from 'primeng/api';
 import { MyPermissionShareService } from '../../../services/share/my-permission.service';
@@ -42,6 +43,7 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
     private titleShareService: TitleShareService,
     private routeService: RouteService,
     private fileService: FileService,
+    private fileAttachmentService: FileAttachmentService,
     private messageService: MessageService,
     private myPermissionShareService: MyPermissionShareService,
     private wrPermissionShareService: WRPermissionShareService,
@@ -152,7 +154,74 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
       }
     );
 
-    this.subscriptions.push(getRouteSub, deleteRouteSub, downloadFileSub);
+    // Suscripción para descarga de archivos adjuntos via WebSocket
+    const downloadAttachedFileSub = this.fileAttachmentService.onDownloadAttachedFile().subscribe(
+      (response: any) => {
+        console.log('File download response:', response);
+        
+        try {
+          if (response.success && response.data) {
+            // Create blob from base64 data
+            const byteCharacters = atob(response.data.fileData);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = response.data.filename || 'archivo.gpx';
+            link.style.display = 'none';
+            
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            setTimeout(() => {
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+            }, 100);
+            
+            this.messageService.add({ 
+              severity: 'success', 
+              summary: 'Descarga exitosa', 
+              detail: 'El archivo se ha descargado correctamente', 
+              life: 3000 
+            });
+          } else {
+            this.messageService.add({ 
+              severity: 'error', 
+              summary: 'Error de descarga', 
+              detail: response.message || 'Error al descargar el archivo', 
+              life: 3000 
+            });
+          }
+        } catch (processingError) {
+          console.error('Error processing download response:', processingError);
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Error de procesamiento', 
+            detail: 'Error al procesar la respuesta de descarga', 
+            life: 3000 
+          });
+        }
+      },
+      (error) => {
+        console.error('Error downloading attached file:', error);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error de descarga', 
+          detail: 'Error al descargar el archivo adjunto', 
+          life: 3000 
+        });
+      }
+    );
+
+    this.subscriptions.push(getRouteSub, deleteRouteSub, downloadFileSub, downloadAttachedFileSub);
   }
 
   private loadRoute(): void {
@@ -294,15 +363,20 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
   }
 
   downloadAttachedFile(): void {
-    if (this.route && this.route.hasAttachedFile && this.route.fileTrack && this.route.filenameTrack) {
-      // Use the existing file service to download the file
-      // Parameters: identifier, name, unique, productName
-      this.fileService.downFile(
-        `attachments/${this.route.fileTrack}`, // identifier (folder path)
-        this.route.filenameTrack, // name (filename)
-        true, // unique
-        'route-attachment' // productName
-      );
+    // Support both camelCase and snake_case field names for compatibility
+    const fileTrack = this.route?.fileTrack || this.route?.['file_track'];
+    const filenameTrack = this.route?.filenameTrack || this.route?.['filename_track'];
+    
+    if (this.route && fileTrack && filenameTrack) {
+      // Use the FileAttachmentService to download the file via WebSocket
+      this.fileAttachmentService.downloadAttachedFile(fileTrack);
+      
+      this.messageService.add({ 
+        severity: 'info', 
+        summary: 'Descarga iniciada', 
+        detail: 'La descarga del archivo ha comenzado', 
+        life: 2000 
+      });
     } else {
       this.messageService.add({ 
         severity: 'warn', 
@@ -311,6 +385,15 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
         life: 3000 
       });
     }
+  }
+
+  // Helper method to check if route has an attached file
+  hasAttachedFile(): boolean {
+    if (!this.route) return false;
+    
+    // Support both camelCase and snake_case field names for compatibility
+    const fileTrack = this.route.fileTrack || this.route['file_track'];
+    return !!(fileTrack && fileTrack.trim() !== '');
   }
 
   // Métodos de control de permisos

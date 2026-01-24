@@ -121,6 +121,18 @@ export class RouteController {
         const route = req.route;
         const fileData: FileData | undefined = req.fileData;
 
+        // Debug: Log complete request to understand the structure
+        console.log('RouteController.editRoute - Request structure:', {
+            hasRoute: !!req.route,
+            hasFileData: !!req.fileData,
+            fileDataKeys: req.fileData ? Object.keys(req.fileData) : 'no fileData',
+            fileDataFile: req.fileData?.file ? {
+                isBuffer: Buffer.isBuffer(req.fileData.file),
+                hasName: !!req.fileData.file.name,
+                keys: Object.keys(req.fileData.file).slice(0, 10) // First 10 keys only
+            } : 'no file in fileData'
+        });
+
         // Iniciar transacción
         let t = await sequelize.transaction(); 
 

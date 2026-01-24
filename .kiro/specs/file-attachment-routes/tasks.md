@@ -12,7 +12,7 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
   - Actualizar modelo Route existente para incluir campos de archivo
   - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 2. Implementar FileAttachmentService
+- [x] 2. Implementar FileAttachmentService
   - [x] 2.1 Crear servicio para gestión de archivos adjuntos
     - Implementar attachFileToRoute() usando File_Manager.generateIdentifier() y uploadFile()
     - Implementar removeFileFromRoute() usando File_Manager.delFiles()
@@ -31,7 +31,7 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
   - Implementar getRoutesWithFiles() para página de gestión
   - _Requirements: 1.3, 2.2, 2.4, 4.1, 4.2_
 
-- [ ] 4. Crear FileAttachmentComponent
+- [x] 4. Crear FileAttachmentComponent
   - [x] 4.1 Implementar componente de upload de archivos
     - Crear interfaz de selección de archivos con drag & drop
     - Implementar indicadores de progreso y estados de carga

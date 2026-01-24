@@ -11,18 +11,18 @@ export class FileAttachmentService {
 
   // Obtener todos los archivos adjuntos con información de ruta
   getAllAttachedFiles(filters?: any): void {
-    this.wsService.emit('fileAttachment/getAllAttachedFiles', { filters });
+    this.wsService.emit('fileManagement/getAttachedFiles', { filters });
   }
   onGetAllAttachedFiles(): Observable<AttachedFileWithRoute[]> {
-    return this.wsService.listen('fileAttachment/getAllAttachedFiles');
+    return this.wsService.listen('fileManagement/getAttachedFiles');
   }
 
   // Eliminar múltiples archivos adjuntos
   deleteAttachedFiles(fileTracks: string[]): void {
-    this.wsService.emit('fileAttachment/deleteAttachedFiles', { fileTracks });
+    this.wsService.emit('fileManagement/deleteAttachedFiles', { fileTracks });
   }
   onDeleteAttachedFiles(): Observable<any> {
-    return this.wsService.listen('fileAttachment/deleteAttachedFiles');
+    return this.wsService.listen('fileManagement/deleteAttachedFiles');
   }
 
   // Adjuntar archivo a una ruta
@@ -43,10 +43,10 @@ export class FileAttachmentService {
 
   // Obtener información de un archivo adjunto específico
   getAttachedFile(fileTrack: string): void {
-    this.wsService.emit('fileAttachment/getAttachedFile', { fileTrack });
+    this.wsService.emit('fileManagement/getAttachedFile', { fileTrack });
   }
   onGetAttachedFile(): Observable<any> {
-    return this.wsService.listen('fileAttachment/getAttachedFile');
+    return this.wsService.listen('fileManagement/getAttachedFile');
   }
 
   // Descargar archivo adjunto

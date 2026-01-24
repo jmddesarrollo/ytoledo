@@ -28,11 +28,22 @@ export interface AttachedFileWithRoute extends AttachedFile {
 }
 
 /**
+ * Interface for file object that can be transmitted through WebSocket
+ */
+export interface SerializableFile {
+  name: string;
+  size: number;
+  type: string;
+  lastModified: number;
+  data: ArrayBuffer;
+}
+
+/**
  * Interface for file data used in forms and API calls
  */
 export interface FileData {
-  file?: File;              // Archivo a subir (opcional)
-  removeExisting?: boolean; // Flag para eliminar archivo existente
+  file?: File | SerializableFile;  // Archivo a subir (File o objeto serializable)
+  removeExisting?: boolean;        // Flag para eliminar archivo existente
 }
 
 /**

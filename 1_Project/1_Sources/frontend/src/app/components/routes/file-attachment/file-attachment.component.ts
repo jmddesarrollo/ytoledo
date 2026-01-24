@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { AttachedFile, FileData } from '../../../models/file-attachment.model';
+import { AttachedFile, FileData, SerializableFile } from '../../../models/file-attachment.model';
 import ErrorMessages from '../../../utils/error-messages';
 
 @Component({
@@ -306,7 +306,7 @@ export class FileAttachmentComponent implements OnInit, OnDestroy {
   /**
    * Subir archivo
    */
-  private uploadFile(): void {
+  private async uploadFile(): Promise<void> {
     if (!this.selectedFile) {
       this.messageService.add(ErrorMessages.createMessage(
         'error',
@@ -333,60 +333,89 @@ export class FileAttachmentComponent implements OnInit, OnDestroy {
     this.uploadProgress = 0;
     this.validationError = '';
 
-    // Simular progreso de subida con manejo de errores
-    const progressInterval = setInterval(() => {
-      this.uploadProgress += 10;
-      if (this.uploadProgress >= 90) {
-        clearInterval(progressInterval);
-      }
-    }, 100);
+    try {
+      // Progreso inicial
+      this.uploadProgress = 10;
 
-    // Emitir evento con el archivo seleccionado
-    const fileData: FileData = {
-      file: this.selectedFile,
-      removeExisting: false
-    };
+      // Leer el archivo como ArrayBuffer (similar al sistema existente)
+      const fileData = await this.readFileAsArrayBuffer(this.selectedFile);
+      this.uploadProgress = 50;
 
-    // Simular delay de procesamiento con manejo de errores
-    setTimeout(() => {
-      try {
-        clearInterval(progressInterval);
-        this.uploadProgress = 100;
-        
-        setTimeout(() => {
-          this.isUploading = false;
-          this.uploadProgress = 0;
-          
-          // Verificar que el archivo aún existe (usuario no lo cambió durante la subida)
-          if (this.selectedFile) {
-            this.fileAttached.emit(fileData);
-            
-            this.messageService.add(ErrorMessages.createMessage(
-              'success',
-              'Archivo preparado',
-              ErrorMessages.SUCCESS.FILE_UPLOADED(this.selectedFile.name)
-            ));
-          } else {
-            this.messageService.add(ErrorMessages.createMessage(
-              'warning',
-              'Advertencia',
-              ErrorMessages.WARNING.FILE_CHANGED_DURING_UPLOAD
-            ));
-          }
-        }, 500);
-      } catch (error) {
+      // Crear objeto de archivo compatible con el backend
+      const fileObject: SerializableFile = {
+        name: this.selectedFile.name,
+        size: this.selectedFile.size,
+        type: this.selectedFile.type,
+        lastModified: this.selectedFile.lastModified,
+        data: fileData
+      };
+
+      this.uploadProgress = 80;
+
+      // Emitir evento con el archivo procesado
+      const fileDataPayload: FileData = {
+        file: fileObject,
+        removeExisting: false
+      };
+
+      this.uploadProgress = 100;
+
+      // Pequeño delay para mostrar el progreso completo
+      setTimeout(() => {
         this.isUploading = false;
         this.uploadProgress = 0;
-        this.validationError = ErrorMessages.FILE_UPLOAD.PROCESSING_ERROR;
         
-        this.messageService.add(ErrorMessages.createMessage(
-          'error',
-          'Error de procesamiento',
-          ErrorMessages.FILE_UPLOAD.PROCESSING_ERROR,
-          4000
-        ));
-      }
-    }, 1000);
+        // Verificar que el archivo aún existe (usuario no lo cambió durante la subida)
+        if (this.selectedFile) {
+          this.fileAttached.emit(fileDataPayload);
+          
+          this.messageService.add(ErrorMessages.createMessage(
+            'success',
+            'Archivo preparado',
+            ErrorMessages.SUCCESS.FILE_UPLOADED(this.selectedFile.name)
+          ));
+        } else {
+          this.messageService.add(ErrorMessages.createMessage(
+            'warning',
+            'Advertencia',
+            ErrorMessages.WARNING.FILE_CHANGED_DURING_UPLOAD
+          ));
+        }
+      }, 300);
+
+    } catch (error) {
+      this.isUploading = false;
+      this.uploadProgress = 0;
+      this.validationError = ErrorMessages.FILE_UPLOAD.PROCESSING_ERROR;
+      
+      console.error('Error processing file:', error);
+      this.messageService.add(ErrorMessages.createMessage(
+        'error',
+        'Error de procesamiento',
+        ErrorMessages.FILE_UPLOAD.PROCESSING_ERROR,
+        4000
+      ));
+    }
+  }
+
+  /**
+   * Leer archivo como ArrayBuffer (compatible con WebSocket)
+   */
+  private async readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      
+      fileReader.onload = () => {
+        resolve(fileReader.result as ArrayBuffer);
+      };
+      
+      fileReader.onerror = () => {
+        const error = new DOMException('Error reading file');
+        reject(error);
+      };
+      
+      fileReader.readAsArrayBuffer(file);
+    });
   }
 
   /**

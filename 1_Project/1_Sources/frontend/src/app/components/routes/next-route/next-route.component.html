@@ -157,20 +157,20 @@
         </div>
         
         <!-- Botones centrados para ver en Wikiloc y descargar archivo -->
-        <div *ngIf="getWikilocLink() || nextRoute?.hasAttachedFile" class="w3-center" [ngClass]="{'w3-margin-top': hasWikilocMapLink()}">
+        <div *ngIf="getWikilocLink() || hasAttachedFile()" class="w3-center" [ngClass]="{'w3-margin-top': hasWikilocMapLink()}">
           <!-- Botón Ver en Wikiloc -->
           <button *ngIf="getWikilocLink()" class="w3-button w3-blue w3-round w3-large w3-margin-right" (click)="openLink(getWikilocLink())">
             <i class="fa fa-map-marker"></i> Ver en Wikiloc
           </button>
           
           <!-- Botón Descargar archivo -->
-          <button *ngIf="nextRoute?.hasAttachedFile" class="w3-button w3-green w3-round w3-large" (click)="downloadAttachedFile()">
+          <button *ngIf="hasAttachedFile()" class="w3-button w3-green w3-round w3-large" (click)="downloadAttachedFile()">
             <i class="fa fa-download"></i> Descargar
           </button>
         </div>
         
         <!-- Mensaje explicativo cuando hay archivo adjunto -->
-        <div *ngIf="nextRoute?.hasAttachedFile" class="w3-center w3-margin-top">
+        <div *ngIf="hasAttachedFile()" class="w3-center w3-margin-top">
           <p class="w3-text-grey w3-small">
             <i class="fa fa-info-circle"></i> 
             El archivo de descarga es el que se usará en la ruta. La ruta que aparece en wikiloc es solo de referencia.

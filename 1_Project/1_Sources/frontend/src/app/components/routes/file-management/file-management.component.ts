@@ -193,7 +193,74 @@ export class FileManagementComponent implements OnInit, OnDestroy {
       }
     );
 
-    this.subscriptions.push(getFilesSub, deleteFilesSub);
+    // Suscripción para descarga de archivos
+    const downloadFilesSub = this.fileAttachmentService.onDownloadAttachedFile().subscribe(
+      (response: any) => {
+        console.log('File download response:', response);
+        
+        try {
+          if (response.success && response.data) {
+            // Create blob from base64 data
+            const byteCharacters = atob(response.data.fileData);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = response.data.filename || 'archivo.gpx';
+            link.style.display = 'none';
+            
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            setTimeout(() => {
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+            }, 100);
+            
+            this.messageService.add({ 
+              severity: 'success', 
+              summary: 'Descarga exitosa', 
+              detail: 'El archivo se ha descargado correctamente', 
+              life: 3000 
+            });
+          } else {
+            this.messageService.add({ 
+              severity: 'error', 
+              summary: 'Error de descarga', 
+              detail: response.message || 'Error al descargar el archivo', 
+              life: 3000 
+            });
+          }
+        } catch (processingError) {
+          console.error('Error processing download response:', processingError);
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Error de procesamiento', 
+            detail: 'Error al procesar la respuesta de descarga', 
+            life: 3000 
+          });
+        }
+      },
+      (error) => {
+        console.error('Error downloading file:', error);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error de descarga', 
+          detail: 'Error al descargar el archivo', 
+          life: 3000 
+        });
+      }
+    );
+
+    this.subscriptions.push(getFilesSub, deleteFilesSub, downloadFilesSub);
   }
 
   loadAttachedFiles(): void {
@@ -426,33 +493,8 @@ export class FileManagementComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Crear un enlace temporal para descargar el archivo
-      const downloadUrl = `/api/files/download/${encodeURIComponent(sanitizedFileTrack)}`;
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = '';
-      link.style.display = 'none';
-      
-      // Add error handling for download
-      link.onerror = () => {
-        this.messageService.add({ 
-          severity: 'error', 
-          summary: 'Error de descarga', 
-          detail: 'No se pudo descargar el archivo. Es posible que no exista o haya sido eliminado', 
-          life: 4000 
-        });
-        document.body.removeChild(link);
-      };
-
-      document.body.appendChild(link);
-      link.click();
-      
-      // Clean up after a delay
-      setTimeout(() => {
-        if (document.body.contains(link)) {
-          document.body.removeChild(link);
-        }
-      }, 1000);
+      // Use the FileAttachmentService to download the file via WebSocket
+      this.fileAttachmentService.downloadAttachedFile(sanitizedFileTrack);
 
       // Show success message
       this.messageService.add({ 

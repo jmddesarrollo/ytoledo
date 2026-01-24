@@ -27,4 +27,8 @@ export const FileManagementRoutes = (socket: Socket) => {
     socket.on('fileManagement/getAttachedFile', (req: Request) => { 
         fileManagementController.getAttachedFile(req, socket);
     });
+    
+    socket.on('fileAttachment/downloadAttachedFile', (req: Request) => { 
+        fileManagementController.downloadAttachedFile(req, socket);
+    });
 }
