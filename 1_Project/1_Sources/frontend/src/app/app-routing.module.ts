@@ -15,6 +15,10 @@ import { FileManagementComponent } from './components/routes/file-management/fil
 import { UserMyprofileComponent } from './components/users/user-myprofile/user-myprofile.component';
 import { UsersListComponent } from './components/users/users-list/users-list.component';
 
+// Guards
+import { AuthGuard } from './guards/auth.guard';
+import { RoutesManagerGuard } from './guards/routes-manager.guard';
+
 // Componentes de soporte
 // import { FilesComponent } from './components/files/files.component';
 
@@ -31,11 +35,11 @@ const routes: Routes = [
   { path: 'routes-public', component: RoutesPublicComponent, data: {titulo: 'Y-Toledo - Rutas de Senderismo'} },
   
   // Rutas de gestión administrativa de rutas
-  { path: 'routes', component: RoutesListComponent, data: {titulo: 'Y-Toledo - Gestión de Rutas'} },
-  { path: 'routes/create', component: RouteFormComponent, data: {titulo: 'Y-Toledo - Nueva Ruta'} },
-  { path: 'routes/edit/:id', component: RouteFormComponent, data: {titulo: 'Y-Toledo - Editar Ruta'} },
+  { path: 'routes', component: RoutesListComponent, canActivate: [AuthGuard, RoutesManagerGuard], data: {titulo: 'Y-Toledo - Gestión de Rutas'} },
+  { path: 'routes/create', component: RouteFormComponent, canActivate: [AuthGuard, RoutesManagerGuard], data: {titulo: 'Y-Toledo - Nueva Ruta'} },
+  { path: 'routes/edit/:id', component: RouteFormComponent, canActivate: [AuthGuard, RoutesManagerGuard], data: {titulo: 'Y-Toledo - Editar Ruta'} },
   { path: 'routes/detail/:id', component: RouteDetailComponent, data: {titulo: 'Y-Toledo - Detalle de Ruta'} },
-  { path: 'routes/files', component: FileManagementComponent, data: {titulo: 'Y-Toledo - Gestión de Archivos'} },
+  { path: 'routes/files', component: FileManagementComponent, canActivate: [AuthGuard, RoutesManagerGuard], data: {titulo: 'Y-Toledo - Gestión de Archivos'} },
   
   // Rutas legacy (mantener compatibilidad)
   { path: 'routes-list', redirectTo: '/routes', pathMatch: 'full' },

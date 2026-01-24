@@ -44,6 +44,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private permission_users_manager: number;
   private permission_permissions_manager: number;
   private permission_files_manager: number;
+  private permission_routes_manager: number;
 
   private observables = new Array();
 
@@ -71,6 +72,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.permission_users_manager = GLOBAL.permission_users_manager;
     this.permission_permissions_manager = GLOBAL.permission_permissions_manager;
     this.permission_files_manager = GLOBAL.permission_files_manager;
+    this.permission_routes_manager = GLOBAL.permission_routes_manager;
   }
 
   ngOnInit(): void {
@@ -118,6 +120,11 @@ export class AppComponent implements OnInit, OnDestroy {
             label: 'Gestión de rutas',
             icon: 'pi pi-fw pi-sitemap',
             routerLink: ['/routes']
+          },
+          {
+            label: 'Gestión de archivos',
+            icon: 'pi pi-fw pi-file',
+            routerLink: ['/routes/files']
           },
           {
             separator: true,
@@ -281,6 +288,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.menuItemVisible('Gestión rutas', 'Próxima ruta', true);
       this.menuItemVisible('Gestión rutas', 'Rutas públicas', true);
       this.menuItemVisible('Gestión rutas', 'Gestión de rutas', true);
+      this.menuItemVisible('Gestión rutas', 'Gestión de archivos', true);
       this.menuItemVisible('Gestión de Socios', null, true);
       this.menuItemVisible('Gestión de Socios', 'Inscripción', true);
       this.menuItemVisible('Archivos', null, true);
@@ -295,6 +303,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.menuItemVisible('Gestión rutas', 'Próxima ruta', true);
     this.menuItemVisible('Gestión rutas', 'Rutas públicas', true);
     this.menuItemVisible('Gestión rutas', 'Gestión de rutas', false); // Solo para usuarios logueados
+    this.menuItemVisible('Gestión rutas', 'Gestión de archivos', false); // Solo para usuarios logueados
     this.menuItemVisible('Gestión de Socios', null, true);
     this.menuItemVisible('Gestión de Socios', 'Inscripción', true);
     this.menuItemVisible('Archivos', null, false);
@@ -319,6 +328,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.menuSession();
     this.menuItem('Acceso', 'Usuarios', this.permission_users_manager);
     this.menuItem('Acceso', 'Permisos', this.permission_permissions_manager);
+    this.menuItem('Gestión rutas', 'Gestión de archivos', this.permission_routes_manager);
 
     const filesBool: boolean = this.menuItem('Archivos', 'Subir archivos', this.permission_files_manager);
 

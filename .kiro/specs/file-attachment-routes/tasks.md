@@ -102,7 +102,7 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
   - Implementar mensajes de error en español
   - _Requirements: Error Handling section_
 
-- [ ] 11. Agregar navegación y routing
+- [x] 11. Agregar navegación y routing
   - Agregar ruta para página de gestión de archivos
   - Actualizar menú de navegación para usuarios autorizados
   - Configurar guards de autorización para página de gestión
