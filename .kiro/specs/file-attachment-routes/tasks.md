@@ -69,14 +69,14 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
     - Manejar errores de archivo no encontrado
     - _Requirements: 3.3, 3.4, 5.4_
 
-- [ ] 8. Crear FileManagementComponent y página
-  - [ ] 8.1 Implementar listado de archivos adjuntos
+- [x] 8. Crear FileManagementComponent y página
+  - [x] 8.1 Implementar listado de archivos adjuntos
     - Mostrar tabla con archivo, ruta asociada, fecha
     - Implementar carga de datos con AttachedFileWithRoute
     - Agregar funcionalidad de selección múltiple
     - _Requirements: 4.1, 4.2_
   
-  - [ ] 8.2 Implementar eliminación de archivos
+  - [x] 8.2 Implementar eliminación de archivos
     - Crear confirmación antes de eliminar archivos
     - Implementar eliminación masiva de archivos seleccionados
     - Actualizar lista después de eliminación

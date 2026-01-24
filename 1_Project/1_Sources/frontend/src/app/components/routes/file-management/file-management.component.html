@@ -1,0 +1,269 @@
+<div class="file-management">
+  <!-- Header con título -->
+  <div class="w3-row w3-margin-bottom">
+    <div class="w3-col l8 m8 s12">
+      <h2>Gestión de Archivos Adjuntos</h2>
+      <p class="w3-text-grey">Administra todos los archivos adjuntos a las rutas de senderismo</p>
+    </div>
+    <div class="w3-col l4 m4 s12 w3-right-align">
+      <button 
+        *ngIf="canDelete() && selectedFiles.length > 0" 
+        class="w3-button w3-red w3-round" 
+        (click)="deleteSelectedFiles()">
+        <i class="fa fa-trash"></i> Eliminar Seleccionados ({{ selectedFiles.length }})
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="w3-card w3-white w3-margin-bottom">
+    <div class="w3-container w3-padding">
+      <h4>Filtros de Búsqueda</h4>
+      
+      <div class="w3-row-padding">
+        <!-- Búsqueda por nombre de archivo -->
+        <div class="w3-col l3 m6 s12">
+          <label>Buscar archivo:</label>
+          <input 
+            class="w3-input w3-border w3-round" 
+            type="text" 
+            [(ngModel)]="filters.search"
+            (input)="onFilterChange()"
+            placeholder="Nombre del archivo...">
+        </div>
+
+        <!-- Búsqueda por nombre de ruta -->
+        <div class="w3-col l3 m6 s12">
+          <label>Buscar ruta:</label>
+          <input 
+            class="w3-input w3-border w3-round" 
+            type="text" 
+            [(ngModel)]="filters.routeName"
+            (input)="onFilterChange()"
+            placeholder="Nombre de la ruta...">
+        </div>
+
+        <!-- Fecha desde -->
+        <div class="w3-col l2 m6 s12">
+          <label>Desde:</label>
+          <input 
+            class="w3-input w3-border w3-round" 
+            type="date" 
+            [(ngModel)]="filters.dateFrom"
+            (change)="onFilterChange()">
+        </div>
+
+        <!-- Fecha hasta -->
+        <div class="w3-col l2 m6 s12">
+          <label>Hasta:</label>
+          <input 
+            class="w3-input w3-border w3-round" 
+            type="date" 
+            [(ngModel)]="filters.dateTo"
+            (change)="onFilterChange()">
+        </div>
+
+        <!-- Botón limpiar filtros -->
+        <div class="w3-col l2 m12 s12">
+          <label>&nbsp;</label>
+          <button 
+            class="w3-button w3-light-grey w3-round w3-block" 
+            (click)="clearFilters()">
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de archivos adjuntos -->
+  <div class="w3-card w3-white">
+    <div class="w3-container w3-padding">
+      
+      <!-- Loading indicator -->
+      <div *ngIf="loading" class="w3-center w3-padding">
+        <i class="fa fa-spinner fa-spin fa-2x"></i>
+        <p>Cargando archivos adjuntos...</p>
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="!loading">
+        <div class="w3-responsive">
+          <table class="w3-table-all w3-hoverable">
+            <thead>
+              <tr class="w3-blue">
+                <th *ngIf="canDelete()">
+                  <input 
+                    type="checkbox" 
+                    [(ngModel)]="selectAll" 
+                    (change)="toggleSelectAll()"
+                    title="Seleccionar todos">
+                </th>
+                <th>Archivo</th>
+                <th>Ruta Asociada</th>
+                <th>Fecha de Subida</th>
+                <th>Tamaño</th>
+                <th>Tipo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let file of attachedFiles">
+                <td *ngIf="canDelete()">
+                  <input 
+                    type="checkbox" 
+                    [checked]="isFileSelected(file.fileTrack)"
+                    (change)="toggleFileSelection(file.fileTrack)">
+                </td>
+                <td>
+                  <div class="file-info">
+                    <i class="fa {{ getFileIcon(file.mimeType) }} w3-text-blue"></i>
+                    <strong class="w3-margin-left">{{ file.filenameTrack }}</strong>
+                  </div>
+                </td>
+                <td>
+                  <div class="route-info">
+                    <strong>{{ file.routeName }}</strong>
+                    <div class="w3-small w3-text-grey">
+                      Fecha de ruta: {{ formatDate(file.routeDate) }}
+                    </div>
+                  </div>
+                </td>
+                <td>{{ formatDate(file.uploadDate) }}</td>
+                <td>{{ formatFileSize(file.fileSize) }}</td>
+                <td>
+                  <span class="w3-tag w3-round w3-light-grey w3-small">
+                    {{ file.mimeType }}
+                  </span>
+                </td>
+                <td>
+                  <button 
+                    *ngIf="canDownload()"
+                    class="w3-button w3-small w3-green w3-round w3-margin-right" 
+                    (click)="downloadFile(file.fileTrack)"
+                    title="Descargar archivo">
+                    <i class="fa fa-download"></i>
+                  </button>
+                  <button 
+                    class="w3-button w3-small w3-blue w3-round" 
+                    (click)="viewRoute(file.routeId)"
+                    title="Ver ruta asociada">
+                    <i class="fa fa-eye"></i>
+                  </button>
+                </td>
+              </tr>
+              
+              <!-- Mensaje cuando no hay archivos -->
+              <tr *ngIf="attachedFiles.length === 0">
+                <td [attr.colspan]="canDelete() ? 7 : 6" class="w3-center w3-padding">
+                  <div class="w3-padding">
+                    <i class="fa fa-file-o fa-3x w3-text-grey"></i>
+                    <p class="w3-large">No se encontraron archivos adjuntos</p>
+                    <p class="w3-text-grey">
+                      Los archivos aparecerán aquí cuando se adjunten a las rutas.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Información de selección -->
+        <div *ngIf="canDelete() && attachedFiles.length > 0" class="w3-margin-top w3-padding">
+          <div class="w3-row">
+            <div class="w3-col l6 m6 s12">
+              <p class="w3-small w3-text-grey">
+                {{ selectedFiles.length }} de {{ attachedFiles.length }} archivos seleccionados
+              </p>
+            </div>
+            <div class="w3-col l6 m6 s12 w3-right-align">
+              <button 
+                *ngIf="selectedFiles.length > 0"
+                class="w3-button w3-small w3-red w3-round" 
+                (click)="deleteSelectedFiles()">
+                <i class="fa fa-trash"></i> Eliminar Seleccionados
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paginación -->
+        <div *ngIf="totalPages > 1" class="w3-center w3-margin-top">
+          <div class="w3-bar">
+            <button 
+              class="w3-button w3-hover-blue" 
+              [disabled]="currentPage === 1"
+              (click)="onPageChange(currentPage - 1)">
+              « Anterior
+            </button>
+            
+            <button 
+              *ngFor="let page of [].constructor(totalPages); let i = index"
+              class="w3-button w3-hover-blue"
+              [ngClass]="{'w3-blue': currentPage === i + 1}"
+              (click)="onPageChange(i + 1)">
+              {{ i + 1 }}
+            </button>
+            
+            <button 
+              class="w3-button w3-hover-blue" 
+              [disabled]="currentPage === totalPages"
+              (click)="onPageChange(currentPage + 1)">
+              Siguiente »
+            </button>
+          </div>
+          
+          <p class="w3-small w3-text-grey w3-margin-top">
+            Página {{ currentPage }} de {{ totalPages }} 
+            ({{ totalRecords }} archivos en total)
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación de eliminación -->
+  <div *ngIf="showDeleteConfirmation" class="w3-modal" style="display: block;">
+    <div class="w3-modal-content w3-animate-top w3-card-4">
+      <header class="w3-container w3-red">
+        <span (click)="cancelDelete()" class="w3-button w3-display-topright">&times;</span>
+        <h2>Confirmar Eliminación</h2>
+      </header>
+      <div class="w3-container w3-padding">
+        <p>
+          <i class="fa fa-warning w3-text-red"></i>
+          ¿Está seguro de que desea eliminar {{ filesToDelete.length }} archivo(s) seleccionado(s)?
+        </p>
+        <p class="w3-text-grey w3-small">
+          Esta acción no se puede deshacer. Los archivos se eliminarán permanentemente del servidor
+          y las rutas asociadas quedarán sin archivo adjunto.
+        </p>
+        
+        <!-- Lista de archivos a eliminar -->
+        <div class="w3-margin-top">
+          <h4>Archivos a eliminar:</h4>
+          <ul class="w3-ul w3-border">
+            <li *ngFor="let fileTrack of filesToDelete" class="w3-padding-small">
+              <ng-container *ngFor="let file of attachedFiles">
+                <div *ngIf="file.fileTrack === fileTrack">
+                  <i class="fa {{ getFileIcon(file.mimeType) }} w3-text-blue"></i>
+                  <strong class="w3-margin-left">{{ file.filenameTrack }}</strong>
+                  <span class="w3-text-grey w3-small"> - {{ file.routeName }}</span>
+                </div>
+              </ng-container>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <footer class="w3-container w3-padding">
+        <button class="w3-button w3-red w3-margin-right" (click)="confirmDelete()">
+          <i class="fa fa-trash"></i> Eliminar
+        </button>
+        <button class="w3-button w3-grey" (click)="cancelDelete()">
+          Cancelar
+        </button>
+      </footer>
+    </div>
+  </div>
+</div>

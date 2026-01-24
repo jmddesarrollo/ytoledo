@@ -11,6 +11,7 @@ import { RouteDetailComponent } from './components/routes/route-detail/route-det
 import { RouteFormComponent } from './components/routes/route-form/route-form.component';
 import { RoutesListComponent } from './components/routes/routes-list/routes-list.component';
 import { RoutesPublicComponent } from './components/routes/routes-public/routes-public.component';
+import { FileManagementComponent } from './components/routes/file-management/file-management.component';
 import { UserMyprofileComponent } from './components/users/user-myprofile/user-myprofile.component';
 import { UsersListComponent } from './components/users/users-list/users-list.component';
 
@@ -34,6 +35,7 @@ const routes: Routes = [
   { path: 'routes/create', component: RouteFormComponent, data: {titulo: 'Y-Toledo - Nueva Ruta'} },
   { path: 'routes/edit/:id', component: RouteFormComponent, data: {titulo: 'Y-Toledo - Editar Ruta'} },
   { path: 'routes/detail/:id', component: RouteDetailComponent, data: {titulo: 'Y-Toledo - Detalle de Ruta'} },
+  { path: 'routes/files', component: FileManagementComponent, data: {titulo: 'Y-Toledo - Gestión de Archivos'} },
   
   // Rutas legacy (mantener compatibilidad)
   { path: 'routes-list', redirectTo: '/routes', pathMatch: 'full' },

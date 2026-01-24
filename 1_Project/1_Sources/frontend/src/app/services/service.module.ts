@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from './websockets/auth.service';
 import { EmailService } from './websockets/email.service';
 import { FileService } from './websockets/file.service';
+import { FileAttachmentService } from './websockets/file-attachment.service';
 import { RoleManagerShareService } from './share/role-mananager-share.service';
 import { MyPermissionShareService } from './share/my-permission.service';
 import { OrderService } from './help/order.service';
@@ -29,6 +30,7 @@ import { ValidateService } from './help/validate.service';
     AuthService,
     EmailService,
     FileService,
+    FileAttachmentService,
     RoleManagerShareService,
     MyPermissionShareService,
     OrderService,

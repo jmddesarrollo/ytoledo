@@ -74,6 +74,7 @@ import { RouteFormComponent } from './components/routes/route-form/route-form.co
 import { RoutesListComponent } from './components/routes/routes-list/routes-list.component';
 import { RoutesPublicComponent } from './components/routes/routes-public/routes-public.component';
 import { FileAttachmentComponent } from './components/routes/file-attachment/file-attachment.component';
+import { FileManagementComponent } from './components/routes/file-management/file-management.component';
 import { UserFormComponent } from './components/users/user-form/user-form.component';
 import { UserFormPasswordComponent } from './components/users/user-form-password/user-form-password.component';
 import { UserMyprofileComponent } from './components/users/user-myprofile/user-myprofile.component';
@@ -98,7 +99,8 @@ import { UsersListComponent } from './components/users/users-list/users-list.com
     RoutesPublicComponent,
     RouteDetailComponent,
     RouteFormComponent,
-    FileAttachmentComponent
+    FileAttachmentComponent,
+    FileManagementComponent
   ],
   imports: [
     BrowserModule,
