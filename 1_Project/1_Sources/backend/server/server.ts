@@ -5,6 +5,7 @@ import http from 'http';
 import { AuthRoutes } from '../routes/ws/auth.route';
 import { EmailRoutes } from '../routes/ws/email.route';
 import { FileRoutes } from '../routes/ws/file.route';
+import { FileManagementRoutes } from '../routes/ws/file-management.route';
 import { PermissionRoutes } from '../routes/ws/permission.route';
 import { RoleRoutes } from '../routes/ws/role.route';
 import { RouteRoutes } from '../routes/ws/route.route';
@@ -81,6 +82,7 @@ export default class Server {
             AuthRoutes(socket); 
             EmailRoutes(socket);
             FileRoutes(socket);
+            FileManagementRoutes(socket);
             PermissionRoutes(socket);
             RoleRoutes(socket);
             RouteRoutes(socket);

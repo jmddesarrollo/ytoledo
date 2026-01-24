@@ -82,14 +82,14 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
     - Actualizar lista después de eliminación
     - _Requirements: 4.3, 4.4_
 
-- [ ] 9. Implementar controladores backend
-  - [ ] 9.1 Extender RouteController
+- [x] 9. Implementar controladores backend
+  - [x] 9.1 Extender RouteController
     - Modificar endpoints de crear/actualizar ruta para manejar archivos
     - Agregar endpoint para descarga de archivos adjuntos
     - Manejar validación y errores de archivos
     - _Requirements: 1.3, 1.4, 2.2, 2.3, 3.3, 3.4_
   
-  - [ ] 9.2 Crear FileManagementController
+  - [x] 9.2 Crear FileManagementController
     - Implementar endpoint para listar archivos adjuntos
     - Implementar endpoint para eliminar archivos múltiples
     - Manejar autorización para usuarios con permisos
