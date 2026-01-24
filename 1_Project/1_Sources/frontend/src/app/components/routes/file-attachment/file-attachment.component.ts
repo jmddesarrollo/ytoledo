@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AttachedFile, FileData } from '../../../models/file-attachment.model';
+import ErrorMessages from '../../../utils/error-messages';
 
 @Component({
   selector: 'app-file-attachment',
@@ -29,8 +30,10 @@ export class FileAttachmentComponent implements OnInit, OnDestroy {
   public validationError: string = '';
 
   // Configuración de validación
-  private readonly MAX_FILE_SIZE_DEFAULT = 10 * 1024 * 1024; // 10MB
+  private readonly MAX_FILE_SIZE_DEFAULT = 50 * 1024 * 1024; // 50MB
   private readonly ACCEPTED_TYPES_DEFAULT: string[] = []; // Todos los tipos
+  private readonly BLOCKED_EXTENSIONS = ['exe', 'bat', 'cmd', 'com', 'pif', 'scr', 'vbs', 'js', 'jar', 'msi', 'dll'];
+  private readonly ALLOWED_EXTENSIONS_DEFAULT = ['pdf', 'gpx', 'kml', 'kmz', 'txt', 'doc', 'docx', 'zip', 'rar', '7z', 'jpg', 'jpeg', 'png', 'gif', 'bmp'];
 
   constructor(
     private messageService: MessageService,
@@ -175,24 +178,83 @@ export class FileAttachmentComponent implements OnInit, OnDestroy {
    * Validar archivo seleccionado
    */
   private validateFile(file: File): { isValid: boolean; error: string } {
+    // Validar que el archivo existe
+    if (!file) {
+      return {
+        isValid: false,
+        error: ErrorMessages.FILE_VALIDATION.NO_FILE_PROVIDED
+      };
+    }
+
+    // Validar nombre del archivo
+    if (!file.name || file.name.trim() === '') {
+      return {
+        isValid: false,
+        error: ErrorMessages.FILE_VALIDATION.INVALID_FILE_NAME
+      };
+    }
+
+    // Validar longitud del nombre
+    if (file.name.length > 255) {
+      return {
+        isValid: false,
+        error: ErrorMessages.FILE_VALIDATION.FILE_NAME_TOO_LONG
+      };
+    }
+
+    // Validar caracteres peligrosos en el nombre
+    if (file.name.includes('..') || file.name.includes('/') || file.name.includes('\\')) {
+      return {
+        isValid: false,
+        error: ErrorMessages.FILE_VALIDATION.FILE_NAME_INVALID_CHARS
+      };
+    }
+
     // Validar tamaño
     const maxSize = this.maxFileSize || this.MAX_FILE_SIZE_DEFAULT;
+    if (file.size === 0) {
+      return {
+        isValid: false,
+        error: ErrorMessages.FILE_VALIDATION.FILE_EMPTY
+      };
+    }
+
     if (file.size > maxSize) {
       return {
         isValid: false,
-        error: `El archivo es demasiado grande. Tamaño máximo: ${this.formatFileSize(maxSize)}`
+        error: ErrorMessages.FILE_VALIDATION.FILE_TOO_LARGE(ErrorMessages.formatFileSize(maxSize))
+      };
+    }
+
+    // Obtener extensión del archivo
+    const fileName = file.name.toLowerCase();
+    const fileExtension = fileName.split('.').pop();
+    
+    if (!fileExtension) {
+      return {
+        isValid: false,
+        error: ErrorMessages.FILE_VALIDATION.INVALID_EXTENSION
+      };
+    }
+
+    // Validar extensiones bloqueadas por seguridad
+    if (this.BLOCKED_EXTENSIONS.includes(fileExtension)) {
+      return {
+        isValid: false,
+        error: ErrorMessages.FILE_VALIDATION.BLOCKED_EXTENSION(fileExtension)
       };
     }
 
     // Validar tipo si se especificaron tipos aceptados
     const acceptedTypes = this.acceptedTypes.length > 0 ? this.acceptedTypes : this.ACCEPTED_TYPES_DEFAULT;
+    
     if (acceptedTypes.length > 0) {
-      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-      const mimeType = file.type.toLowerCase();
+      const fileExtensionWithDot = '.' + fileExtension;
+      const mimeType = file.type ? file.type.toLowerCase() : '';
       
       const isAccepted = acceptedTypes.some(type => {
         if (type.startsWith('.')) {
-          return fileExtension === type.toLowerCase();
+          return fileExtensionWithDot === type.toLowerCase();
         } else if (type.includes('/')) {
           return mimeType === type.toLowerCase() || mimeType.startsWith(type.toLowerCase().replace('*', ''));
         }
@@ -202,7 +264,38 @@ export class FileAttachmentComponent implements OnInit, OnDestroy {
       if (!isAccepted) {
         return {
           isValid: false,
-          error: `Tipo de archivo no permitido. Tipos aceptados: ${acceptedTypes.join(', ')}`
+          error: ErrorMessages.FILE_VALIDATION.EXTENSION_NOT_ALLOWED(fileExtension, acceptedTypes.join(', '))
+        };
+      }
+    } else {
+      // Si no se especificaron tipos aceptados, usar la lista por defecto
+      if (!this.ALLOWED_EXTENSIONS_DEFAULT.includes(fileExtension)) {
+        return {
+          isValid: false,
+          error: ErrorMessages.FILE_VALIDATION.EXTENSION_NOT_ALLOWED(fileExtension, this.ALLOWED_EXTENSIONS_DEFAULT.join(', '))
+        };
+      }
+    }
+
+    // Validar tipo MIME si está disponible
+    if (file.type) {
+      const mimeType = file.type.toLowerCase();
+      
+      // Lista de tipos MIME peligrosos
+      const dangerousMimeTypes = [
+        'application/x-msdownload',
+        'application/x-executable',
+        'application/x-dosexec',
+        'application/x-winexe',
+        'application/x-msdos-program',
+        'application/javascript',
+        'text/javascript'
+      ];
+
+      if (dangerousMimeTypes.includes(mimeType)) {
+        return {
+          isValid: false,
+          error: ErrorMessages.FILE_VALIDATION.MIME_TYPE_BLOCKED(mimeType)
         };
       }
     }
@@ -214,12 +307,33 @@ export class FileAttachmentComponent implements OnInit, OnDestroy {
    * Subir archivo
    */
   private uploadFile(): void {
-    if (!this.selectedFile) return;
+    if (!this.selectedFile) {
+      this.messageService.add(ErrorMessages.createMessage(
+        'error',
+        'Error',
+        ErrorMessages.FILE_UPLOAD.UPLOAD_FAILED
+      ));
+      return;
+    }
+
+    // Validar archivo una vez más antes de subir
+    const validation = this.validateFile(this.selectedFile);
+    if (!validation.isValid) {
+      this.validationError = validation.error;
+      this.messageService.add(ErrorMessages.createMessage(
+        'error',
+        'Error de validación',
+        validation.error,
+        4000
+      ));
+      return;
+    }
 
     this.isUploading = true;
     this.uploadProgress = 0;
+    this.validationError = '';
 
-    // Simular progreso de subida
+    // Simular progreso de subida con manejo de errores
     const progressInterval = setInterval(() => {
       this.uploadProgress += 10;
       if (this.uploadProgress >= 90) {
@@ -233,23 +347,45 @@ export class FileAttachmentComponent implements OnInit, OnDestroy {
       removeExisting: false
     };
 
-    // Simular delay de procesamiento
+    // Simular delay de procesamiento con manejo de errores
     setTimeout(() => {
-      clearInterval(progressInterval);
-      this.uploadProgress = 100;
-      
-      setTimeout(() => {
+      try {
+        clearInterval(progressInterval);
+        this.uploadProgress = 100;
+        
+        setTimeout(() => {
+          this.isUploading = false;
+          this.uploadProgress = 0;
+          
+          // Verificar que el archivo aún existe (usuario no lo cambió durante la subida)
+          if (this.selectedFile) {
+            this.fileAttached.emit(fileData);
+            
+            this.messageService.add(ErrorMessages.createMessage(
+              'success',
+              'Archivo preparado',
+              ErrorMessages.SUCCESS.FILE_UPLOADED(this.selectedFile.name)
+            ));
+          } else {
+            this.messageService.add(ErrorMessages.createMessage(
+              'warning',
+              'Advertencia',
+              ErrorMessages.WARNING.FILE_CHANGED_DURING_UPLOAD
+            ));
+          }
+        }, 500);
+      } catch (error) {
         this.isUploading = false;
         this.uploadProgress = 0;
-        this.fileAttached.emit(fileData);
+        this.validationError = ErrorMessages.FILE_UPLOAD.PROCESSING_ERROR;
         
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Archivo adjuntado',
-          detail: `Archivo "${this.selectedFile?.name}" listo para subir`,
-          life: 3000
-        });
-      }, 500);
+        this.messageService.add(ErrorMessages.createMessage(
+          'error',
+          'Error de procesamiento',
+          ErrorMessages.FILE_UPLOAD.PROCESSING_ERROR,
+          4000
+        ));
+      }
     }, 1000);
   }
 

@@ -95,7 +95,7 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
     - Manejar autorización para usuarios con permisos
     - _Requirements: 4.1, 4.2, 4.4_
 
-- [ ] 10. Implementar manejo de errores y validaciones
+- [x] 10. Implementar manejo de errores y validaciones
   - Agregar validación de tipos de archivo si es necesario
   - Implementar manejo de errores de subida/descarga
   - Agregar cleanup de archivos huérfanos
