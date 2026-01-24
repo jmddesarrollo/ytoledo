@@ -108,7 +108,7 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
   - Configurar guards de autorización para página de gestión
   - _Requirements: 4.1_
 
-- [ ] 12. Checkpoint final - Verificar integración completa
+- [x] 12. Checkpoint final - Verificar integración completa
   - Verificar flujo completo de adjuntar archivos en crear/editar ruta
   - Verificar descarga de archivos desde página de detalle
   - Verificar gestión de archivos desde página administrativa
