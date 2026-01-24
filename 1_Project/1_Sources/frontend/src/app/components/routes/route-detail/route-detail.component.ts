@@ -5,6 +5,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { TitleShareService } from '../../../services/share/title.service';
 import { RouteService } from '../../../services/websockets/route.service';
+import { FileService } from '../../../services/websockets/file.service';
 import { RouteModel } from '../../../models/route.model';
 import { MessageService } from 'primeng/api';
 import { MyPermissionShareService } from '../../../services/share/my-permission.service';
@@ -40,6 +41,7 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private titleShareService: TitleShareService,
     private routeService: RouteService,
+    private fileService: FileService,
     private messageService: MessageService,
     private myPermissionShareService: MyPermissionShareService,
     private wrPermissionShareService: WRPermissionShareService,
@@ -120,7 +122,37 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
       }
     );
 
-    this.subscriptions.push(getRouteSub, deleteRouteSub);
+    // Suscripción para descarga de archivos
+    const downloadFileSub = this.fileService._downFile().subscribe(
+      (response: any) => {
+        if (response.success) {
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: 'Descarga', 
+            detail: 'Archivo descargado correctamente', 
+            life: 2000 
+          });
+        } else {
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: response.message || 'Error al descargar el archivo', 
+            life: 3000 
+          });
+        }
+      },
+      (error) => {
+        console.error('Error downloading file:', error);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'Error al descargar el archivo', 
+          life: 3000 
+        });
+      }
+    );
+
+    this.subscriptions.push(getRouteSub, deleteRouteSub, downloadFileSub);
   }
 
   private loadRoute(): void {
@@ -258,6 +290,26 @@ export class RouteDetailComponent implements OnInit, OnDestroy {
   openLink(url: string): void {
     if (url) {
       window.open(url, '_blank');
+    }
+  }
+
+  downloadAttachedFile(): void {
+    if (this.route && this.route.hasAttachedFile && this.route.fileTrack && this.route.filenameTrack) {
+      // Use the existing file service to download the file
+      // Parameters: identifier, name, unique, productName
+      this.fileService.downFile(
+        `attachments/${this.route.fileTrack}`, // identifier (folder path)
+        this.route.filenameTrack, // name (filename)
+        true, // unique
+        'route-attachment' // productName
+      );
+    } else {
+      this.messageService.add({ 
+        severity: 'warn', 
+        summary: 'Advertencia', 
+        detail: 'No hay archivo adjunto para descargar', 
+        life: 3000 
+      });
     }
   }
 

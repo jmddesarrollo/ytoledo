@@ -57,13 +57,13 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
   - Verificar que los campos de base de datos se actualizan correctamente
 
 - [ ] 7. Extender páginas de detalle y próxima ruta
-  - [-] 7.1 Mostrar botón de descarga cuando existe archivo adjunto
+  - [x] 7.1 Mostrar botón de descarga cuando existe archivo adjunto
     - Agregar botón "Descargar" junto a "Ver en Wikiloc" en página de detalle
     - Agregar botón "Descargar" junto a "Ver en Wikiloc" en página de próxima ruta
     - Mostrar mensaje explicativo sobre archivo vs referencia Wikiloc
     - _Requirements: 3.1, 3.2_
   
-  - [ ] 7.2 Implementar funcionalidad de descarga
+  - [x] 7.2 Implementar funcionalidad de descarga
     - Crear endpoint para descarga usando File_Manager.downloadFile()
     - Usar filename_track como nombre de descarga
     - Manejar errores de archivo no encontrado

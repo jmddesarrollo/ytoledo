@@ -10,6 +10,9 @@ import { RoleRoutes } from '../routes/ws/role.route';
 import { RouteRoutes } from '../routes/ws/route.route';
 import { UserRoutes } from '../routes/ws/user.route';
 
+// HTTP Routes
+import { RouteController } from '../controllers/ws/route.controller';
+
 const path = require('path');
 
 /**
@@ -42,6 +45,7 @@ export default class Server {
         // Conexión Socket como Servidor
         this.io = require("socket.io")(this.httpServer, { path: "/" + process.env.YTO_SERVICE_NAME });
 
+        this.configureHttpRoutes();
         this.listenSockets();
 
         this.app.use(express.static(path.resolve(__dirname, '../public')));
@@ -52,6 +56,15 @@ export default class Server {
     // static: método que puede ser llamado directamente haciendo referencia a la clase
     public static get instance() {
         return this._instance || (this._instance = new this());
+    }
+
+    private configureHttpRoutes() {
+        const routeController = new RouteController();
+        
+        // HTTP endpoint for file downloads
+        this.app.get('/api/routes/:fileTrack/download', (req, res) => {
+            routeController.downloadAttachedFile(req, res);
+        });
     }
 
     private listenSockets() {

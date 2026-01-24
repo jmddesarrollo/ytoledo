@@ -1,9 +1,11 @@
 import { Socket } from 'socket.io';
+import { Request, Response } from 'express';
 
 import ControlException from '../../utils/controlException';
 
 import { RouteService } from '../../services/route';
 import { FileData } from '../../models/file-attachment.model';
+import FileAttachmentService from '../../services/file/file-attachment.bll';
 
 import AuthorizedMiddleware from '../../server/middlewares/authorized.middleware';
 
@@ -14,6 +16,7 @@ const sequelize = require('../../models').sequelize;
 
 export class RouteController {
     private routeService = new RouteService();
+    private fileAttachmentService = new FileAttachmentService();
     private AuthorizedMiddleware = new AuthorizedMiddleware();
 
     private permissionType: string;
@@ -176,6 +179,48 @@ export class RouteController {
                 socket.emit("error_message", { message: error.message, code: error.code });
             } else {
                 socket.emit("error_message", { message: "Error no controlado" });
+            }
+        }
+    }
+
+    /**
+     * Download attached file from route
+     * Requirements: 3.3, 3.4, 5.4
+     */
+    public async downloadAttachedFile(req: Request, res: Response) {
+        const fileTrack = req.params.fileTrack;
+
+        try {
+            // Validate file track parameter
+            if (!fileTrack || fileTrack.trim() === '') {
+                return res.status(400).json({ 
+                    error: 'El identificador del archivo es obligatorio' 
+                });
+            }
+
+            // Use FileAttachmentService to download the file
+            const downloadResult = await this.fileAttachmentService.downloadAttachedFile(fileTrack);
+
+            // Set appropriate headers for file download
+            res.setHeader('Content-Disposition', `attachment; filename="${downloadResult.filename}"`);
+            res.setHeader('Content-Type', 'application/octet-stream');
+            res.setHeader('Content-Length', downloadResult.buffer.length);
+
+            // Send the file buffer
+            res.send(downloadResult.buffer);
+
+        } catch (error) {
+            console.error('RouteController.downloadAttachedFile - Error:', error);
+            
+            if (error instanceof ControlException) {
+                const statusCode = error.code === 404 ? 404 : 500;
+                return res.status(statusCode).json({ 
+                    error: error.message 
+                });
+            } else {
+                return res.status(500).json({ 
+                    error: 'Error no controlado al descargar el archivo' 
+                });
             }
         }
     }
