@@ -11,6 +11,7 @@ import { MyPermissionShareService } from '../../../services/share/my-permission.
 import { WRPermissionShareService } from '../../../services/share/wr-permission';
 import { RoleHasPermission } from '../../../models/roleHasPermission.model';
 import { GLOBAL } from '../../../services/global';
+import { AttachedFile, FileData } from '../../../models/file-attachment.model';
 
 @Component({
   selector: 'app-route-form',
@@ -25,6 +26,12 @@ export class RouteFormComponent implements OnInit, OnDestroy {
   public isEditMode: boolean = false;
   public routeId: number | null = null;
   public errorMessage: string = '';
+
+  // File attachment properties
+  public attachedFile: AttachedFile | null = null;
+  public fileData: FileData | null = null;
+  public fileOperationInProgress: boolean = false;
+  public acceptedFileTypes: string[] = ['.gpx', '.kml', '.kmz', 'application/gpx+xml', 'application/vnd.google-earth.kml+xml', 'application/vnd.google-earth.kmz'];
 
   // Control de permisos
   public permission: RoleHasPermission | undefined;
@@ -329,6 +336,19 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       wikiloc_link: route.wikiloc_link || '',
       wikiloc_map_link: route.wikiloc_map_link || ''
     });
+
+    // Populate attached file information if exists
+    if (route.file_track && route.filename_track) {
+      this.attachedFile = {
+        fileTrack: route.file_track,
+        filenameTrack: route.filename_track,
+        uploadDate: route.updated_at ? new Date(route.updated_at) : new Date(),
+        fileSize: 0, // Size not available from route data
+        mimeType: this.getMimeTypeFromFilename(route.filename_track)
+      };
+    } else {
+      this.attachedFile = null;
+    }
   }
 
   changeTitle(): void {
@@ -360,6 +380,11 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       if (formData.estimated_duration_hours) formData.estimated_duration_hours = parseInt(formData.estimated_duration_hours);
       if (formData.estimated_duration_minutes) formData.estimated_duration_minutes = parseInt(formData.estimated_duration_minutes);
       if (formData.type) formData.type = parseInt(formData.type);
+      
+      // Include file data if present
+      if (this.fileData) {
+        formData.fileData = this.fileData;
+      }
       
       if (this.isEditMode && this.routeId) {
         formData.id = this.routeId;
@@ -446,6 +471,80 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       'wikiloc_map_link': 'Código iframe mapa Wikiloc'
     };
     return labels[fieldName] || fieldName;
+  }
+
+  /**
+   * File attachment event handlers
+   */
+  onFileAttached(fileData: FileData): void {
+    this.fileData = fileData;
+    this.fileOperationInProgress = false;
+    
+    console.log('File attached:', fileData);
+    
+    // Update attached file info for display
+    if (fileData.file) {
+      this.attachedFile = {
+        fileTrack: '', // Will be generated on server
+        filenameTrack: fileData.file.name,
+        uploadDate: new Date(),
+        fileSize: fileData.file.size,
+        mimeType: fileData.file.type
+      };
+    }
+  }
+
+  onFileRemoved(): void {
+    // Set file data to indicate removal
+    this.fileData = {
+      removeExisting: this.attachedFile !== null
+    };
+    
+    // Clear attached file info
+    this.attachedFile = null;
+    this.fileOperationInProgress = false;
+    
+    console.log('File removed, fileData set to:', this.fileData);
+  }
+
+  /**
+   * Utility method to get MIME type from filename
+   */
+  private getMimeTypeFromFilename(filename: string): string {
+    if (!filename) return 'application/octet-stream';
+    
+    const extension = filename.split('.').pop()?.toLowerCase();
+    
+    const mimeTypes: { [key: string]: string } = {
+      // Hiking track formats
+      'gpx': 'application/gpx+xml',
+      'kml': 'application/vnd.google-earth.kml+xml',
+      'kmz': 'application/vnd.google-earth.kmz',
+      // Other common formats (kept for compatibility)
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'xls': 'application/vnd.ms-excel',
+      'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'bmp': 'image/bmp',
+      'txt': 'text/plain',
+      'zip': 'application/zip',
+      'rar': 'application/x-rar-compressed',
+      '7z': 'application/x-7z-compressed'
+    };
+    
+    return mimeTypes[extension || ''] || 'application/octet-stream';
+  }
+
+  /**
+   * Check if form is in a loading state (saving or file operations)
+   */
+  get isFormDisabled(): boolean {
+    return this.saving || this.fileOperationInProgress || this.loading;
   }
 
   /**

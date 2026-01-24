@@ -44,7 +44,7 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
     - Manejar confirmación de eliminación
     - _Requirements: 2.1, 2.2_
 
-- [ ] 5. Extender RouteFormComponent
+- [x] 5. Extender RouteFormComponent
   - Integrar FileAttachmentComponent en formulario de crear/editar ruta
   - Manejar onFileAttached() y onFileRemoved() events
   - Extender handleFormSubmit() para procesar FileData

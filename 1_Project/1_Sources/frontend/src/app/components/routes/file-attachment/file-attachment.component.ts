@@ -371,6 +371,11 @@ export class FileAttachmentComponent implements OnInit, OnDestroy {
     const extension = filename.split('.').pop()?.toLowerCase();
     
     switch (extension) {
+      // Hiking track formats
+      case 'gpx':
+      case 'kml':
+      case 'kmz':
+        return 'pi pi-map-marker';
       case 'pdf':
         return 'pi pi-file-pdf';
       case 'doc':

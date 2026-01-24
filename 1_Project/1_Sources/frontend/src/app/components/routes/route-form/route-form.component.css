@@ -193,3 +193,44 @@ textarea {
   outline: none;
   border-width: 2px;
 }
+
+/* File attachment section */
+.file-attachment-section {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  background-color: #fafafa;
+}
+
+.file-attachment-section .field-label {
+  margin-bottom: 0.75rem;
+}
+
+/* Disabled state for form during file operations */
+.route-form-container input:disabled,
+.route-form-container select:disabled,
+.route-form-container textarea:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* File operation status */
+.file-operation-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #007ad9;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.file-operation-status i {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

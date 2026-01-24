@@ -40,6 +40,7 @@
                 [ngClass]="{'w3-border-red': isFieldInvalid('name')}"
                 type="text" 
                 formControlName="name"
+                [disabled]="isFormDisabled"
                 placeholder="Ej: Ruta del Pinar">
               <div *ngIf="isFieldInvalid('name')" class="error-message">
                 {{ getFieldError('name') }}
@@ -53,7 +54,8 @@
                 class="w3-input w3-border w3-round"
                 [ngClass]="{'w3-border-red': isFieldInvalid('date')}"
                 type="date" 
-                formControlName="date">
+                formControlName="date"
+                [disabled]="isFormDisabled">
               <div *ngIf="isFieldInvalid('date')" class="error-message">
                 {{ getFieldError('date') }}
               </div>
@@ -69,6 +71,7 @@
                 [ngClass]="{'w3-border-red': isFieldInvalid('start_point')}"
                 type="text" 
                 formControlName="start_point"
+                [disabled]="isFormDisabled"
                 placeholder="Ej: Plaza del pueblo">
               <div *ngIf="isFieldInvalid('start_point')" class="error-message">
                 {{ getFieldError('start_point') }}
@@ -81,7 +84,8 @@
               <select 
                 class="w3-select w3-border w3-round"
                 [ngClass]="{'w3-border-red': isFieldInvalid('difficulty')}"
-                formControlName="difficulty">
+                formControlName="difficulty"
+                [disabled]="isFormDisabled">
                 <option *ngFor="let diff of difficulties" [value]="diff.value">
                   {{ diff.label }}
                 </option>
@@ -100,6 +104,7 @@
                 class="w3-input w3-border w3-round"
                 [ngClass]="{'w3-border-red': isFieldInvalid('description')}"
                 formControlName="description"
+                [disabled]="isFormDisabled"
                 rows="4"
                 placeholder="Describe la ruta, puntos de interés, características especiales..."></textarea>
               <div *ngIf="isFieldInvalid('description')" class="error-message" 
@@ -248,7 +253,25 @@
 
         <!-- Enlaces adicionales -->
         <div class="form-section">
-          <h4 class="section-title">Enlaces Adicionales</h4>
+          <h4 class="section-title">Enlaces y Archivos</h4>
+          
+          <!-- File attachment section -->
+          <div class="w3-row-padding">
+            <div class="w3-col s12">
+              <label class="field-label">Archivo Adjunto</label>
+              <app-file-attachment
+                [currentFile]="attachedFile"
+                [disabled]="isFormDisabled"
+                [maxFileSize]="5242880"
+                [acceptedTypes]="acceptedFileTypes"
+                (fileAttached)="onFileAttached($event)"
+                (fileRemoved)="onFileRemoved()">
+              </app-file-attachment>
+              <small class="field-help">
+                Adjunta un archivo de track de senderismo: GPX (recomendado), KML o KMZ
+              </small>
+            </div>
+          </div>
           
           <div class="w3-row-padding">
             <!-- Enlace de inscripción -->
@@ -259,6 +282,7 @@
                 [ngClass]="{'w3-border-red': isFieldInvalid('sign_up_link')}"
                 type="url" 
                 formControlName="sign_up_link"
+                [disabled]="isFormDisabled"
                 placeholder="https://...">
               <div *ngIf="isFieldInvalid('sign_up_link')" class="error-message">
                 {{ getFieldError('sign_up_link') }}
@@ -275,6 +299,7 @@
                 [ngClass]="{'w3-border-red': isFieldInvalid('wikiloc_link')}"
                 type="url" 
                 formControlName="wikiloc_link"
+                [disabled]="isFormDisabled"
                 placeholder="https://wikiloc.com/...">
               <div *ngIf="isFieldInvalid('wikiloc_link')" class="error-message">
                 {{ getFieldError('wikiloc_link') }}
@@ -291,6 +316,7 @@
                 class="w3-input w3-border w3-round"
                 [ngClass]="{'w3-border-red': isFieldInvalid('wikiloc_map_link')}"
                 formControlName="wikiloc_map_link"
+                [disabled]="isFormDisabled"
                 rows="4"
                 placeholder="<iframe frameBorder=&quot;0&quot; scrolling=&quot;no&quot; src=&quot;https://es.wikiloc.com/wikiloc/embedv2.do?id=17328354&elevation=on&images=off&maptype=H&quot; width=&quot;600&quot; height=&quot;500&quot;></iframe>">
               </textarea>
@@ -312,7 +338,7 @@
                 type="button" 
                 class="w3-button w3-light-grey w3-round w3-block"
                 (click)="onCancel()"
-                [disabled]="saving">
+                [disabled]="isFormDisabled">
                 <i class="fa fa-times"></i> Cancelar
               </button>
             </div>
@@ -320,10 +346,11 @@
               <button 
                 type="submit" 
                 class="w3-button w3-blue w3-round w3-block"
-                [disabled]="saving || routeForm.invalid">
+                [disabled]="isFormDisabled || routeForm.invalid">
                 <i *ngIf="saving" class="fa fa-spinner fa-spin"></i>
-                <i *ngIf="!saving" class="fa fa-save"></i>
-                {{ saving ? 'Guardando...' : (isEditMode ? 'Actualizar Ruta' : 'Crear Ruta') }}
+                <i *ngIf="!saving && !fileOperationInProgress" class="fa fa-save"></i>
+                <i *ngIf="fileOperationInProgress" class="fa fa-file-upload"></i>
+                {{ saving ? 'Guardando...' : (fileOperationInProgress ? 'Procesando archivo...' : (isEditMode ? 'Actualizar Ruta' : 'Crear Ruta')) }}
               </button>
             </div>
           </div>
