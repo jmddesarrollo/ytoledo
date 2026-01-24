@@ -2,7 +2,7 @@ import ControlException from '../../utils/controlException';
 
 import RouteDAL from './route.dal';
 import FileAttachmentService from '../file/file-attachment.bll';
-import { FileData, RouteWithFile, AttachedFileWithRoute } from '../../models/file-attachment.model';
+import { FileData, RouteWithFile, AttachedFileWithRoute } from '../../types/file-attachment.types';
 
 const env = process.env.YTO_NODE_ENV || 'development';
 const config = require('../../config/config')[env];

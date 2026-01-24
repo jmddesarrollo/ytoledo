@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import ControlException from '../../utils/controlException';
 
 import { RouteService } from '../../services/route';
-import { FileData } from '../../models/file-attachment.model';
+import { FileData } from '../../types/file-attachment.types';
 import FileAttachmentService from '../../services/file/file-attachment.bll';
 
 import AuthorizedMiddleware from '../../server/middlewares/authorized.middleware';

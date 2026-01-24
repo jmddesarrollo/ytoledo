@@ -105,8 +105,8 @@ export default class FileAttachmentService {
 
             // Get all file track directories
             const fileTrackDirs = fs.readdirSync(attachmentsDir, { withFileTypes: true })
-                .filter(dirent => dirent.isDirectory())
-                .map(dirent => dirent.name);
+                .filter((dirent: any) => dirent.isDirectory())
+                .map((dirent: any) => dirent.name);
 
             // Get all file tracks from database
             const routesWithFiles = await Routes.findAll({
@@ -128,16 +128,16 @@ export default class FileAttachmentService {
                         const orphanedPath = path.join(attachmentsDir, fileTrack);
                         this.fileManager.delFiles(`attachments/${fileTrack}`);
                         cleaned++;
-                    } catch (error) {
-                        errors.push(`Error eliminando archivo huérfano ${fileTrack}: ${error.message}`);
+                    } catch (error: any) {
+                        errors.push(`Error eliminando archivo huérfano ${fileTrack}: ${error?.message || 'Error desconocido'}`);
                     }
                 }
             }
 
             return { cleaned, errors };
 
-        } catch (error) {
-            errors.push(`Error durante la limpieza de archivos huérfanos: ${error.message}`);
+        } catch (error: any) {
+            errors.push(`Error durante la limpieza de archivos huérfanos: ${error?.message || 'Error desconocido'}`);
             return { cleaned, errors };
         }
     }
@@ -613,9 +613,9 @@ export default class FileAttachmentService {
                             const folderPath = `attachments/${fileTrack}`;
                             this.fileManager.delFiles(folderPath);
                             fileDeletedSuccessfully = true;
-                        } catch (deleteError) {
+                        } catch (deleteError: any) {
                             console.error(`Error deleting file ${fileTrack}:`, deleteError);
-                            deletionResults.errors.push(`Error eliminando archivo ${filename}: ${deleteError.message}`);
+                            deletionResults.errors.push(`Error eliminando archivo ${filename}: ${deleteError?.message || 'Error desconocido'}`);
                         }
                     } else {
                         // File doesn't exist on disk, but we'll still clean up the database
@@ -641,16 +641,16 @@ export default class FileAttachmentService {
                             deletionResults.failed.push(fileTrack);
                         }
 
-                    } catch (dbError) {
+                    } catch (dbError: any) {
                         console.error(`Database update failed for file ${fileTrack}:`, dbError);
                         deletionResults.failed.push(fileTrack);
-                        deletionResults.errors.push(`Error actualizando base de datos para ${filename}: ${dbError.message}`);
+                        deletionResults.errors.push(`Error actualizando base de datos para ${filename}: ${dbError?.message || 'Error desconocido'}`);
                     }
 
-                } catch (routeError) {
+                } catch (routeError: any) {
                     console.error(`Error processing route ${route.id}:`, routeError);
                     deletionResults.failed.push(fileTrack);
-                    deletionResults.errors.push(`Error procesando archivo ${filename}: ${routeError.message}`);
+                    deletionResults.errors.push(`Error procesando archivo ${filename}: ${routeError?.message || 'Error desconocido'}`);
                 }
             }
 

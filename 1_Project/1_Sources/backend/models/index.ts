@@ -28,7 +28,4 @@ Object.keys(db).forEach((modelName) => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-// Export TypeScript interfaces for file attachment functionality
-export * from './file-attachment.model';
-
 module.exports = db;
