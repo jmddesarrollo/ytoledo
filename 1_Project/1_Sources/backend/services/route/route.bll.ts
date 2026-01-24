@@ -97,14 +97,14 @@ export default class RouteService {
 
         // Procesar operaciones de archivo antes de actualizar otros campos
         if (fileData) {
-            // Debug: Log fileData to understand its structure
-            console.log('RouteService.editRoute - FileData object:', {
-                fileData: fileData,
-                hasFile: !!fileData.file,
-                fileKeys: fileData.file ? Object.keys(fileData.file) : 'no file',
-                fileName: fileData.file?.name,
-                removeExisting: fileData.removeExisting
-            });
+            //// Debug: Log fileData to understand its structure
+            //console.log('RouteService.editRoute - FileData object:', {
+            //    fileData: fileData,
+            //    hasFile: !!fileData.file,
+            //    fileKeys: fileData.file ? Object.keys(fileData.file) : 'no file',
+            //    fileName: fileData.file?.name,
+            //    removeExisting: fileData.removeExisting
+            //});
             
             // Convertir route.id a número entero para las operaciones de archivo
             const routeIdNumber = parseInt(route.id, 10);

@@ -69,18 +69,15 @@ export class WebsocketService {
   }
 
   emit(event: string, payload: any): any {
-    console.log('WebSocketService emit', event, payload);
     const token = this.token;
 
     this.socket.ioSocket.io.opts.query = { token };
     if (!this.socketStatus) {
       this.socket.connect();
     }
-    console.log('WebSocketService emit - token', token);
-    console.log('WebSocketService emit - socket', this.socket);
+
     payload.token = this.token;
 
-    console.log('WebSocketService emit - payload', payload);
     this.socket.emit(event, payload);
   }
 

@@ -217,7 +217,6 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       (response: any) => {
         this.saving = false;
         if (response.data) {
-          console.log('Route created successfully:', response);
           
           // Mostrar mensaje de éxito
           if (response.message) {
@@ -253,7 +252,6 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       (response: any) => {
         this.saving = false;
         if (response.data) {
-          console.log('Route updated successfully:', response);
           
           // Mostrar mensaje de éxito
           if (response.message) {
@@ -480,8 +478,6 @@ export class RouteFormComponent implements OnInit, OnDestroy {
     this.fileData = fileData;
     this.fileOperationInProgress = false;
     
-    console.log('File attached:', fileData);
-    
     // Update attached file info for display
     if (fileData.file) {
       this.attachedFile = {
@@ -503,8 +499,6 @@ export class RouteFormComponent implements OnInit, OnDestroy {
     // Clear attached file info
     this.attachedFile = null;
     this.fileOperationInProgress = false;
-    
-    console.log('File removed, fileData set to:', this.fileData);
   }
 
   /**

@@ -98,7 +98,6 @@ export class FileManagementComponent implements OnInit, OnDestroy {
             this.attachedFiles = [];
             this.totalRecords = 0;
           }
-          console.log('Attached files loaded:', this.attachedFiles);
         } catch (processingError) {
           console.error('Error processing attached files response:', processingError);
           this.attachedFiles = [];
@@ -130,7 +129,6 @@ export class FileManagementComponent implements OnInit, OnDestroy {
     // Suscripción para eliminar archivos
     const deleteFilesSub = this.fileAttachmentService.onDeleteAttachedFiles().subscribe(
       (response: any) => {
-        console.log('Files deleted:', response);
         
         try {
           // Mostrar mensaje de éxito
@@ -196,7 +194,6 @@ export class FileManagementComponent implements OnInit, OnDestroy {
     // Suscripción para descarga de archivos
     const downloadFilesSub = this.fileAttachmentService.onDownloadAttachedFile().subscribe(
       (response: any) => {
-        console.log('File download response:', response);
         
         try {
           if (response.success && response.data) {

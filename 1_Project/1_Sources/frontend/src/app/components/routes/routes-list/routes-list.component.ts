@@ -97,7 +97,6 @@ export class RoutesListComponent implements OnInit, OnDestroy {
             this.totalRecords = this.routes.length;
           }
         }
-        console.log('Routes loaded:', this.routes);
       },
       (error) => {
         this.loading = false;
@@ -108,7 +107,6 @@ export class RoutesListComponent implements OnInit, OnDestroy {
     // Suscripción para eliminar ruta
     const deleteRouteSub = this.routeService.onDeleteRoute().subscribe(
       (response: any) => {
-        console.log('Route deleted:', response);
         
         // Mostrar mensaje de éxito
         if (response.message) {

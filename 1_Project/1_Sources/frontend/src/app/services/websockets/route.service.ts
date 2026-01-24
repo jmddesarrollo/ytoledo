@@ -18,11 +18,9 @@ export class RouteService {
   }
 
   getNextRoute(): void {
-    console.log('getNextRoute Service');
     this.wsService.emit('route/getNextRoute', {});
   }
   onGetNextRoute(): Observable<RouteModel> {
-    console.log('onGetNextRoute Service');
     return this.wsService.listen('route/getNextRoute');
   }
 

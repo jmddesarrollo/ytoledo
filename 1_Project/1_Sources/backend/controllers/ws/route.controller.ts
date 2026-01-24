@@ -62,10 +62,7 @@ export class RouteController {
 
     public async getNextRoute(req: any, socket: Socket ) {
         try {
-            console.log('RouteController - getNextRoute');
             const data = await this.routeService.getNextRoute();
-
-            console.log('RouteController - getNextRoute - data', data);
             
             if (data) {
                 socket.emit("route/getNextRoute", { data, message: 'La próxima ruta se ha consultado correctamente' });
@@ -121,17 +118,17 @@ export class RouteController {
         const route = req.route;
         const fileData: FileData | undefined = req.fileData;
 
-        // Debug: Log complete request to understand the structure
-        console.log('RouteController.editRoute - Request structure:', {
-            hasRoute: !!req.route,
-            hasFileData: !!req.fileData,
-            fileDataKeys: req.fileData ? Object.keys(req.fileData) : 'no fileData',
-            fileDataFile: req.fileData?.file ? {
-                isBuffer: Buffer.isBuffer(req.fileData.file),
-                hasName: !!req.fileData.file.name,
-                keys: Object.keys(req.fileData.file).slice(0, 10) // First 10 keys only
-            } : 'no file in fileData'
-        });
+        //// Debug: Log complete request to understand the structure
+        //console.log('RouteController.editRoute - Request structure:', {
+        //    hasRoute: !!req.route,
+        //    hasFileData: !!req.fileData,
+        //    fileDataKeys: req.fileData ? Object.keys(req.fileData) : 'no fileData',
+        //    fileDataFile: req.fileData?.file ? {
+        //        isBuffer: Buffer.isBuffer(req.fileData.file),
+        //        hasName: !!req.fileData.file.name,
+        //        keys: Object.keys(req.fileData.file).slice(0, 10) // First 10 keys only
+        //    } : 'no file in fileData'
+        // });
 
         // Iniciar transacción
         let t = await sequelize.transaction(); 

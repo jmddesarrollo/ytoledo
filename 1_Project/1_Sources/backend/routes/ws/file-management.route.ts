@@ -4,8 +4,6 @@ import { FileManagementController } from '../../controllers/ws/file-management.c
 
 export const FileManagementRoutes = (socket: Socket) => {
 
-    console.log('Inside FileManagementRoutes');
-
     const fileManagementController = new FileManagementController();        
     
     socket.on('fileManagement/getAttachedFiles', (req: Request) => { 

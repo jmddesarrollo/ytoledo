@@ -10,7 +10,6 @@ export class WRPermissionShareService {
   constructor() {}
 
   changeWRPermission(wrPermission: string): any {
-    console.log('WRPermissionShareService changeWRPermission', wrPermission);
     this.objWRPermission.next(wrPermission);
   }
 }

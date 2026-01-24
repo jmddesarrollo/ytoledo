@@ -78,7 +78,6 @@ export class RoutesPublicComponent implements OnInit, OnDestroy {
             this.totalRecords = this.routes.length;
           }
         }
-        console.log('Public routes loaded:', this.routes);
       },
       (error) => {
         this.loading = false;

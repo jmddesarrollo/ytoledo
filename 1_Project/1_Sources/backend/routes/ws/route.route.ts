@@ -4,8 +4,6 @@ import { RouteController } from '../../controllers/ws/route.controller';
 
 export const RouteRoutes = (socket: Socket) => {
 
-    console.log('Inside RouteRoutes');
-
     const routeController = new RouteController();        
     
     socket.on('route/getRoutes', (req: Request) => { routeController.getRoutes(req, socket)});
