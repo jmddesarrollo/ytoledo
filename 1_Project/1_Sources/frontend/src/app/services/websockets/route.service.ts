@@ -3,6 +3,7 @@ import { WebsocketService } from '../websocket.service';
 import { Observable } from 'rxjs';
 
 import { RouteModel } from '../../models/route.model';
+import { FileData } from '../../models/file-attachment.model';
 
 @Injectable()
 export class RouteService {
@@ -32,15 +33,31 @@ export class RouteService {
     return this.wsService.listen('route/getRoute');
   }
 
-  addRoute(route: RouteModel): void {
-    this.wsService.emit('route/addRoute', { route });
+  addRoute(route: any): void {
+    // Extract fileData if present
+    const { fileData, ...routeData } = route;
+    
+    const payload: any = { route: routeData };
+    if (fileData) {
+      payload.fileData = fileData;
+    }
+    
+    this.wsService.emit('route/addRoute', payload);
   }
   onAddRoute(): Observable<RouteModel> {
     return this.wsService.listen('route/addRoute');
   }
 
-  editRoute(route: RouteModel): void {
-    this.wsService.emit('route/editRoute', { route });
+  editRoute(route: any): void {
+    // Extract fileData if present
+    const { fileData, ...routeData } = route;
+    
+    const payload: any = { route: routeData };
+    if (fileData) {
+      payload.fileData = fileData;
+    }
+    
+    this.wsService.emit('route/editRoute', payload);
   }
   onEditRoute(): Observable<RouteModel> {
     return this.wsService.listen('route/editRoute');

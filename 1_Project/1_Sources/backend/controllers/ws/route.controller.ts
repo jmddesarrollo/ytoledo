@@ -3,6 +3,7 @@ import { Socket } from 'socket.io';
 import ControlException from '../../utils/controlException';
 
 import { RouteService } from '../../services/route';
+import { FileData } from '../../models/file-attachment.model';
 
 import AuthorizedMiddleware from '../../server/middlewares/authorized.middleware';
 
@@ -80,6 +81,7 @@ export class RouteController {
  
     public async addRoute(req: any, socket: Socket) {
         const route = req.route;
+        const fileData: FileData | undefined = req.fileData;
 
         // Iniciar transacción
         let t = await sequelize.transaction(); 
@@ -93,7 +95,7 @@ export class RouteController {
             // Obtener el user_id del token decodificado (está en tokenDecoded.user.id)
             const userId = tokenDecoded.user.id;
             
-            const data = await this.routeService.addRoute(route, t, userId);
+            const data = await this.routeService.addRoute(route, t, userId, fileData);
     
             t.commit();
     
@@ -114,6 +116,7 @@ export class RouteController {
        
     public async editRoute(req: any, socket: Socket) {
         const route = req.route;
+        const fileData: FileData | undefined = req.fileData;
 
         // Iniciar transacción
         let t = await sequelize.transaction(); 
@@ -126,7 +129,7 @@ export class RouteController {
 
             const routePrev = await this.routeService.getRoute(route.id);
 
-            const data = await this.routeService.editRoute(route, t);
+            const data = await this.routeService.editRoute(route, t, fileData);
     
             t.commit();
     

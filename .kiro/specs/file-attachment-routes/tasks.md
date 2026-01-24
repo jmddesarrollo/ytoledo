@@ -51,13 +51,13 @@ Este plan implementa la funcionalidad de adjuntar archivos a rutas de manera int
   - Manejar estados de carga durante operaciones de archivo
   - _Requirements: 1.1, 1.3, 2.1, 2.2_
 
-- [ ] 6. Checkpoint - Verificar funcionalidad básica de adjuntar/quitar archivos
+- [x] 6. Checkpoint - Verificar funcionalidad básica de adjuntar/quitar archivos
   - Verificar que se pueden adjuntar archivos al crear rutas
   - Verificar que se pueden quitar archivos al editar rutas
   - Verificar que los campos de base de datos se actualizan correctamente
 
 - [ ] 7. Extender páginas de detalle y próxima ruta
-  - [ ] 7.1 Mostrar botón de descarga cuando existe archivo adjunto
+  - [-] 7.1 Mostrar botón de descarga cuando existe archivo adjunto
     - Agregar botón "Descargar" junto a "Ver en Wikiloc" en página de detalle
     - Agregar botón "Descargar" junto a "Ver en Wikiloc" en página de próxima ruta
     - Mostrar mensaje explicativo sobre archivo vs referencia Wikiloc
