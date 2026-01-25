@@ -14,6 +14,8 @@ services:
       DB_NAME: y-toledo
     ports:
       - "5555:5555"
+    volumes:
+      - /var/data/ytoledo:/data
     depends_on:
       - mysql
     # Usa un script de espera para asegurarte de que MySQL esté listo

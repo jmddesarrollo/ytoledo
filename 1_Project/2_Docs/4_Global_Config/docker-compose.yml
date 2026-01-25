@@ -1,0 +1,76 @@
+version: '3.9'
+
+services:
+  # Servicio para la primera aplicación Node.js
+  ytoledo:
+    build:
+      context: ./ytoledo
+    container_name: ytoledo
+    restart: always
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: y-toledo-pwd
+      DB_NAME: y-toledo
+    ports:
+      - "5555:5555"
+    volumes:
+      - /var/data/ytoledo:/data
+    depends_on:
+      - mysql
+    # Usa un script de espera para asegurarte de que MySQL esté listo
+    command: sh -c "dockerize -wait tcp://mysql:3306 -timeout 30s && npm start"
+
+  # Servicio para la segunda aplicación Node.js
+  efcastillodelaguila:
+    build:
+      context: ./efcastillodelaguila
+    container_name: efcastillodelaguila
+    restart: always
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: y-toledo-pwd
+      DB_NAME: efcastillodelaguila
+    ports:
+      - "5577:5577"
+    volumes:
+      - /var/data/efcastillodelaguila:/data
+    depends_on:
+      - mysql
+    command: sh -c "dockerize -wait tcp://mysql:3306 -timeout 30s && npm start"
+
+  # Servicio para MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: y-toledo-pwd
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Servicio para Nginx como proxy inverso
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt:/etc/letsencrypt:ro # Montar certificados en modo de solo lectura
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - ytoledo
+      - efcastillodelaguila
+
+# Volúmenes
+volumes:
+  mysql_data:
+
+networks:
+  default:
+    name: app_network
