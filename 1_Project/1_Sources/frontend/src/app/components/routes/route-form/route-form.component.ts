@@ -321,13 +321,13 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       date: formattedDate,
       start_point: route.start_point || '',
       description: route.description || '',
-      distance_km: route.distance_km || '',
-      distance_m: route.distance_m || '',
-      elevation_gain: route.elevation_gain || '',
-      max_height: route.max_height || '',
-      min_height: route.min_height || '',
-      estimated_duration_hours: route.estimated_duration_hours || '',
-      estimated_duration_minutes: route.estimated_duration_minutes || '',
+      distance_km: route.distance_km !== null && route.distance_km !== undefined ? route.distance_km : '',
+      distance_m: route.distance_m !== null && route.distance_m !== undefined ? route.distance_m : '',
+      elevation_gain: route.elevation_gain !== null && route.elevation_gain !== undefined ? route.elevation_gain : '',
+      max_height: route.max_height !== null && route.max_height !== undefined ? route.max_height : '',
+      min_height: route.min_height !== null && route.min_height !== undefined ? route.min_height : '',
+      estimated_duration_hours: route.estimated_duration_hours !== null && route.estimated_duration_hours !== undefined ? route.estimated_duration_hours : '',
+      estimated_duration_minutes: route.estimated_duration_minutes !== null && route.estimated_duration_minutes !== undefined ? route.estimated_duration_minutes : '',
       type: route.type || null,
       difficulty: route.difficulty || '',
       sign_up_link: route.sign_up_link || '',
@@ -369,14 +369,28 @@ export class RouteFormComponent implements OnInit, OnDestroy {
         formData.description = this.cleanEmojis(formData.description);
       }
       
-      // Convertir valores numéricos
-      if (formData.distance_km) formData.distance_km = parseFloat(formData.distance_km);
-      if (formData.distance_m) formData.distance_m = parseInt(formData.distance_m);
-      if (formData.elevation_gain) formData.elevation_gain = parseInt(formData.elevation_gain);
-      if (formData.max_height) formData.max_height = parseInt(formData.max_height);
-      if (formData.min_height) formData.min_height = parseInt(formData.min_height);
-      if (formData.estimated_duration_hours) formData.estimated_duration_hours = parseInt(formData.estimated_duration_hours);
-      if (formData.estimated_duration_minutes) formData.estimated_duration_minutes = parseInt(formData.estimated_duration_minutes);
+      // Convertir valores numéricos - manejar correctamente los valores cero
+      if (formData.distance_km !== null && formData.distance_km !== undefined && formData.distance_km !== '') {
+        formData.distance_km = parseFloat(formData.distance_km);
+      }
+      if (formData.distance_m !== null && formData.distance_m !== undefined && formData.distance_m !== '') {
+        formData.distance_m = parseInt(formData.distance_m);
+      }
+      if (formData.elevation_gain !== null && formData.elevation_gain !== undefined && formData.elevation_gain !== '') {
+        formData.elevation_gain = parseInt(formData.elevation_gain);
+      }
+      if (formData.max_height !== null && formData.max_height !== undefined && formData.max_height !== '') {
+        formData.max_height = parseInt(formData.max_height);
+      }
+      if (formData.min_height !== null && formData.min_height !== undefined && formData.min_height !== '') {
+        formData.min_height = parseInt(formData.min_height);
+      }
+      if (formData.estimated_duration_hours !== null && formData.estimated_duration_hours !== undefined && formData.estimated_duration_hours !== '') {
+        formData.estimated_duration_hours = parseInt(formData.estimated_duration_hours);
+      }
+      if (formData.estimated_duration_minutes !== null && formData.estimated_duration_minutes !== undefined && formData.estimated_duration_minutes !== '') {
+        formData.estimated_duration_minutes = parseInt(formData.estimated_duration_minutes);
+      }
       if (formData.type) formData.type = parseInt(formData.type);
       
       // Include file data if present

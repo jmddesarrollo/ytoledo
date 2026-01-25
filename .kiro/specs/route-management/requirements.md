@@ -107,6 +107,12 @@ Desarrollar un sistema completo de gestión de rutas para el club de senderismo 
 - **AC-045**: Al hacer hover, solo el icono debe cambiar a un color más intenso o contrastante
 - **AC-046**: Los botones deben tener tooltips descriptivos para mejorar la accesibilidad
 
+#### 5.3.4 Manejo de Valores Cero
+- **AC-047**: El formulario debe manejar correctamente los valores cero en campos numéricos
+- **AC-048**: Los campos con valor cero no deben considerarse como campos vacíos
+- **AC-049**: Al editar una ruta con valores cero, estos deben mantenerse visibles en el formulario
+- **AC-050**: El botón de actualizar debe permanecer habilitado cuando hay valores cero válidos
+
 ### 5.4 Integración con Sistema Existente
 
 #### 5.4.1 Arquitectura

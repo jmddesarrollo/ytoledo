@@ -143,6 +143,15 @@
   - [x] 6.6.2.2 Verificar que los iconos se muestren correctamente
   - [x] 6.6.2.3 Probar iconos en todos los componentes que los usan
 
+### 6.7 Corregir manejo de valores cero en formulario de rutas
+- [x] 6.7.1 Corregir populateForm para manejar valores cero correctamente
+  - [x] 6.7.1.1 Cambiar operador || por verificación explícita de null/undefined
+  - [x] 6.7.1.2 Aplicar corrección a todos los campos numéricos
+  - [x] 6.7.1.3 Especial atención a estimated_duration_minutes
+- [x] 6.7.2 Corregir onSubmit para procesar valores cero correctamente
+  - [x] 6.7.2.1 Verificar que valores cero se conviertan correctamente
+  - [x] 6.7.2.2 Mantener validaciones de formulario funcionando
+
 ### 6.7 Testing Componentes
 - [ ]* 6.5.1 Crear tests unitarios para routes-list.component
 - [ ]* 6.5.2 Crear tests unitarios para route-form.component
