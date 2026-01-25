@@ -197,6 +197,13 @@
 - [x] 8.4.5 Manejo de campos con valores cero
 - [x] 8.4.6 Control de visibilidad de badges de permisos
 
+### 8.5 Limpieza de Menú
+- [x] 8.5.1 Comentar sección "Archivos" del menú principal
+  - [x] 8.5.1.1 Comentar definición del menú "Archivos" en items[]
+  - [x] 8.5.1.2 Comentar referencias en menuSession()
+  - [x] 8.5.1.3 Comentar referencias en inspectMenu()
+  - [x] 8.5.1.4 Agregar comentarios explicativos sobre la obsolescencia
+
 ## 9. Documentación y Deployment
 
 ### 9.1 Documentación

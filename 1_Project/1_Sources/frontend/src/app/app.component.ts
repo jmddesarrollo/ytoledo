@@ -148,6 +148,8 @@ export class AppComponent implements OnInit, OnDestroy {
           }
         ],
       },
+      // COMENTADO: Sección de Archivos obsoleta - ahora la gestión de archivos está integrada en las rutas
+      /*
       {
         label: 'Archivos',
         icon: 'pi pi-fw pi-file',
@@ -162,6 +164,7 @@ export class AppComponent implements OnInit, OnDestroy {
           }
         ],
       },
+      */
       {
         label: 'Sesión',
         icon: 'pi pi-fw pi-power-off',
@@ -291,7 +294,8 @@ export class AppComponent implements OnInit, OnDestroy {
       this.menuItemVisible('Gestión rutas', 'Gestión de archivos', true);
       this.menuItemVisible('Gestión de Socios', null, true);
       this.menuItemVisible('Gestión de Socios', 'Inscripción', true);
-      this.menuItemVisible('Archivos', null, true);
+      // COMENTADO: Sección de Archivos obsoleta - ahora la gestión de archivos está integrada en las rutas
+      // this.menuItemVisible('Archivos', null, true);
 
       return false;
     }
@@ -306,7 +310,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.menuItemVisible('Gestión rutas', 'Gestión de archivos', false); // Solo para usuarios logueados
     this.menuItemVisible('Gestión de Socios', null, true);
     this.menuItemVisible('Gestión de Socios', 'Inscripción', true);
-    this.menuItemVisible('Archivos', null, false);
+    // COMENTADO: Sección de Archivos obsoleta - ahora la gestión de archivos está integrada en las rutas
+    // this.menuItemVisible('Archivos', null, false);
   }
 
   /**
@@ -330,11 +335,14 @@ export class AppComponent implements OnInit, OnDestroy {
     this.menuItem('Acceso', 'Permisos', this.permission_permissions_manager);
     this.menuItem('Gestión rutas', 'Gestión de archivos', this.permission_routes_manager);
 
+    // COMENTADO: Sección de Archivos obsoleta - ahora la gestión de archivos está integrada en las rutas
+    /*
     const filesBool: boolean = this.menuItem('Archivos', 'Subir archivos', this.permission_files_manager);
 
     if (!filesBool) {
       this.menuItemVisible('Archivos', null, false);
     }
+    */
   }
 
   /**
