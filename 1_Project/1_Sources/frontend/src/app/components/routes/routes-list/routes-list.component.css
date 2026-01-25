@@ -32,6 +32,70 @@
   margin: 0.1rem;
 }
 
+/* Botones de acción específicos con mejores efectos hover */
+.action-button {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Botón Ver - Azul */
+.action-button.view-btn {
+  background-color: #2196F3 !important;
+  border: none;
+}
+
+.action-button.view-btn:hover {
+  background-color: #2196F3 !important;
+}
+
+.action-button.view-btn:hover i {
+  color: #E3F2FD !important;
+  transform: scale(1.1);
+}
+
+/* Botón Editar - Naranja */
+.action-button.edit-btn {
+  background-color: #FF9800 !important;
+  border: none;
+}
+
+.action-button.edit-btn:hover {
+  background-color: #FF9800 !important;
+}
+
+.action-button.edit-btn:hover i {
+  color: #FFF3E0 !important;
+  transform: scale(1.1);
+}
+
+/* Botón Eliminar - Rojo */
+.action-button.delete-btn {
+  background-color: #F44336 !important;
+  border: none;
+}
+
+.action-button.delete-btn:hover {
+  background-color: #F44336 !important;
+}
+
+.action-button.delete-btn:hover i {
+  color: #FFEBEE !important;
+  transform: scale(1.1);
+}
+
+/* Iconos de los botones */
+.action-button i {
+  color: white;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
 /* Loading spinner */
 .fa-spinner {
   color: #007ad9;

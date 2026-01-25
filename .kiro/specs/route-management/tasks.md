@@ -131,7 +131,19 @@
 - [x] 6.4.1 Crear `components/routes/next-route/` (Próxima ruta)
 - [x] 6.4.2 Crear `components/routes/routes-public/` (Rutas públicas)
 
-### 6.5 Testing Componentes
+### 6.6 Mejorar diseño de botones de acción
+- [x] 6.6.1 Mejorar estilos CSS de botones de acción en routes-list
+  - [x] 6.6.1.1 Mantener color de fondo del botón en hover
+  - [x] 6.6.1.2 Cambiar solo el color del icono en hover
+  - [x] 6.6.1.3 Asegurar que los iconos sean claros y descriptivos
+  - [x] 6.6.1.4 Mejorar tooltips para mejor accesibilidad
+  - [x] 6.6.1.5 Aplicar efectos de transición suaves
+- [x] 6.6.2 Configurar FontAwesome para mostrar iconos
+  - [x] 6.6.2.1 Agregar FontAwesome CDN al index.html
+  - [x] 6.6.2.2 Verificar que los iconos se muestren correctamente
+  - [x] 6.6.2.3 Probar iconos en todos los componentes que los usan
+
+### 6.7 Testing Componentes
 - [ ]* 6.5.1 Crear tests unitarios para routes-list.component
 - [ ]* 6.5.2 Crear tests unitarios para route-form.component
 - [ ]* 6.5.3 Crear tests unitarios para route-detail.component

@@ -6,8 +6,8 @@ USE `y-toledo`;
 
 -- Add file tracking fields to routes table
 ALTER TABLE `routes` 
-ADD COLUMN `file_track` VARCHAR(255) DEFAULT '' COMMENT 'Unique identifier for attached file',
-ADD COLUMN `filename_track` VARCHAR(255) DEFAULT '' COMMENT 'Original filename with extension for download';
+ADD COLUMN `file_track` VARCHAR(255) DEFAULT '' COMMENT 'Unique identifier for attached file'  AFTER `wikiloc_map_link`,
+ADD COLUMN `filename_track` VARCHAR(255) DEFAULT '' COMMENT 'Original filename with extension for download'  AFTER `file_track`;
 
 -- Update existing records to have empty strings (already default, but explicit)
 UPDATE `routes` SET `file_track` = '', `filename_track` = '' WHERE `file_track` IS NULL OR `filename_track` IS NULL;

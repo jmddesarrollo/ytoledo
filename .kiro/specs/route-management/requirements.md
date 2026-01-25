@@ -101,6 +101,12 @@ Desarrollar un sistema completo de gestión de rutas para el club de senderismo 
 - **AC-033**: Debe incluir ayuda contextual para cada campo
 - **AC-034**: Debe permitir guardar como borrador y publicar
 
+#### 5.3.3 Botones de Acción
+- **AC-043**: Los botones de acción deben mostrar iconos claros y descriptivos (ojo para ver, lápiz para editar, papelera para eliminar)
+- **AC-044**: Los botones deben mantener su visibilidad y color base al hacer hover
+- **AC-045**: Al hacer hover, solo el icono debe cambiar a un color más intenso o contrastante
+- **AC-046**: Los botones deben tener tooltips descriptivos para mejorar la accesibilidad
+
 ### 5.4 Integración con Sistema Existente
 
 #### 5.4.1 Arquitectura
@@ -140,6 +146,9 @@ Desarrollar un sistema completo de gestión de rutas para el club de senderismo 
 - **Rendimiento**: El sistema responde dentro de los tiempos establecidos
 - **Integración**: Se integra seamlessly con el sistema existente
 - **Mantenibilidad**: El código sigue las convenciones y patrones existentes
+
+### 4.4 Como usuario del sistema
+- **HU-011**: Como usuario, quiero que los botones de acción (consultar, editar, eliminar) tengan iconos claros y permanezcan visibles con efectos hover apropiados para una mejor experiencia de usuario.
 
 ## 8. Fuera del Alcance
 

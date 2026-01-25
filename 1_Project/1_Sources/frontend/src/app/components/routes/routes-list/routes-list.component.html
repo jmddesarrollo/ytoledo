@@ -127,24 +127,24 @@
                 <td>{{ formatDuration(route) }}</td>
                 <td>
                   <button 
-                    class="w3-button w3-small w3-blue w3-round w3-margin-right" 
+                    class="w3-button w3-small w3-round w3-margin-right action-button view-btn" 
                     (click)="viewRoute(route)"
-                    title="Ver detalles">
+                    title="Ver detalles de la ruta">
                     <i class="fa fa-eye"></i>
                   </button>
                   <button 
                     *ngIf="canEdit()"
-                    class="w3-button w3-small w3-orange w3-round w3-margin-right" 
+                    class="w3-button w3-small w3-round w3-margin-right action-button edit-btn" 
                     (click)="editRoute(route)"
-                    title="Editar">
-                    <i class="fa fa-edit"></i>
+                    title="Editar esta ruta">
+                    <i class="fa fa-pencil"></i>
                   </button>
                   <button 
                     *ngIf="canEdit()"
-                    class="w3-button w3-small w3-red w3-round" 
+                    class="w3-button w3-small w3-round action-button delete-btn" 
                     (click)="deleteRoute(route)"
-                    title="Eliminar">
-                    <i class="fa fa-trash"></i>
+                    title="Eliminar esta ruta">
+                    <i class="fa fa-trash-o"></i>
                   </button>
                 </td>
               </tr>
