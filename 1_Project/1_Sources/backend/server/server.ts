@@ -49,8 +49,11 @@ export default class Server {
         this.configureHttpRoutes();
         this.listenSockets();
 
-        this.app.use(express.static(path.resolve(__dirname, '../public')));
-        this.app.use('*', express.static(path.resolve(__dirname, '../public/index.html')));
+        // Servir archivos estáticos del frontend (solo en producción)
+        if (process.env.YTO_NODE_ENV === 'production') {
+            this.app.use(express.static(path.resolve(__dirname, '../public')));
+            this.app.use('*', express.static(path.resolve(__dirname, '../public/index.html')));
+        }
     }
 
     // Patrón Singleton para devolver la instancia si no ha sido creada, sino devuelve la ya creada

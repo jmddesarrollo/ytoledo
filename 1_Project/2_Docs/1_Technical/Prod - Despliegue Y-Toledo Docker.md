@@ -28,37 +28,39 @@ cd 1_Project/1_Sources/frontend
 ng build --configuration=production
 ```
 
-### 2. Backend - Preparación
-Asegurar que el backend está configurado para servir archivos estáticos:
-```typescript
-// En server/server.ts (ya configurado)
-this.app.use(express.static(path.resolve(__dirname, '../public')));
-this.app.use('*', express.static(path.resolve(__dirname, '../public/index.html')));
+### 2. Backend - Compilación
+En la carpeta frontend realizar compilación para producción:
+```bash
+cd 1_Project/1_Sources/backend
+tsc -w
 ```
 
 ### 3. Preparar archivos para despliegue
 ```bash
 # Crear carpeta temporal
 mkdir /tmp/ytoledo-deploy
+mkdir /tmp/ytoledo-deploy/files
 
 # Copiar backend
-cp -r 1_Project/1_Sources/backend/* /tmp/ytoledo-deploy/
-
-# Usar .env.production
-rm /tmp/ytoledo-deploy/.env
-mv /tmp/ytoledo-deploy/.env.prouduction /tmp/ytoledo-deploy/.env
+cd 1_Project/1_Sources/backend
+cp -r dist/* /tmp/ytoledo-deploy/
+cp package.json package-lock.json .env.production dockerfile /tmp/ytoledo-deploy/
+cp -r files/* /tmp/ytoledo-deploy/files/
 
 # Copiar frontend compilado a public
 mkdir -p /tmp/ytoledo-deploy/public
-cp -r 1_Project/1_Sources/frontend/dist/* /tmp/ytoledo-deploy/public/
+# Posicionarse en la raíz del proyecto
+cd 1_Project/1_Sources/
+cp -r frontend/dist/* /tmp/ytoledo-deploy/public/
+mv /tmp/ytoledo-deploy/.env.production /tmp/ytoledo-deploy/.env 
 
 # Verificar estructura
 ls -la /tmp/ytoledo-deploy/
 ls -la /tmp/ytoledo-deploy/public/
 ```
 
-### Servidor - Carga de archivos
-Comando para la gestión de archivos del servidor en linux:
+### 3. Servidor - Carga de archivos
+Comando por si se necesita realizar la gestión de archivos desde el servidor en linux:
 sftp://usuario@IP_DEL_SERVIDOR
 
 ### 4. Subir archivos al servidor
@@ -69,12 +71,20 @@ tar -czf ytoledo-deploy.tar.gz ytoledo-deploy/
 
 # Subir al servidor
 scp ytoledo-deploy.tar.gz usuario@servidor:/home/
+# Eliminar archivos temporales
+rm -rf ytoledo-deploy ytoledo-deploy.tar.gz
 
 # En el servidor, extraer archivos
+ssh usuario@servidor
 cd /home
 tar -xzf ytoledo-deploy.tar.gz
 rm -rf ytoledo/*  # Limpiar versión anterior
+# Crear carpeta ytoledo si no existe
+mkdir -p ytoledo
+# Mover archivos (normales y ocultos)
 mv ytoledo-deploy/* ytoledo/
+cp ytoledo-deploy/.env ytoledo/.env
+# Eliminar archivos temporales
 rm -rf ytoledo-deploy ytoledo-deploy.tar.gz
 ```
 
@@ -83,11 +93,11 @@ rm -rf ytoledo-deploy ytoledo-deploy.tar.gz
 # En el servidor, ir al directorio principal
 cd /home
 
-# Parar el contenedor actual
-docker-compose down ytoledo
+# Parar TODOS los servicios y limpiar
+docker-compose down
 
-# Reconstruir y levantar el contenedor
-docker-compose up -d --build ytoledo
+# Levantar TODOS los servicios con rebuild
+docker-compose up -d --build
 
 # Verificar que está funcionando
 docker-compose logs ytoledo
