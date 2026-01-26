@@ -23,7 +23,6 @@ export interface RouteWithFile {
   start_point: string;
   description: string;
   distance_km: number;
-  distance_m: number;
   elevation_gain: number;
   max_height: number;
   min_height: number;
@@ -87,7 +86,6 @@ export interface RouteData {
   start_point: string;
   description: string;
   distance_km: number;
-  distance_m: number;
   elevation_gain: number;
   max_height: number;
   min_height: number;

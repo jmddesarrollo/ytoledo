@@ -26,10 +26,6 @@ module.exports = (sequelize: any, DataTypes: any) => {
             type: DataTypes.DECIMAL(5,2),
             allowNull: false
         },
-        distance_m: {
-            type: DataTypes.INTEGER(11),
-            allowNull: false
-        },
         elevation_gain: {
             type: DataTypes.INTEGER(11),
             allowNull: false

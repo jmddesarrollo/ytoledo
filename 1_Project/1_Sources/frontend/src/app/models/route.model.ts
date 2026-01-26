@@ -6,7 +6,6 @@ export class RouteModel {
         public startPoint: string,
         public description: string,
         public distanceKm: number,
-        public distanceM: number,
         public elevationGain: number,           
         public maxHeight: number,
         public minHeight: number,

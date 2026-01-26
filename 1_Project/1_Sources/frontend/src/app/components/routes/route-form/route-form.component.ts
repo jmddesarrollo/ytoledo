@@ -110,7 +110,6 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       start_point: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', Validators.maxLength(1000)],
       distance_km: ['', [Validators.required, Validators.min(0.1), Validators.max(999.99)]],
-      distance_m: ['', [Validators.required, Validators.min(1)]],
       elevation_gain: ['', [Validators.required, Validators.min(0)]],
       max_height: ['', [Validators.required, Validators.min(0)]],
       min_height: ['', [Validators.required, Validators.min(0)]],
@@ -322,7 +321,6 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       start_point: route.start_point || '',
       description: route.description || '',
       distance_km: route.distance_km !== null && route.distance_km !== undefined ? route.distance_km : '',
-      distance_m: route.distance_m !== null && route.distance_m !== undefined ? route.distance_m : '',
       elevation_gain: route.elevation_gain !== null && route.elevation_gain !== undefined ? route.elevation_gain : '',
       max_height: route.max_height !== null && route.max_height !== undefined ? route.max_height : '',
       min_height: route.min_height !== null && route.min_height !== undefined ? route.min_height : '',
@@ -372,9 +370,6 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       // Convertir valores numéricos - manejar correctamente los valores cero
       if (formData.distance_km !== null && formData.distance_km !== undefined && formData.distance_km !== '') {
         formData.distance_km = parseFloat(formData.distance_km);
-      }
-      if (formData.distance_m !== null && formData.distance_m !== undefined && formData.distance_m !== '') {
-        formData.distance_m = parseInt(formData.distance_m);
       }
       if (formData.elevation_gain !== null && formData.elevation_gain !== undefined && formData.elevation_gain !== '') {
         formData.elevation_gain = parseInt(formData.elevation_gain);
@@ -429,7 +424,6 @@ export class RouteFormComponent implements OnInit, OnDestroy {
   get start_point() { return this.routeForm.get('start_point'); }
   get description() { return this.routeForm.get('description'); }
   get distance_km() { return this.routeForm.get('distance_km'); }
-  get distance_m() { return this.routeForm.get('distance_m'); }
   get elevation_gain() { return this.routeForm.get('elevation_gain'); }
   get max_height() { return this.routeForm.get('max_height'); }
   get min_height() { return this.routeForm.get('min_height'); }
@@ -470,7 +464,6 @@ export class RouteFormComponent implements OnInit, OnDestroy {
       'start_point': 'Punto de inicio',
       'description': 'Descripción',
       'distance_km': 'Distancia (km)',
-      'distance_m': 'Distancia (m)',
       'elevation_gain': 'Desnivel positivo',
       'max_height': 'Altura máxima',
       'min_height': 'Altura mínima',

@@ -142,7 +142,6 @@ export default class RouteService {
         if (route.start_point !== undefined) routeDB.start_point = route.start_point;
         if (route.description !== undefined) routeDB.description = route.description;
         if (route.distance_km !== undefined) routeDB.distance_km = route.distance_km;
-        if (route.distance_m !== undefined) routeDB.distance_m = route.distance_m;
         if (route.elevation_gain !== undefined) routeDB.elevation_gain = route.elevation_gain;
         if (route.max_height !== undefined) routeDB.max_height = route.max_height;
         if (route.min_height !== undefined) routeDB.min_height = route.min_height;
@@ -212,7 +211,6 @@ export default class RouteService {
                     start_point: route.start_point,
                     description: route.description,
                     distance_km: route.distance_km,
-                    distance_m: route.distance_m,
                     elevation_gain: route.elevation_gain,
                     max_height: route.max_height,
                     min_height: route.min_height,
@@ -284,10 +282,6 @@ export default class RouteService {
         // Validar campos numéricos obligatorios
         if (route.distance_km === undefined || route.distance_km === null || isNaN(route.distance_km) || route.distance_km < 0) {
             throw new ControlException('La distancia en kilómetros es obligatoria y debe ser un número positivo', 400);
-        }
-
-        if (route.distance_m === undefined || route.distance_m === null || isNaN(route.distance_m) || route.distance_m < 0) {
-            throw new ControlException('La distancia en metros es obligatoria y debe ser un número positivo', 400);
         }
 
         if (route.elevation_gain === undefined || route.elevation_gain === null || isNaN(route.elevation_gain) || route.elevation_gain < 0) {

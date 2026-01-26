@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS `y-toledo`.`routes` (
   `start_point` VARCHAR(100) NOT NULL,
   `description` TEXT,
   `distance_km` DECIMAL(5,2) NOT NULL,
-  `distance_m` INT(11) NOT NULL,
   `elevation_gain` INT(11) NOT NULL,
   `max_height` INT(11) NOT NULL,
   `min_height` INT(11) NOT NULL,

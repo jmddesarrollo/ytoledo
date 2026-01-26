@@ -139,20 +139,7 @@
               </div>
             </div>
 
-            <!-- Distancia metros -->
-            <div class="w3-col l3 m6 s12">
-              <label class="field-label">Distancia (m) *</label>
-              <input 
-                class="w3-input w3-border w3-round"
-                [ngClass]="{'w3-border-red': isFieldInvalid('distance_m')}"
-                type="number" 
-                min="1"
-                formControlName="distance_m"
-                placeholder="0">
-              <div *ngIf="isFieldInvalid('distance_m')" class="error-message">
-                {{ getFieldError('distance_m') }}
-              </div>
-            </div>
+
 
             <!-- Tipo de ruta -->
             <div class="w3-col l3 m6 s12">
