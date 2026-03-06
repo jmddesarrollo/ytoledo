@@ -35,23 +35,24 @@ Por ejemplo generar 'preproduccion'. Descargar archivos key y cert que se encuen
     cerbot-auto
 ~~~
 
-Pasos previos que debe cerciorarse antes de usar certificado :  
-* El dominio o subdominio ya deben redireccionar a nuestro servidor
-* Se debe de detener el proceso con el gestor de procesos PM2
-~~~
-    sudo pm2 stop {processName}
-~~~
 
 * El puerto 80 debe estar libre para que la organización del certificado se pueda conectar y validar que poseemos ese dominio. Para obtener el certificado, hay que agregar todos los dominios y subdominios requeridos, para ello por ssh se debe dar el comando:
 ~~~
-    certbot-auto certonly --standalone -d {dominio.com} -d {www.dominio.com}
+# 1. Detener servicios
+docker-compose down
+
+# 2. Renovar certificados
+sudo certbot renew --standalone
+
+# 3. Reiniciar servicios
+docker-compose up -d --build
 ~~~
 
 ** Es importante dar un email para poder recibir notificaciones del estado del certificado, cuando va a caducar, etc.
 
 * Con el siguiente comando se puede consultar los certificados solicitados en nuestro servidor con información sobre los dominios, caducidad y alojamiento:
 ~~~
-    certbot-auto certificates
+    sudo certbot certificates
 ~~~
 
 * Asignación de permisos, tanto en archivos físicos como en los enlaces simbólicos del certificado y clave privada según path del paso previo:

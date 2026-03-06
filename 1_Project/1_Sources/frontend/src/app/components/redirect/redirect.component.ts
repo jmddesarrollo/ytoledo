@@ -20,7 +20,7 @@ export class RedirectComponent implements OnInit {
     if (this.websocketService.sessionOn) {
       this.router.navigate(['/my-profile']);
     } else {
-      this.router.navigate(['/route-detail']);
+      this.router.navigate(['/next-route']);
     }    
   }
 
