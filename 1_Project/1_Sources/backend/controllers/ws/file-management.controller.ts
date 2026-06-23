@@ -34,7 +34,7 @@ export class FileManagementController {
             this.mode = 'reading';
 
             // Check authorization
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             // Validate request parameters
@@ -113,7 +113,7 @@ export class FileManagementController {
             this.mode = 'reading';
 
             // Check authorization
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             // Get routes with attached files
@@ -145,7 +145,7 @@ export class FileManagementController {
             this.mode = 'writing';
 
             // Check authorization
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             // Validate input
@@ -248,7 +248,7 @@ export class FileManagementController {
             this.mode = 'writing';
 
             // Check authorization
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             // Validate input
@@ -289,7 +289,7 @@ export class FileManagementController {
             this.mode = 'reading';
 
             // Check authorization
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             // Validate input
@@ -339,7 +339,7 @@ export class FileManagementController {
             this.mode = 'reading';
 
             // Check authorization
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             // Validate input
@@ -390,7 +390,7 @@ export class FileManagementController {
             this.mode = 'writing';
 
             // Check authorization
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             // Perform cleanup

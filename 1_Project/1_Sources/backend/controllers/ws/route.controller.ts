@@ -89,7 +89,7 @@ export class RouteController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
             
             // Obtener el user_id del token decodificado (está en tokenDecoded.user.id)
@@ -136,7 +136,7 @@ export class RouteController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const routePrev = await this.routeService.getRoute(route.id);
@@ -169,7 +169,7 @@ export class RouteController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);           
 
             await this.routeService.deleteRoute(routeId, t);

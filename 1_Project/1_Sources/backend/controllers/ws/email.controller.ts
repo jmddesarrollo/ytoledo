@@ -34,7 +34,7 @@ export class EmailController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.authorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.authorizedMiddleware.checkToken(req.token, socket);
             await this.authorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const user = await this.userService.getUser(userId);
@@ -62,7 +62,7 @@ export class EmailController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.authorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.authorizedMiddleware.checkToken(req.token, socket);
             await this.authorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const user = await this.userService.getUser(userId);
@@ -118,7 +118,7 @@ export class EmailController {
         try {
             this.mode = 'writing';
     
-            const tokenDecoded = this.authorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.authorizedMiddleware.checkToken(req.token, socket);
             await this.authorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
     
             const user = await this.userService.getUser(userId);
@@ -144,7 +144,7 @@ export class EmailController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.authorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.authorizedMiddleware.checkToken(req.token, socket);
             await this.authorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const data = await this.emailService.sendEmailUserDelete(user);

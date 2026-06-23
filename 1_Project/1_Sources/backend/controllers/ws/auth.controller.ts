@@ -31,7 +31,8 @@ export class AuthController {
         let t = await sequelize.transaction(); 
 
         try {
-            const data = await this.authService.login(req.userName, req.password, t);
+            const ip = socket.handshake && socket.handshake.address ? socket.handshake.address : 'unknown';
+            const data = await this.authService.login(req.userName, req.password, t, ip);
 
             t.commit();
 
@@ -65,7 +66,7 @@ export class AuthController {
      */
     public async getMyProfile(req: any, socket: Socket) {
         try {
-            const decoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const decoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             const user = await this.userService.getUser(decoded.user.id);
             user.password = undefined;
 
@@ -86,7 +87,7 @@ export class AuthController {
      */
     public async renewToken(req: any, socket: Socket) {
         try {
-            const decoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const decoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
 
             req.user = decoded.user;
             const data = await this.authService.renewToken(req);
@@ -115,9 +116,10 @@ export class AuthController {
             if (!user) { throw new ControlException('El usuario no está registrado', 500); }
             if (!user.active) { throw new ControlException('El usuario está deshabilitado', 500); }
 
-            req.user = { id: user.id, username: user.username };
+            req.user = { id: user.id, username: user.username, role_id: user.role_id };
 
-            const token = await this.authService.recoveryToken(req);
+            const ip = socket.handshake && socket.handshake.address ? socket.handshake.address : 'unknown';
+            const token = await this.authService.recoveryToken(req, ip);
 
             const route = config.url + '/recovery/' + token;
 
@@ -167,7 +169,7 @@ export class AuthController {
 
     public async validateTokenRecovery(req: any, socket: Socket) {
         try {
-            const decoded = this.AuthorizedMiddleware.checkToken(req.tokenRecovery, socket, true);
+            const decoded = await this.AuthorizedMiddleware.checkToken(req.tokenRecovery, socket, true);
 
             if (!decoded.user) { throw new ControlException('No ha sido encontrado el usuario', 500); }
 
@@ -188,4 +190,3 @@ export class AuthController {
     }
 
 }
-

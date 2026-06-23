@@ -27,7 +27,7 @@ export default class RoleController {
      */        
     public async getRoles(req: any, socket: Socket ) {
         try {
-            this.AuthorizedMiddleware.checkToken(req.token, socket);
+            await this.AuthorizedMiddleware.checkToken(req.token, socket);
                    
             const data = await this.roleService.getRoles();            
             
@@ -46,7 +46,7 @@ export default class RoleController {
      */        
     public async getRole(req: any, socket: Socket ) {
         try {      
-            this.AuthorizedMiddleware.checkToken(req.token, socket);            
+            await this.AuthorizedMiddleware.checkToken(req.token, socket);            
 
             const data = await this.roleService.getRole(req.id);
             
@@ -72,7 +72,7 @@ export default class RoleController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
             
             const data = await this.roleService.addRole(role, t);
@@ -104,7 +104,7 @@ export default class RoleController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const data = await this.roleService.editRole(role, t);
@@ -136,7 +136,7 @@ export default class RoleController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             if (roleId == config.roleAdmin) { throw new ControlException('El rol Administrador no se permite eliminar', 500); }

@@ -89,4 +89,54 @@ export default class UsersDAL {
     
         return userDB;
     }
+
+    /**
+     * Guarda el hash del token de recuperación activo del usuario.
+     */
+    public saveRecoveryToken(userId: number, tokenHash: string, createdAt: Date) {
+        const result = Users.update(
+            {
+                recovery_token_hash: tokenHash,
+                recovery_token_created_at: createdAt,
+            },
+            { where: { id: userId } }
+        ).catch(() => { throw new ControlException('Ha ocurrido un error al guardar el token de recuperación', 500); });
+
+        return result;
+    }
+
+    /**
+     * Elimina el token de recuperación activo del usuario.
+     */
+    public clearRecoveryToken(userId: number) {
+        const result = Users.update(
+            {
+                recovery_token_hash: null,
+                recovery_token_created_at: null,
+            },
+            { where: { id: userId } }
+        ).catch(() => { throw new ControlException('Ha ocurrido un error al limpiar el token de recuperación', 500); });
+
+        return result;
+    }
+
+    /**
+     * Consulta los datos del token de recuperación activo del usuario.
+     */
+    public async getRecoveryTokenData(userId: number) {
+        const user = await Users.findOne({
+            where: { id: userId },
+            attributes: ['recovery_token_hash', 'recovery_token_created_at'],
+            raw: true,
+        }).catch(() => { throw new ControlException('Ha ocurrido un error al consultar el token de recuperación', 500); });
+
+        if (!user) {
+            return null;
+        }
+
+        return {
+            hash: user.recovery_token_hash,
+            createdAt: user.recovery_token_created_at,
+        };
+    }
 }

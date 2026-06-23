@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 
 import ControlException from '../../utils/controlException';
+import SecurityLogger from '../../utils/securityLogger';
 
 const jwt = require('jsonwebtoken');
 
@@ -13,6 +14,18 @@ export default class AuthorizedMiddleware {
 
     constructor() {}
 
+    private getSocketIp(socket: Socket): string {
+        return socket.handshake && socket.handshake.address ? socket.handshake.address : 'unknown';
+    }
+
+    private getTokenUsername(tokenDecoded: any): string {
+        if (tokenDecoded && tokenDecoded.user) {
+            return tokenDecoded.user.username || String(tokenDecoded.user.id || 'unknown');
+        }
+
+        return 'unknown';
+    }
+
     // =====================================
     // Verificar token - Middleware
     // =====================================
@@ -20,23 +33,27 @@ export default class AuthorizedMiddleware {
      * Check pensado por si se usa middleware ('use') en server.ts antes del connect     
      */
     public checkTokenNameSpace = (socket: Socket, next: Function) => {
-        if (socket.handshake.query && !socket.handshake.query.token) {            
-            next(new Error('El usuario o contraseña no son correctos'));
+        if (socket.handshake.query && !socket.handshake.query.token) {
+            SecurityLogger.logAccessDenied(this.getSocketIp(socket), 'unknown', 'Token ausente');
+            return next(new Error('El usuario o contraseña no son correctos'));
         }
             
         const token = socket.handshake.query.token;
 
         if (!token) { 
-            next(new Error('El usuario no ha iniciado sesión')); 
+            SecurityLogger.logAccessDenied(this.getSocketIp(socket), 'unknown', 'Token ausente');
+            return next(new Error('El usuario no ha iniciado sesión')); 
         }
     
         jwt.verify(token, process.env.YTO_SEED, (err: any, decoded: any) => {
             if (err) {
                 if (err.name && err.name === 'TokenExpiredError') {
-                    next(new Error('El tiempo de conexión ha expirado'));                                      
+                    SecurityLogger.logTokenExpired(this.getSocketIp(socket));
+                    return next(new Error('El tiempo de conexión ha expirado'));                                      
                 }
 
-                next(new Error('El usuario o contraseña no son correctos'));               
+                SecurityLogger.logTokenInvalid(this.getSocketIp(socket));
+                return next(new Error('El usuario o contraseña no son correctos'));               
             }
     
             socket.handshake.query.decoded = decoded;
@@ -48,28 +65,46 @@ export default class AuthorizedMiddleware {
     /**
      * Verificar token      
      */
-    public checkToken (token: string, socket: Socket, recovery: boolean = false): any {        
-        var data = null;
+    public async checkToken (token: string, socket: Socket, recovery: boolean = false): Promise<any> {        
         if (!token) {
             socket.emit("auth/logout", {});
+            SecurityLogger.logUnauthorizedAccess(this.getSocketIp(socket), 'unknown', 'Token ausente');
             throw new ControlException('El usuario no tiene inicio de sesión', 401); 
         }
-    
-        jwt.verify(token, process.env.YTO_SEED, (err: any, decoded: any) => {
-            if (err) {
-                if (err.name && err.name === 'TokenExpiredError') {
-                    socket.emit("auth/logout", {});
-                    if (recovery) throw new ControlException('El enlace de recuperación de la contraseña ha expirado', 401);
-                    throw new ControlException('El tiempo de conexión ha expirado', 401);
-                }
-                socket.emit("auth/logout", {});
-                throw new ControlException('El usuario o contraseña no son correctos', 401);                 
-            }
-    
-            data = decoded;
-        });
 
-        return data;
+        try {
+            const decoded = jwt.verify(token, process.env.YTO_SEED);
+            const user = await this.userService.getUser(decoded.user.id);
+
+            if (!user || !user.active) {
+                socket.emit("auth/logout", {});
+                SecurityLogger.logAccessDenied(this.getSocketIp(socket), this.getTokenUsername(decoded), 'Usuario inactivo o inexistente');
+                throw new ControlException('El usuario no tiene inicio de sesión', 401);
+            }
+
+            decoded.user = {
+                id: user.id,
+                username: user.username,
+                role_id: user.role_id,
+            };
+
+            return decoded;
+        } catch (err: any) {
+            if (err instanceof ControlException) {
+                throw err;
+            }
+
+            if (err.name && err.name === 'TokenExpiredError') {
+                socket.emit("auth/logout", {});
+                SecurityLogger.logTokenExpired(this.getSocketIp(socket));
+                if (recovery) throw new ControlException('El enlace de recuperación de la contraseña ha expirado', 401);
+                throw new ControlException('El tiempo de conexión ha expirado', 401);
+            }
+
+            socket.emit("auth/logout", {});
+            SecurityLogger.logTokenInvalid(this.getSocketIp(socket));
+            throw new ControlException('El usuario o contraseña no son correctos', 401);
+        }
     }
 
 
@@ -94,6 +129,7 @@ export default class AuthorizedMiddleware {
 
         if (!boolPermission) {
             socket.emit("auth/notAllowed", {mode});
+            SecurityLogger.logAccessDenied(this.getSocketIp(socket), this.getTokenUsername(tokenDecoded), permissionType);
             throw new ControlException('El usuario no tiene permiso para la petición', 405); 
         }
 
@@ -124,6 +160,7 @@ export default class AuthorizedMiddleware {
 
         if (!boolPermission) {
             socket.emit("auth/notAllowed", {mode});
+            SecurityLogger.logAccessDenied(this.getSocketIp(socket), this.getTokenUsername(tokenDecoded), permissionTypes.join(','));
             throw new ControlException('El usuario no tiene permiso para la petición', 405); 
         }
 

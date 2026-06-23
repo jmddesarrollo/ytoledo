@@ -1,5 +1,8 @@
 import express from 'express';
 import http from 'http';
+import cors from 'cors';
+import RateLimiter from './rateLimiter';
+import { getAllowedCorsOrigins, validateAppSeed } from './securityConfig';
 
 // Router
 import { AuthRoutes } from '../routes/ws/auth.route';
@@ -41,10 +44,21 @@ export default class Server {
         this.port = Number(process.env.YTO_SERVER_PORT);
         this.url = process.env.YTO_SERVER_URL || '0.0.0.0';
 
+        this.validateConfiguration();
+        const corsOrigins = this.getAllowedCorsOrigins();
+
+        this.app.use(cors({ origin: corsOrigins, credentials: true }));
+
         this.httpServer = new http.Server(this.app);
 
         // Conexión Socket como Servidor
-        this.io = require("socket.io")(this.httpServer, { path: "/" + process.env.YTO_SERVICE_NAME });
+        this.io = require("socket.io")(this.httpServer, {
+            path: "/" + process.env.YTO_SERVICE_NAME,
+            cors: {
+                origin: corsOrigins,
+                credentials: true,
+            },
+        });
 
         this.configureHttpRoutes();
         this.listenSockets();
@@ -54,6 +68,14 @@ export default class Server {
             this.app.use(express.static(path.resolve(__dirname, '../public')));
             this.app.use('*', express.static(path.resolve(__dirname, '../public/index.html')));
         }
+    }
+
+    private validateConfiguration(): void {
+        validateAppSeed(process.env.APP_SEED || process.env.YTO_SEED, process.env.YTO_NODE_ENV);
+    }
+
+    private getAllowedCorsOrigins(): string[] {
+        return getAllowedCorsOrigins(process.env.APP_CORS_ORIGINS || process.env.YTO_CORS_ORIGINS, process.env.YTO_NODE_ENV);
     }
 
     // Patrón Singleton para devolver la instancia si no ha sido creada, sino devuelve la ya creada
@@ -78,6 +100,11 @@ export default class Server {
         console.log('VERSION NODE: ' + process.version);
         console.log('*********');
         console.log('Escuchando conexiones');
+
+        if (process.env.YTO_NODE_ENV === 'production' || process.env.APP_RATE_LIMIT_ENABLED === 'true') {
+            const rateLimiter = new RateLimiter();
+            this.io.use(rateLimiter.middleware);
+        }
 
         this.io.on('connect', (socket: any) => {
             console.log('Cliente conectado v2: ' + socket.id);

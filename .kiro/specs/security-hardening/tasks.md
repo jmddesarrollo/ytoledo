@@ -6,14 +6,14 @@ Implementación incremental del endurecimiento de seguridad de App Base. Las tar
 
 ## Tareas
 
-- [ ] 1. Crear utilidades base de seguridad
-  - [ ] 1.1 Implementar `utils/inputSanitizer.ts`
+- [x] 1. Crear utilidades base de seguridad
+  - [x] 1.1 Implementar `utils/inputSanitizer.ts`
     - Crear clase `InputSanitizer` con métodos: `sanitizeString(value, maxLength?)`, `validatePositiveInt(value, fieldName)`, `requireField(value, fieldName)`, `sanitizeObject(obj, schema)`
     - `sanitizeString` debe escapar `<`, `>`, `"`, `'`, `&` y truncar si supera `maxLength`
     - `requireField` y `validatePositiveInt` deben lanzar `ControlException` con código 400
     - _Requisitos: 9.1, 9.2, 9.3, 9.4_
 
-  - [ ] 1.2 Escribir tests de propiedad para InputSanitizer
+  - [x] 1.2 Escribir tests de propiedad para InputSanitizer
     - **Propiedad 13: El InputSanitizer escapa todos los caracteres HTML peligrosos**
     - **Valida: Requisitos 9.1**
     - **Propiedad 14: El InputSanitizer hace cumplir los límites de longitud y tipos**
@@ -21,31 +21,31 @@ Implementación incremental del endurecimiento de seguridad de App Base. Las tar
     - Instalar `fast-check` y `jest` + `ts-jest` si no están presentes
     - Mínimo 100 iteraciones por propiedad
 
-  - [ ] 1.3 Implementar `utils/securityLogger.ts`
+  - [x] 1.3 Implementar `utils/securityLogger.ts`
     - Crear enum `SecurityEventType` con todos los tipos de evento definidos en el diseño
     - Crear interfaz `SecurityLogEntry` con campos: `timestamp`, `event`, `username?`, `ip?`, `result`, `details?`
     - Implementar método `log(entry)` que escribe en `data/logs/security.log` en formato JSON por línea
     - Reutilizar el `Logger` existente para la escritura de archivos
     - _Requisitos: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8_
 
-  - [ ] 1.4 Escribir tests de propiedad para SecurityLogger
+  - [x] 1.4 Escribir tests de propiedad para SecurityLogger
     - **Propiedad 12: Cada entrada del SecurityLogger contiene todos los campos requeridos**
     - **Valida: Requisitos 8.1, 8.8**
     - Verificar que timestamp es ISO 8601 válido, event es SecurityEventType válido, result es SUCCESS o FAILURE
 
-- [ ] 2. Configuración y arranque seguro del servidor
-  - [ ] 2.1 Añadir validación de `APP_SEED` en `server/server.ts`
+- [x] 2. Configuración y arranque seguro del servidor
+  - [x] 2.1 Añadir validación de `APP_SEED` en `server/server.ts`
     - Crear método privado `validateConfiguration()` llamado en el constructor antes de inicializar Socket.IO
     - En producción: verificar longitud >= 32 y presencia de letras + números + caracteres especiales
     - En desarrollo: emitir `console.warn` si no cumple requisitos sin detener el arranque
     - _Requisitos: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-  - [ ] 2.2 Escribir tests de propiedad para validación de APP_SEED
+  - [x] 2.2 Escribir tests de propiedad para validación de APP_SEED
     - **Propiedad 10: La validación de APP_SEED rechaza cualquier secreto débil en producción**
     - **Valida: Requisitos 6.1, 6.2, 6.3**
     - Generar strings aleatorios y verificar que la función acepta/rechaza correctamente
 
-  - [ ] 2.3 Implementar restricción de CORS en `server/server.ts`
+  - [x] 2.3 Implementar restricción de CORS en `server/server.ts`
     - Leer `APP_CORS_ORIGINS` del entorno y parsear como lista separada por comas
     - Reemplazar `origin: '*'` en la configuración de Express CORS y Socket.IO CORS
     - En desarrollo sin `APP_CORS_ORIGINS`: usar `['http://localhost:4200']` por defecto
@@ -53,13 +53,13 @@ Implementación incremental del endurecimiento de seguridad de App Base. Las tar
     - Añadir `APP_CORS_ORIGINS` a `.env.template` con valor de ejemplo
     - _Requisitos: 1.1, 1.2, 1.3, 1.4_
 
-  - [ ] 2.4 Escribir tests de propiedad para validación de CORS
+  - [x] 2.4 Escribir tests de propiedad para validación de CORS
     - **Propiedad 1: Validación de CORS es exhaustiva y correcta**
     - **Valida: Requisitos 1.1, 1.2**
     - Generar listas de orígenes y orígenes de prueba, verificar aceptación/rechazo
 
-- [ ] 3. Implementar Rate Limiting en WebSocket
-  - [ ] 3.1 Crear `server/rateLimiter.ts`
+- [x] 3. Implementar Rate Limiting en WebSocket
+  - [x] 3.1 Crear `server/rateLimiter.ts`
     - Implementar `RateLimiter` con `Map<socketId, { count, windowStart }>` en memoria
     - Método `checkLimit(socketId, eventName)`: retorna `true` si dentro del límite, `false` si lo supera
     - Límite general configurable via `APP_RATE_LIMIT_MAX_EVENTS` y `APP_RATE_LIMIT_WINDOW_MS`
@@ -68,13 +68,13 @@ Implementación incremental del endurecimiento de seguridad de App Base. Las tar
     - Añadir las 4 variables de entorno a `.env.template`
     - _Requisitos: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-  - [ ] 3.2 Escribir tests de propiedad para RateLimiter
+  - [x] 3.2 Escribir tests de propiedad para RateLimiter
     - **Propiedad 2: El contador de rate limiting refleja fielmente los eventos recibidos**
     - **Valida: Requisitos 2.1, 2.2**
     - **Propiedad 3: El límite de login es siempre más restrictivo que el límite general**
     - **Valida: Requisito 2.3**
 
-  - [ ] 3.3 Registrar RateLimiter como middleware en `server/server.ts`
+  - [x] 3.3 Registrar RateLimiter como middleware en `server/server.ts`
     - Añadir `this.io.use(rateLimiter.middleware)` en el método `listenSockets()`
     - Solo activar en producción o si `APP_RATE_LIMIT_ENABLED=true`
     - _Requisitos: 2.4_
@@ -82,54 +82,54 @@ Implementación incremental del endurecimiento de seguridad de App Base. Las tar
 - [ ] 4. Checkpoint — Verificar que el servidor arranca correctamente
   - Asegurarse de que todos los tests pasan, el servidor arranca sin errores con la nueva configuración y los logs de seguridad se escriben correctamente. Consultar al usuario si surgen dudas.
 
-- [ ] 5. Hardening de autenticación y JWT
-  - [ ] 5.1 Reducir payload JWT en `services/user/auth.bll.ts`
+- [x] 5. Hardening de autenticación y JWT
+  - [x] 5.1 Reducir payload JWT en `services/user/auth.bll.ts`
     - Modificar el método `login()` para generar el token con payload mínimo: `{ id, username, role_id }`
     - Modificar el método `renewToken()` para usar el mismo payload mínimo
     - Modificar el método `recoveryToken()` para usar payload mínimo
     - _Requisitos: 3.1, 3.2_
 
-  - [ ] 5.2 Escribir tests de propiedad para payload JWT mínimo
+  - [x] 5.2 Escribir tests de propiedad para payload JWT mínimo
     - **Propiedad 4: El payload JWT contiene exactamente los campos mínimos requeridos**
     - **Valida: Requisitos 3.1, 3.2**
     - Generar usuarios aleatorios y verificar que el token generado no contiene campos sensibles
 
-  - [ ] 5.3 Añadir logging de seguridad en `auth.bll.ts` y `authorized.middleware.ts`
+  - [x] 5.3 Añadir logging de seguridad en `auth.bll.ts` y `authorized.middleware.ts`
     - En `auth.bll.ts`: llamar a `SecurityLogger` en login fallido (contraseña incorrecta), bloqueo de cuenta, login exitoso
     - En `authorized.middleware.ts`: llamar a `SecurityLogger` en token inválido, token expirado, acceso denegado
     - Extraer la IP del socket desde `socket.handshake.address`
     - _Requisitos: 8.1, 8.2, 8.3, 8.4_
 
-  - [ ] 5.4 Actualizar `authorized.middleware.ts` para consultar BD en verificación de token
+  - [x] 5.4 Actualizar `authorized.middleware.ts` para consultar BD en verificación de token
     - En `checkToken()` y `isAllowed()`: después de verificar el JWT, consultar `UsersDAL.getUser(decoded.user.id)` para obtener datos actualizados
     - Verificar que el usuario sigue activo en BD antes de proceder
     - _Requisitos: 3.3_
 
 - [ ] 6. Migración de base de datos y modelo de usuario
-  - [ ] 6.1 Actualizar `models/user.model.ts`
+  - [x] 6.1 Actualizar `models/user.model.ts`
     - Cambiar `attempts` de `DataTypes.INTEGER(1)` a `DataTypes.INTEGER(11)`
     - Añadir campo `recovery_token_hash: DataTypes.STRING(64), allowNull: true`
     - Añadir campo `recovery_token_created_at: DataTypes.DATE, allowNull: true`
     - _Requisitos: 10.1, 5.2_
 
-  - [ ] 6.2 Escribir test de ejemplo para el campo attempts
+  - [x] 6.2 Escribir test de ejemplo para el campo attempts
     - Verificar que el modelo acepta valores > 9 sin error de validación
     - **Propiedad 15: El campo attempts nunca toma valores negativos**
     - **Valida: Requisito 10.2**
 
-  - [ ] 6.3 Crear script de migración SQL
+  - [x] 6.3 Crear script de migración SQL
     - Crear archivo `1_Project/4_Database/migrations/001_security_hardening.sql` con los ALTER TABLE del diseño
     - Incluir comentarios explicativos y verificación de que las columnas no existen antes de añadirlas
     - _Requisitos: 10.1, 5.2_
 
 - [-] 7. Invalidación de tokens de recuperación de contraseña
-  - [ ] 7.1 Actualizar `services/user/users.dal.ts` para gestionar tokens de recuperación
+  - [x] 7.1 Actualizar `services/user/users.dal.ts` para gestionar tokens de recuperación
     - Añadir método `saveRecoveryToken(userId, tokenHash, createdAt)`: guarda el hash en BD
     - Añadir método `clearRecoveryToken(userId)`: limpia `recovery_token_hash` y `recovery_token_created_at`
     - Añadir método `getRecoveryTokenData(userId)`: retorna `{ hash, createdAt }` del token activo
     - _Requisitos: 5.2, 5.3, 5.4, 5.5_
 
-  - [ ] 7.2 Actualizar `services/user/auth.bll.ts` para invalidar tokens anteriores
+  - [x] 7.2 Actualizar `services/user/auth.bll.ts` para invalidar tokens anteriores
     - En `recoveryToken()`: generar token, calcular `SHA-256(token)`, llamar a `saveRecoveryToken()` (invalida el anterior automáticamente)
     - Crear nuevo método `validateRecoveryToken(userId, token)`: obtiene hash de BD, compara con `SHA-256(token)`, verifica que no ha expirado
     - Crear nuevo método `consumeRecoveryToken(userId)`: llama a `clearRecoveryToken()` tras cambio de contraseña exitoso

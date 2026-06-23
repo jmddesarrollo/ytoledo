@@ -1,6 +1,18 @@
+/**
+ * Tests de propiedad para InputSanitizer
+ * Feature: security-hardening
+ *
+ * Propiedad 13: El InputSanitizer escapa todos los caracteres HTML peligrosos
+ * Valida: Requisito 9.1
+ *
+ * Propiedad 14: El InputSanitizer hace cumplir los límites de longitud y tipos
+ * Valida: Requisitos 9.2, 9.3, 9.4
+ */
 import * as fc from 'fast-check';
 import InputSanitizer from '../../utils/inputSanitizer';
 import ControlException from '../../utils/controlException';
+
+const HTML_CHARS = ['<', '>', '"', "'", '&'];
 
 describe('InputSanitizer', () => {
     describe('sanitizeString', () => {
@@ -17,17 +29,18 @@ describe('InputSanitizer', () => {
             expect(InputSanitizer.sanitizeString(true)).toBe('true');
         });
 
-        it('escapa caracteres HTML', () => {
+        it('escapa caracteres HTML peligrosos en ejemplos concretos', () => {
             expect(InputSanitizer.sanitizeString('<script>alert(1)</script>')).toBe('&lt;script&gt;alert(1)&lt;/script&gt;');
             expect(InputSanitizer.sanitizeString('foo & bar')).toBe('foo &amp; bar');
             expect(InputSanitizer.sanitizeString('"quoted"')).toBe('&quot;quoted&quot;');
             expect(InputSanitizer.sanitizeString("'single'")).toBe('&#x27;single&#x27;');
         });
 
-        it('trunca si supera maxLength', () => {
-            const result = InputSanitizer.sanitizeString('abcdefghij', 5);
-            expect(result).toBe('abcde');
-            expect(result.length).toBe(5);
+        it('trunca basándose en el input original (antes de escape)', () => {
+            // '<' con maxLength=1 → trunca a '<' → escapa a '&lt;'
+            // (el maxLength se aplica sobre el string original, no el escapado)
+            const result = InputSanitizer.sanitizeString('<', 1);
+            expect(result).toBe('&lt;');
         });
 
         it('no trunca si no supera maxLength', () => {
@@ -35,8 +48,48 @@ describe('InputSanitizer', () => {
             expect(result).toBe('abc');
         });
 
-        it('propiedad: siempre devuelve un string', (): Property => {
-            return fc.assert(
+        // Propiedad 13 — parte 1: no quedan caracteres HTML sin escapar
+        it('Propiedad 13: no quedan caracteres HTML peligrosos sin escapar', () => {
+            fc.assert(
+                fc.property(
+                    // Generar strings que pueden contener caracteres HTML peligrosos
+                    fc.array(
+                        fc.oneof(fc.constant('<'), fc.constant('>'), fc.constant('"'), fc.constant("'"), fc.constant('&'), fc.string({ minLength: 1, maxLength: 1 })),
+                        { minLength: 0, maxLength: 50 }
+                    ).map(arr => arr.join('')),
+                    (input) => {
+                        const result = InputSanitizer.sanitizeString(input);
+                        // El resultado no debe contener ningún char peligroso sin escapar
+                        expect(result).not.toMatch(/[<>"']/);
+                        // El '&' solo puede aparecer como parte de entidades HTML válidas
+                        const stripped = result.replace(/&(amp|lt|gt|quot|#x27);/g, '');
+                        expect(stripped).not.toContain('&');
+                    }
+                ),
+                { numRuns: 100 }
+            );
+        });
+
+        // Propiedad 13 — parte 2: la función es idempotente sobre strings ya escapados
+        // (una entrada que ya es un string escapado no debe escaparse de nuevo)
+        it('Propiedad 13: sanitizeString es idempotente sobre strings sin chars peligrosos', () => {
+            fc.assert(
+                fc.property(
+                    // Generar strings SIN caracteres especiales HTML → no hay nada que escapar
+                    fc.string().filter(s => !/[<>"'&]/.test(s)),
+                    (input) => {
+                        const once = InputSanitizer.sanitizeString(input);
+                        const twice = InputSanitizer.sanitizeString(once);
+                        expect(once).toBe(twice);
+                    }
+                ),
+                { numRuns: 100 }
+            );
+        });
+
+        // Propiedad 13 — parte 3: siempre devuelve un string
+        it('Propiedad 13: siempre devuelve un string para cualquier entrada', () => {
+            fc.assert(
                 fc.property(fc.anything(), (val) => {
                     const result = InputSanitizer.sanitizeString(val);
                     expect(typeof result).toBe('string');
@@ -45,12 +98,19 @@ describe('InputSanitizer', () => {
             );
         });
 
-        it('propiedad: maxLength siempre se respeta', (): Property => {
-            return fc.assert(
-                fc.property(fc.string(), fc.integer({ min: 1, max: 100 }), (str, max) => {
-                    const result = InputSanitizer.sanitizeString(str, max);
-                    expect(result.length).toBeLessThanOrEqual(max);
-                }),
+        // Propiedad 14 — maxLength sobre input original
+        it('Propiedad 14: la longitud del output no supera maxLength caracteres del input original', () => {
+            fc.assert(
+                fc.property(
+                    fc.string().filter(s => !HTML_CHARS.some(c => s.includes(c))),
+                    fc.integer({ min: 1, max: 100 }),
+                    (str, max) => {
+                        // Sin caracteres especiales, la longitud de salida = longitud de entrada truncada
+                        const result = InputSanitizer.sanitizeString(str, max);
+                        const truncated = str.substring(0, max);
+                        expect(result).toBe(truncated);
+                    }
+                ),
                 { numRuns: 100 }
             );
         });
@@ -79,19 +139,18 @@ describe('InputSanitizer', () => {
             expect(() => InputSanitizer.validatePositiveInt(null, 'campo')).toThrow(ControlException);
         });
 
-        it('propiedad: lanza error para números <= 0', (): Property => {
-            return fc.assert(
-                fc.property(fc.integer(), (num) => {
-                    if (num <= 0) {
-                        expect(() => InputSanitizer.validatePositiveInt(num, 'campo')).toThrow(ControlException);
-                    }
+        // Propiedad 14 — validatePositiveInt
+        it('Propiedad 14: lanza ControlException para cualquier número <= 0', () => {
+            fc.assert(
+                fc.property(fc.integer({ min: -100000, max: 0 }), (num) => {
+                    expect(() => InputSanitizer.validatePositiveInt(num, 'campo')).toThrow(ControlException);
                 }),
                 { numRuns: 100 }
             );
         });
 
-        it('propiedad: acepta números positivos', (): Property => {
-            return fc.assert(
+        it('Propiedad 14: acepta y retorna cualquier entero positivo sin modificación', () => {
+            fc.assert(
                 fc.property(fc.nat().map(n => n + 1), (num) => {
                     const result = InputSanitizer.validatePositiveInt(num, 'campo');
                     expect(result).toBe(num);
@@ -120,11 +179,15 @@ describe('InputSanitizer', () => {
             expect(() => InputSanitizer.requireField('', 'campo')).toThrow(ControlException);
         });
 
-        it('propiedad: lanza error para valores vacíos', (): Property => {
-            return fc.assert(
-                fc.property(fc.oneof(fc.constant(null), fc.constant(undefined), fc.constant('')), (val) => {
-                    expect(() => InputSanitizer.requireField(val, 'campo')).toThrow(ControlException);
-                }),
+        // Propiedad 14 — requireField
+        it('Propiedad 14: lanza ControlException para null, undefined y string vacío', () => {
+            fc.assert(
+                fc.property(
+                    fc.oneof(fc.constant(null), fc.constant(undefined), fc.constant('')),
+                    (val) => {
+                        expect(() => InputSanitizer.requireField(val, 'campo')).toThrow(ControlException);
+                    }
+                ),
                 { numRuns: 50 }
             );
         });
@@ -135,7 +198,8 @@ describe('InputSanitizer', () => {
             const obj = { nombre: '<script>alert(1)</script>' };
             const schema = { nombre: { type: 'string' as const, maxLength: 10 } };
             const result = InputSanitizer.sanitizeObject(obj, schema);
-            expect(result.nombre).toBe('&lt;script');
+            // maxLength=10 se aplica sobre '<script>al' → escapa a '&lt;script&gt;al'
+            expect(result.nombre).toBe('&lt;script&gt;al');
         });
 
         it('valida campos number', () => {
@@ -151,7 +215,7 @@ describe('InputSanitizer', () => {
             expect(() => InputSanitizer.sanitizeObject(obj, schema)).toThrow(ControlException);
         });
 
-        it('sanitiza número negativo lanza error', () => {
+        it('número negativo en campo numérico lanza error', () => {
             const obj = { edad: -5 };
             const schema = { edad: { type: 'number' as const, required: true } };
             expect(() => InputSanitizer.sanitizeObject(obj, schema)).toThrow(ControlException);

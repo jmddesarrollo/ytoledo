@@ -32,7 +32,7 @@ export class UsersController {
         try {
             this.mode = 'reading';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const data = await this.userService.getUsers();
@@ -56,7 +56,7 @@ export class UsersController {
         try {
             this.mode = 'reading';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const data = await this.userService.getUser(userId);
@@ -84,7 +84,7 @@ export class UsersController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const role = await this.roleService.getRole(user.role_id);
@@ -119,7 +119,7 @@ export class UsersController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const userPrev = await this.userService.getUser(user.id);
@@ -161,7 +161,7 @@ export class UsersController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
 
             if (tokenDecoded.user.id !== user.id) {
                 await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
@@ -205,7 +205,7 @@ export class UsersController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             await this.userService.validateDeleteUserDefault(userId);            

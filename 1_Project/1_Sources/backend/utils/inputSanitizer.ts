@@ -19,14 +19,16 @@ export default class InputSanitizer {
         if (typeof str !== 'string') {
             str = '';
         }
+        // Truncar ANTES de escapar para que maxLength se refiera al input original,
+        // evitando que entidades HTML queden partidas a mitad (ej. "&lt" en lugar de "&lt;")
+        if (maxLength && str.length > maxLength) {
+            str = str.substring(0, maxLength);
+        }
         str = str.replace(/&/g, '&amp;');
         str = str.replace(/</g, '&lt;');
         str = str.replace(/>/g, '&gt;');
         str = str.replace(/"/g, '&quot;');
         str = str.replace(/'/g, '&#x27;');
-        if (maxLength && str.length > maxLength) {
-            str = str.substring(0, maxLength);
-        }
         return str;
     }
 

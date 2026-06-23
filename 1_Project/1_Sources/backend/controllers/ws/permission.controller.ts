@@ -32,7 +32,7 @@ export default class PermissionController {
         try {
             this.mode = 'reading';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const roles = await this.roleService.getRoles();
@@ -56,7 +56,7 @@ export default class PermissionController {
         try {
             this.mode = 'reading';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const data = await this.permissionService.getPermissionsHasRoles();
@@ -76,7 +76,7 @@ export default class PermissionController {
      */        
     public async getMyPermissionsHasRoles(req: any, socket: Socket ) {
         try {            
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
 
             let data = {};
             let userId = undefined;
@@ -117,7 +117,7 @@ export default class PermissionController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const permission = this.permissionService.getPermission(RoleHasPermission.permissions_id);
@@ -158,7 +158,7 @@ export default class PermissionController {
         try {
             this.mode = 'writing';
 
-            const tokenDecoded = this.AuthorizedMiddleware.checkToken(req.token, socket);
+            const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             if (roles_id === config.roleAdmin) throw new ControlException('El Administrador debe tener todos los permisos', 500);

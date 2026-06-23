@@ -96,10 +96,18 @@ module.exports = (sequelize: any, DataTypes: any) => {
             defaultValue: '1'
         },
         attempts: {
-            type: DataTypes.INTEGER(1),
+            type: DataTypes.INTEGER(11),
             allowNull: false,
             defaultValue: '0'
-        },        
+        },
+        recovery_token_hash: {
+            type: DataTypes.STRING(64),
+            allowNull: true
+        },
+        recovery_token_created_at: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
         role_id: {
             type: DataTypes.INTEGER(10),
             allowNull: false,

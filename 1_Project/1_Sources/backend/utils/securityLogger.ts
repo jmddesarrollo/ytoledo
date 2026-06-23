@@ -1,21 +1,28 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-
+// Tipos de evento alineados con el documento de diseño (design.md).
+// Se mantienen también eventos adicionales útiles para auditoría ampliada.
 export enum SecurityEventType {
-    FAILED_LOGIN = 'FAILED_LOGIN',
-    SUCCESSFUL_LOGIN = 'SUCCESSFUL_LOGIN',
-    SQL_INJECTION_ATTEMPT = 'SQL_INJECTION_ATTEMPT',
-    XSS_ATTEMPT = 'XSS_ATTEMPT',
-    INVALID_INPUT = 'INVALID_INPUT',
-    UNAUTHORIZED_ACCESS = 'UNAUTHORIZED_ACCESS',
+    // Autenticación
+    LOGIN_FAILED = 'LOGIN_FAILED',
+    LOGIN_SUCCESS = 'LOGIN_SUCCESS',
+    ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
+    // Token JWT
+    TOKEN_INVALID = 'TOKEN_INVALID',
+    TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+    // Autorización
+    ACCESS_DENIED = 'ACCESS_DENIED',
+    // Contraseña
+    PASSWORD_CHANGED = 'PASSWORD_CHANGED',
+    PASSWORD_RECOVERY_REQUESTED = 'PASSWORD_RECOVERY_REQUESTED',
+    PASSWORD_RECOVERY_COMPLETED = 'PASSWORD_RECOVERY_COMPLETED',
+    // Rate limiting
     RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
-    SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',
 }
 
-
 export interface SecurityLogEntry {
-    timestamp: string;
+    timestamp: string;       // ISO 8601
     event: SecurityEventType;
     username?: string;
     ip?: string;
@@ -33,82 +40,116 @@ export default class SecurityLogger {
         }
     }
 
-
     private static formatEntry(entry: SecurityLogEntry): string {
         return JSON.stringify(entry) + '\n';
     }
-
 
     static log(entry: SecurityLogEntry): void {
         this.ensureLogDirectory();
         fs.appendFileSync(this.logFilePath, this.formatEntry(entry));
     }
 
+    // --- Autenticación ---
+
     static logFailedLogin(ip: string, username: string, reason?: string): void {
         this.log({
             timestamp: new Date().toISOString(),
-            event: SecurityEventType.FAILED_LOGIN,
+            event: SecurityEventType.LOGIN_FAILED,
             username,
             ip,
             result: 'FAILURE',
-            details: { reason }
+            details: { reason },
         });
     }
 
     static logSuccessfulLogin(ip: string, username: string): void {
         this.log({
             timestamp: new Date().toISOString(),
-            event: SecurityEventType.SUCCESSFUL_LOGIN,
+            event: SecurityEventType.LOGIN_SUCCESS,
             username,
             ip,
             result: 'SUCCESS',
-            details: {}
         });
     }
 
-    static logSqlInjectionAttempt(ip: string, payload: string, username?: string): void {
+    static logAccountLocked(ip: string, username: string): void {
         this.log({
             timestamp: new Date().toISOString(),
-            event: SecurityEventType.SQL_INJECTION_ATTEMPT,
+            event: SecurityEventType.ACCOUNT_LOCKED,
             username,
             ip,
             result: 'FAILURE',
-            details: { payload }
         });
     }
 
-    static logXssAttempt(ip: string, payload: string, username?: string): void {
+    // --- Token JWT ---
+
+    static logTokenInvalid(ip: string, username?: string): void {
         this.log({
             timestamp: new Date().toISOString(),
-            event: SecurityEventType.XSS_ATTEMPT,
+            event: SecurityEventType.TOKEN_INVALID,
             username,
             ip,
             result: 'FAILURE',
-            details: { payload }
         });
     }
 
-    static logInvalidInput(ip: string, field: string, value: string, username?: string): void {
+    static logTokenExpired(ip: string, username?: string): void {
         this.log({
             timestamp: new Date().toISOString(),
-            event: SecurityEventType.INVALID_INPUT,
+            event: SecurityEventType.TOKEN_EXPIRED,
             username,
             ip,
             result: 'FAILURE',
-            details: { field, value: value.substring(0, 100) }
         });
     }
 
-    static logUnauthorizedAccess(ip: string, username: string, resource: string): void {
+    // --- Autorización ---
+
+    static logAccessDenied(ip: string, username: string, resource: string): void {
         this.log({
             timestamp: new Date().toISOString(),
-            event: SecurityEventType.UNAUTHORIZED_ACCESS,
+            event: SecurityEventType.ACCESS_DENIED,
             username,
             ip,
             result: 'FAILURE',
-            details: { resource }
+            details: { resource },
         });
     }
+
+    // --- Contraseña ---
+
+    static logPasswordChanged(ip: string, username: string): void {
+        this.log({
+            timestamp: new Date().toISOString(),
+            event: SecurityEventType.PASSWORD_CHANGED,
+            username,
+            ip,
+            result: 'SUCCESS',
+        });
+    }
+
+    static logPasswordRecoveryRequested(ip: string, username: string): void {
+        this.log({
+            timestamp: new Date().toISOString(),
+            event: SecurityEventType.PASSWORD_RECOVERY_REQUESTED,
+            username,
+            ip,
+            result: 'SUCCESS',
+        });
+    }
+
+    static logPasswordRecoveryCompleted(ip: string, username: string): void {
+        this.log({
+            timestamp: new Date().toISOString(),
+            event: SecurityEventType.PASSWORD_RECOVERY_COMPLETED,
+            username,
+            ip,
+            result: 'SUCCESS',
+        });
+    }
+
+    // --- Rate Limiting ---
 
     static logRateLimitExceeded(ip: string, endpoint: string, username?: string): void {
         this.log({
@@ -117,18 +158,7 @@ export default class SecurityLogger {
             username,
             ip,
             result: 'FAILURE',
-            details: { endpoint }
-        });
-    }
-
-    static logSuspiciousActivity(ip: string, description: string, details?: Record<string, unknown>, username?: string, result: 'SUCCESS' | 'FAILURE' = 'FAILURE'): void {
-        this.log({
-            timestamp: new Date().toISOString(),
-            event: SecurityEventType.SUSPICIOUS_ACTIVITY,
-            username,
-            ip,
-            result,
-            details: { description, ...details }
+            details: { endpoint },
         });
     }
 }

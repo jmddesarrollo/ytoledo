@@ -12,6 +12,15 @@ This directory contains database migration scripts for the Y-Toledo project.
   - Adds `filename_track` VARCHAR(255) field with default empty string
   - Updates existing records to ensure empty strings for new fields
 
+### 003_security_hardening.sql
+- **Date**: 2026-06-20
+- **Description**: Adds user fields required by security hardening
+- **Changes**:
+  - Changes `users.attempts` to `INTEGER(11)`
+  - Adds nullable `users.recovery_token_hash` field
+  - Adds nullable `users.recovery_token_created_at` field
+  - Uses `INFORMATION_SCHEMA` checks to skip columns that already exist
+
 ## How to Apply Migrations
 
 1. Connect to your MySQL database

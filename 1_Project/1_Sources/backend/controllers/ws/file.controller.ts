@@ -36,7 +36,7 @@ export default class FileController {
     try {
       this.mode = "writing";
 
-      const tokenDecoded = this.AuthorizedMiddleware.checkToken( req.token, socket );
+      const tokenDecoded = await this.AuthorizedMiddleware.checkToken( req.token, socket );
       await this.AuthorizedMiddleware.isAllowed( tokenDecoded, this.permissionType, this.mode, socket );
 
       const identifier = this.fileService.generateIdentifier();
@@ -74,7 +74,7 @@ export default class FileController {
     try {
       this.mode = "writing";
 
-      const tokenDecoded = this.AuthorizedMiddleware.checkToken( req.token, socket );
+      const tokenDecoded = await this.AuthorizedMiddleware.checkToken( req.token, socket );
       await this.AuthorizedMiddleware.isAllowed( tokenDecoded, this.permissionType, this.mode, socket );
 
       let nameComplete = `${name}.lic`;
@@ -108,7 +108,7 @@ export default class FileController {
     try {
       this.mode = "writing";
 
-      const tokenDecoded = this.AuthorizedMiddleware.checkToken( req.token, socket );
+      const tokenDecoded = await this.AuthorizedMiddleware.checkToken( req.token, socket );
       await this.AuthorizedMiddleware.isAllowed( tokenDecoded, this.permissionType, this.mode, socket );
 
       // Elimina todos los archivos y la carpeta
