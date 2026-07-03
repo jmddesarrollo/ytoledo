@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 
 import ControlException from '../../utils/controlException';
+import InputSanitizer from '../../utils/inputSanitizer';
 
 import PermissionService from '../../services/permission';
 import RolesService from '../../services/role';
@@ -109,13 +110,16 @@ export default class PermissionController {
      * Añadir un permiso asociado a un rol
      */
     public async addPermission(req: any, socket: Socket) {
-        const RoleHasPermission = req.RoleHasPermission;
-
         // Iniciar transacción
         let t = await sequelize.transaction();
 
         try {
             this.mode = 'writing';
+
+            // Validar IDs numéricos (Requisito 9.3)
+            const permissions_id = InputSanitizer.validatePositiveInt(req.RoleHasPermission?.permissions_id, 'permissions_id');
+            const roles_id       = InputSanitizer.validatePositiveInt(req.RoleHasPermission?.roles_id, 'roles_id');
+            const RoleHasPermission = { ...req.RoleHasPermission, permissions_id, roles_id };
 
             const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
@@ -149,14 +153,15 @@ export default class PermissionController {
      * Eliminar un permiso asociado a un rol
      */
     public async delPermission(req: any, socket: Socket) {
-        const permissions_id = req.permissions_id;
-        const roles_id       = req.roles_id;
-
         // Iniciar transacción
         let t = await sequelize.transaction();
 
         try {
             this.mode = 'writing';
+
+            // Validar IDs numéricos (Requisito 9.3)
+            const permissions_id = InputSanitizer.validatePositiveInt(req.permissions_id, 'permissions_id');
+            const roles_id       = InputSanitizer.validatePositiveInt(req.roles_id, 'roles_id');
 
             const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
@@ -170,7 +175,7 @@ export default class PermissionController {
             if (!role) throw new ControlException('El rol no ha sido encontrado', 500);
             
             await this.permissionService.delRoleHasPermission(permissions_id, roles_id, t);
-            const data = {permissions_id, roles_id};            
+            const data = { permissions_id, roles_id };
     
             t.commit();
     

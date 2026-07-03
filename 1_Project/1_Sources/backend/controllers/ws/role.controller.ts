@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 
 import ControlException from '../../utils/controlException';
+import InputSanitizer from '../../utils/inputSanitizer';
 import RoleService from '../../services/role';
 
 const sequelize = require('../../models').sequelize;
@@ -46,9 +47,12 @@ export default class RoleController {
      */        
     public async getRole(req: any, socket: Socket ) {
         try {      
-            await this.AuthorizedMiddleware.checkToken(req.token, socket);            
+            await this.AuthorizedMiddleware.checkToken(req.token, socket);
 
-            const data = await this.roleService.getRole(req.id);
+            // Validar que id es un entero positivo (Requisito 9.3)
+            const id = InputSanitizer.validatePositiveInt(req.id, 'id');
+
+            const data = await this.roleService.getRole(id);
             
             socket.emit("role/getRole", { data, message: "El rol se ha consultado correctamente" });
         } catch(error) {
@@ -64,13 +68,16 @@ export default class RoleController {
      * Añadir un rol
      */        
     public async addRole(req: any, socket: Socket) {
-        const role = req.role;
-
         // Iniciar transacción
         let t = await sequelize.transaction(); 
 
         try {
             this.mode = 'writing';
+
+            // Sanitizar campos string del rol (Requisitos 9.1, 9.2, 9.4)
+            const role = InputSanitizer.sanitizeObject(req.role ?? {}, {
+                name: { type: 'string', maxLength: 100, required: true },
+            });
 
             const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
@@ -96,13 +103,17 @@ export default class RoleController {
      * Editar un rol
      */        
     public async editRole(req: any, socket: Socket) {
-        const role = req.role;
-
         // Iniciar transacción
         let t = await sequelize.transaction(); 
 
         try {
             this.mode = 'writing';
+
+            // Sanitizar campos string y validar id (Requisitos 9.1, 9.2, 9.3, 9.4)
+            const role = InputSanitizer.sanitizeObject(req.role ?? {}, {
+                name: { type: 'string', maxLength: 100, required: true },
+            });
+            role['id'] = InputSanitizer.validatePositiveInt(req.role?.id, 'id');
 
             const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
@@ -128,13 +139,14 @@ export default class RoleController {
      * Eliminar un rol
      */        
     public async delRole(req: any, socket: Socket) {
-        const roleId = req.roleId;
-
         // Iniciar transacción
         let t = await sequelize.transaction(); 
 
         try {
             this.mode = 'writing';
+
+            // Validar que roleId es un entero positivo (Requisito 9.3)
+            const roleId = InputSanitizer.validatePositiveInt(req.roleId, 'roleId');
 
             const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);

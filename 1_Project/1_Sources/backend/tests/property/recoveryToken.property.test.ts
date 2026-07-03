@@ -13,8 +13,8 @@
  */
 import * as fc from 'fast-check';
 
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
+import * as crypto from 'crypto';
+import * as jwt from 'jsonwebtoken';
 
 // ---------------------------------------------------------------------------
 // Configuración de entorno para los tests
@@ -198,8 +198,7 @@ describe('Propiedad 8: verificación de token es round-trip de hash SHA-256', ()
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 99999 }),
-        fc.integer({ min: 0, max: 9 }), // posición a modificar (relativa al final)
-        (userId, posFromEnd) => {
+        (userId) => {
           const store = new Map<number, TokenStore>();
           const token = generateAndStoreToken(userId, store);
 

@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 
 import ControlException from '../../utils/controlException';
+import InputSanitizer from '../../utils/inputSanitizer';
 
 import RoleService from '../../services/role';
 import { UserService } from '../../services/user';
@@ -20,15 +21,15 @@ export class UsersController {
     private permissionType: string;
     private mode: string;
 
-    constructor(){
+    constructor() {
         this.permissionType = config.permission_users_manager;
         this.mode = 'reading';
     }
 
     /**
      * Consultar todos los usuarios
-     */        
-    public async getUsers(req: any, socket: Socket ) {
+     */
+    public async getUsers(req: any, socket: Socket) {
         try {
             this.mode = 'reading';
 
@@ -36,9 +37,9 @@ export class UsersController {
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const data = await this.userService.getUsers();
-            
+
             socket.emit("user/getUsers", { data, message: 'Los usuarios se han consultado correctamente' });
-        } catch(error) {
+        } catch (error) {
             if (error instanceof ControlException) {
                 socket.emit("error_message", { message: error.message, code: error.code });
             } else {
@@ -46,24 +47,25 @@ export class UsersController {
             }
         }
     }
-    
+
     /**
      * Consultar un usuario
-     */    
-    public async getUser(req: any, socket: Socket ) {
-        const userId = req.userId;
-        
+     */
+    public async getUser(req: any, socket: Socket) {
         try {
             this.mode = 'reading';
+
+            // Validar que userId es un entero positivo (Requisito 9.3)
+            const userId = InputSanitizer.validatePositiveInt(req.userId, 'userId');
 
             const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
             const data = await this.userService.getUser(userId);
             data.password = '';
-            
+
             socket.emit("user/getUser", { data, message: 'El usuario se ha consultado correctamente' });
-        } catch(error) {
+        } catch (error) {
             if (error instanceof ControlException) {
                 socket.emit("error_message", { message: error.message, code: error.code });
             } else {
@@ -74,29 +76,39 @@ export class UsersController {
 
     /**
      * Añadir un usuario
-     */        
+     */
     public async addUser(req: any, socket: Socket) {
-        const user = req.user;
-
         // Iniciar transacción
-        let t = await sequelize.transaction(); 
+        let t = await sequelize.transaction();
 
         try {
             this.mode = 'writing';
 
+            // Sanitizar todos los campos string del objeto user (Requisitos 9.1, 9.2, 9.4)
+            const user = InputSanitizer.sanitizeObject(req.user ?? {}, {
+                name: { type: 'string', maxLength: 100, required: true },
+                lastname: { type: 'string', maxLength: 100, required: true },
+                email: { type: 'string', maxLength: 200, required: true },
+                username: { type: 'string', maxLength: 45, required: true },
+                member_num: { type: 'string', maxLength: 20 },
+            });
+            // Campos numéricos y booleanos se pasan tal cual — la BLL los valida
+            user['role_id'] = InputSanitizer.validatePositiveInt(req.user?.role_id, 'role_id');
+            user['active'] = req.user?.active;
+
             const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
-            const role = await this.roleService.getRole(user.role_id);
+            const role = await this.roleService.getRole(user['role_id']);
             if (!role) throw new ControlException('El rol asociado no existe', 500);
-            
+
             const data = await this.userService.addUser(user, t);
-    
+
             t.commit();
-    
+
             socket.emit("user/addUser", { data, message: 'El usuario se ha registrado correctamente' });
             socket.broadcast.emit('user/addUser', { data });
-        } catch(error) {
+        } catch (error) {
             t.rollback();
 
             if (error instanceof ControlException) {
@@ -109,36 +121,46 @@ export class UsersController {
 
     /**
      * Editar un usuario
-     */        
+     */
     public async editUser(req: any, socket: Socket) {
-        const user = req.user;
-
         // Iniciar transacción
-        let t = await sequelize.transaction(); 
+        let t = await sequelize.transaction();
 
         try {
             this.mode = 'writing';
 
+            // Sanitizar campos string y validar id (Requisitos 9.1, 9.2, 9.3, 9.4)
+            const user = InputSanitizer.sanitizeObject(req.user ?? {}, {
+                name: { type: 'string', maxLength: 100, required: true },
+                lastname: { type: 'string', maxLength: 100, required: true },
+                email: { type: 'string', maxLength: 200, required: true },
+                username: { type: 'string', maxLength: 45, required: true },
+                member_num: { type: 'string', maxLength: 20 },
+            });
+            user['id'] = InputSanitizer.validatePositiveInt(req.user?.id, 'id');
+            user['role_id'] = InputSanitizer.validatePositiveInt(req.user?.role_id, 'role_id');
+            user['active'] = req.user?.active;
+
             const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
-            const userPrev = await this.userService.getUser(user.id);
-            const role = await this.roleService.getRole(user.role_id);
+            const userPrev = await this.userService.getUser(user['id']);
+            const role = await this.roleService.getRole(user['role_id']);
             if (!role) throw new ControlException('El rol asociado no existe', 500);
 
             await this.userService.validateEditUserDefault(user, tokenDecoded);
 
-            const data     = await this.userService.editUser(user, t);
-    
+            const data = await this.userService.editUser(user, t);
+
             t.commit();
-    
+
             socket.emit("user/editUser", { data, userPrev, message: 'El usuario se ha editado correctamente' });
             socket.broadcast.emit('user/editUser', { data });
 
             if (!data.active) {
                 socket.broadcast.emit('user/disabledUser', { data, message: 'El usuario ha sido deshabilitado' });
             }
-        } catch(error) {
+        } catch (error) {
             t.rollback();
 
             if (error instanceof ControlException) {
@@ -151,15 +173,18 @@ export class UsersController {
 
     /**
      * Editar la contraseña de un usuario
-     */        
+     */
     public async editPasswordUser(req: any, socket: Socket) {
-        const user = req.user;
-
         // Iniciar transacción
-        let t = await sequelize.transaction(); 
+        let t = await sequelize.transaction();
 
         try {
             this.mode = 'writing';
+
+            // Validar id como entero positivo (Requisito 9.3)
+            const userId = InputSanitizer.validatePositiveInt(req.user?.id, 'id');
+            // password no se escapa — la regex del BLL lo valida con sus propios criterios
+            const user = { ...req.user, id: userId };
 
             const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
 
@@ -168,20 +193,20 @@ export class UsersController {
 
                 // Si el usuario conectado es distinto del usuario a editar, la contraseña generada será aleatoria
                 user.password = this.userService.generatePasswordRandom();
-            }     
-            
+            }
+
             await this.userService.validateEditPasswordUserDefault(user, tokenDecoded);
 
             const data = await this.userService.editPasswordUser(user, t);
-    
-            t.commit();            
-    
+
+            t.commit();
+
             socket.emit("user/editPasswordUser", { data, message: 'La contraseña se ha editado correctamente' });
             socket.broadcast.emit('user/editPasswordUser', { data });
 
             socket.emit('user/endSessionChangePasswordUser', { data, message: 'Necesario iniciar sesión por cambio de contraseña' });
             socket.broadcast.emit('user/endSessionChangePasswordUser', { data, message: 'Necesario iniciar sesión por cambio de contraseña' });
-        } catch(error) {
+        } catch (error) {
             t.rollback();
 
             if (error instanceof ControlException) {
@@ -194,31 +219,33 @@ export class UsersController {
 
     /**
      * Eliminar un usuario
-     */        
+     */
     public async delUser(req: any, socket: Socket) {
         const user = req.user;
         const userId = user.id;
 
         // Iniciar transacción
-        let t = await sequelize.transaction(); 
+        let t = await sequelize.transaction();
 
         try {
             this.mode = 'writing';
 
+            const userId = InputSanitizer.validatePositiveInt(req.user?.id, 'id');
+
             const tokenDecoded = await this.AuthorizedMiddleware.checkToken(req.token, socket);
             await this.AuthorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
 
-            await this.userService.validateDeleteUserDefault(userId);            
+            await this.userService.validateDeleteUserDefault(userId);
 
             await this.userService.delUser(userId, t);
 
             const data = { user };
-    
+
             t.commit();
-    
+
             socket.emit("user/delUser", { data, message: 'El usuario se ha eliminado correctamente' });
             socket.broadcast.emit('user/delUser', { data });
-        } catch(error) {
+        } catch (error) {
             t.rollback();
 
             if (error instanceof ControlException) {

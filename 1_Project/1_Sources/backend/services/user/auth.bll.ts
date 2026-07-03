@@ -1,12 +1,10 @@
 import ControlException from '../../utils/controlException';
 import SecurityLogger from '../../utils/securityLogger';
-
 import UsersDAL from './users.dal';
 
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
+import * as crypto from 'crypto';
 import momentTZ from 'moment-timezone';
 import moment from 'moment';
 
@@ -77,16 +75,10 @@ export default class AuthService {
         user.password = undefined;
     
         // Crear token: objeto, contraseña secreta general de encriptación, tiempo de expiración
-        var token = jwt.sign(this.getTokenPayload(user), process.env.YTO_SEED, { expiresIn: process.env.YTO_EXPIRATION_TOKEN });
+        const token = jwt.sign(this.getTokenPayload(user), process.env.YTO_SEED, { expiresIn: process.env.YTO_EXPIRATION_TOKEN });
         SecurityLogger.logSuccessfulLogin(ip, user.username);
-    
-        let data = new Object;
-        data = {
-            user,
-            token
-        }        
-    
-        return data;
+
+        return { user, token };
     }
     
     // =====================================

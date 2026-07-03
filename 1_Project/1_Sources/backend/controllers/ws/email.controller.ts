@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 
 import ControlException from '../../utils/controlException';
+import InputSanitizer from '../../utils/inputSanitizer';
 
 import EmailService from '../../services/email';
 import RoleService from '../../services/role';
@@ -29,10 +30,11 @@ export class EmailController {
      * Enviar un email de alta de usuario
      */    
     public async sendEmailUserAdd(req: any, socket: Socket ) {
-        const userId = req.userId;
-        
         try {
             this.mode = 'writing';
+
+            // Validar que userId es un entero positivo (Requisito 9.3)
+            const userId = InputSanitizer.validatePositiveInt(req.userId, 'userId');
 
             const tokenDecoded = await this.authorizedMiddleware.checkToken(req.token, socket);
             await this.authorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
@@ -56,11 +58,12 @@ export class EmailController {
      * Enviar un email de edición de usuario
      */    
      public async sendEmailUserEdit(req: any, socket: Socket ) {
-        const userId = req.userId;
-        const userPrev = req.userPrev;
-        
         try {
             this.mode = 'writing';
+
+            // Validar que userId es un entero positivo (Requisito 9.3)
+            const userId   = InputSanitizer.validatePositiveInt(req.userId, 'userId');
+            const userPrev = req.userPrev;
 
             const tokenDecoded = await this.authorizedMiddleware.checkToken(req.token, socket);
             await this.authorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);
@@ -92,9 +95,10 @@ export class EmailController {
      * Enviar un email de edición de contraseña al usuario
      */    
     public async sendEmailUserEditPassword(req: any, socket: Socket ) {
-        const userId = req.userId;        
-        
-        try {    
+        try {
+            // Validar que userId es un entero positivo (Requisito 9.3)
+            const userId = InputSanitizer.validatePositiveInt(req.userId, 'userId');
+
             const user = await this.userService.getUser(userId);
     
             const data = await this.emailService.sendEmailUserEditPassword(user);
@@ -113,10 +117,11 @@ export class EmailController {
      * Enviar un email de restaruación de contraseña al usuario
      */    
      public async sendEmailUserRestorePassword(req: any, socket: Socket ) {
-        const userId = req.userId;        
-        
         try {
             this.mode = 'writing';
+
+            // Validar que userId es un entero positivo (Requisito 9.3)
+            const userId = InputSanitizer.validatePositiveInt(req.userId, 'userId');
     
             const tokenDecoded = await this.authorizedMiddleware.checkToken(req.token, socket);
             await this.authorizedMiddleware.isAllowed(tokenDecoded, this.permissionType, this.mode, socket);

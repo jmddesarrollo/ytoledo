@@ -10,5 +10,6 @@ export const AuthRoutes = (socket: Socket) => {
     socket.on('auth/getMyProfile', (req: Request) => { authController.getMyProfile(req, socket)});
     socket.on('auth/renewToken', (req: Request) => { authController.renewToken(req, socket)});
     socket.on('auth/recoveryPassword', (req: Request) => { authController.recoveryPassword(req, socket)});
-    socket.on('auth/validateTokenRecovery', (req: Request) => { authController.validateTokenRecovery(req, socket)});    
+    socket.on('auth/validateTokenRecovery', (req: Request) => { authController.validateTokenRecovery(req, socket)});
+    socket.on('auth/changePasswordWithRecoveryToken', (req: Request) => { authController.changePasswordWithRecoveryToken(req, socket)});
 }

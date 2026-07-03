@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 
 import ControlException from '../../utils/controlException';
+import InputSanitizer from '../../utils/inputSanitizer';
 import { AuthService, UserService } from '../../services/user';
 
 import AuthorizedMiddleware from '../../server/middlewares/authorized.middleware';
@@ -31,8 +32,14 @@ export class AuthController {
         let t = await sequelize.transaction(); 
 
         try {
+            // Sanitización de inputs (Requisitos 9.1, 9.2, 9.4)
+            InputSanitizer.requireField(req.userName, 'userName');
+            InputSanitizer.requireField(req.password, 'password');
+            const userName = InputSanitizer.sanitizeString(req.userName, 45);
+            const password = InputSanitizer.sanitizeString(req.password, 100);
+
             const ip = socket.handshake && socket.handshake.address ? socket.handshake.address : 'unknown';
-            const data = await this.authService.login(req.userName, req.password, t, ip);
+            const data = await this.authService.login(userName, password, t, ip);
 
             t.commit();
 
@@ -108,9 +115,11 @@ export class AuthController {
     public async recoveryPassword(req: any, socket: Socket) {
         const mailSMTP = new mailSMTPClass();
 
-        const userName = req.userName;
-
         try {
+            // Sanitización de inputs (Requisitos 9.1, 9.2, 9.4)
+            InputSanitizer.requireField(req.userName, 'userName');
+            const userName = InputSanitizer.sanitizeString(req.userName, 45);
+
             const user = await this.userService.getUserByNameOrEmail(userName);
 
             if (!user) { throw new ControlException('El usuario no está registrado', 500); }
@@ -167,11 +176,59 @@ export class AuthController {
         }
     }
 
-    public async validateTokenRecovery(req: any, socket: Socket) {
+    /**
+     * Cambio de contraseña usando token de recuperación.
+     * Valida el token contra BD, cambia la contraseña e invalida el token (Requisitos 5.3, 5.4).
+     */
+    public async changePasswordWithRecoveryToken(req: any, socket: Socket) {
+        let t = await sequelize.transaction();
+
         try {
-            const decoded = await this.AuthorizedMiddleware.checkToken(req.tokenRecovery, socket, true);
+            // Sanitización de inputs (Requisitos 9.1, 9.4)
+            InputSanitizer.requireField(req.tokenRecovery, 'tokenRecovery');
+            InputSanitizer.requireField(req.user?.password, 'password');
+            const tokenRecovery = InputSanitizer.sanitizeString(req.tokenRecovery, 500);
+            const user = { ...req.user, password: req.user?.password }; // password se valida en BLL con regex
+
+            const decoded = await this.AuthorizedMiddleware.checkToken(tokenRecovery, socket, true);
 
             if (!decoded.user) { throw new ControlException('No ha sido encontrado el usuario', 500); }
+
+            // Verificar hash del token en BD antes de cambiar la contraseña (Requisito 5.3)
+            await this.authService.validateRecoveryToken(decoded.user.id, tokenRecovery);
+
+            const data = await this.userService.editPasswordUser(user, t);
+
+            // Invalidar el token tras cambio exitoso (Requisito 5.4)
+            const ip = socket.handshake && socket.handshake.address ? socket.handshake.address : 'unknown';
+            await this.authService.consumeRecoveryToken(decoded.user.id, decoded.user.username, ip);
+
+            t.commit();
+
+            socket.emit("auth/changePasswordWithRecoveryToken", { data, message: 'La contraseña se ha cambiado correctamente' });
+        } catch (error) {
+            t.rollback();
+
+            if (error instanceof ControlException) {
+                socket.emit("error_message", { message: error.message, code: error.code });
+            } else {
+                socket.emit("error_message", { message: "Error no controlado" });
+            }
+        }
+    }
+
+    public async validateTokenRecovery(req: any, socket: Socket) {
+        try {
+            // Sanitización de inputs (Requisitos 9.1, 9.4)
+            InputSanitizer.requireField(req.tokenRecovery, 'tokenRecovery');
+            const tokenRecovery = InputSanitizer.sanitizeString(req.tokenRecovery, 500);
+
+            const decoded = await this.AuthorizedMiddleware.checkToken(tokenRecovery, socket, true);
+
+            if (!decoded.user) { throw new ControlException('No ha sido encontrado el usuario', 500); }
+
+            // Verificar que el hash del token coincide con el almacenado en BD (Requisito 5.3)
+            await this.authService.validateRecoveryToken(decoded.user.id, tokenRecovery);
 
             const user = await this.userService.getUserByNameOrEmail(decoded.user.username);
             if (!user) { throw new ControlException('No ha sido encontrado el usuario', 500); }
