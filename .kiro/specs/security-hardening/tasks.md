@@ -165,49 +165,49 @@ Implementación incremental del endurecimiento de seguridad de App Base. Las tar
     - Sanitizar campos string y validar campos numéricos en todos los eventos WebSocket
     - _Requisitos: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 9. Checkpoint — Verificar que todos los tests de backend pasan
+- [x] 9. Checkpoint — Verificar que todos los tests de backend pasan
   - Ejecutar la suite completa de tests. Verificar que los tests de propiedad pasan con 100+ iteraciones. Consultar al usuario si surgen dudas.
 
-- [ ] 10. Cambios en el Frontend (Angular 17)
-  - [ ] 10.1 Crear `utils/password-validator.ts` en el frontend
+- [x] 10. Cambios en el Frontend (Angular 17)
+  - [x] 10.1 Crear `utils/password-validator.ts` en el frontend
     - Exportar `PASSWORD_REGEX` con la misma expresión regular que el backend
     - Exportar función `validatePassword(password): { valid: boolean; errors: string[] }`
     - Los mensajes de error deben indicar qué requisito específico falta (mayúscula, número, carácter especial, longitud)
     - _Requisitos: 7.1, 7.2, 7.3, 7.4_
 
-  - [ ] 10.2 Escribir tests de propiedad para validación de contraseña frontend
+  - [x] 10.2 Escribir tests de propiedad para validación de contraseña frontend
     - **Propiedad 11: La validación de contraseña frontend es equivalente a la del backend**
     - **Valida: Requisitos 7.1, 7.2**
     - Usar `fast-check` en el proyecto Angular (instalar si no está presente)
     - Generar strings aleatorios y verificar que frontend y backend producen el mismo resultado
 
-  - [ ] 10.3 Integrar validación de contraseña en los componentes de cambio de contraseña
+  - [x] 10.3 Integrar validación de contraseña en los componentes de cambio de contraseña
     - Usar `validatePassword()` en los formularios reactivos de Angular donde se introduce contraseña
     - Mostrar mensajes de error en tiempo real mientras el usuario escribe
     - _Requisitos: 7.2, 7.3, 7.4_
 
-  - [ ] 10.4 Crear `services/share/inactivity.service.ts` en el frontend
+  - [x] 10.4 Crear `services/share/inactivity.service.ts` en el frontend
     - Implementar `startWatching()`: registrar listeners para `click`, `keydown`, `mousemove` en `document`
     - Implementar `resetTimer()`: reiniciar el `setTimeout` de logout y el `setTimeout` de advertencia
     - Implementar `stopWatching()`: limpiar listeners y timers
     - Leer el timeout desde la variable de entorno Angular (`environment.inactivityTimeoutMinutes`)
     - _Requisitos: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-  - [ ] 10.5 Escribir tests de propiedad para InactivityService
+  - [x] 10.5 Escribir tests de propiedad para InactivityService
     - **Propiedad 5: El servicio de inactividad reinicia el timer ante cualquier interacción**
     - **Valida: Requisitos 4.1, 4.5**
     - **Propiedad 6: El timeout de inactividad siempre dispara el logout**
     - **Valida: Requisito 4.2**
     - Usar `fakeAsync` y `tick` de Angular para simular el paso del tiempo
 
-  - [ ] 10.6 Integrar `InactivityService` en el componente raíz o en el guard de autenticación
+  - [x] 10.6 Integrar `InactivityService` en el componente raíz o en el guard de autenticación
     - Llamar a `startWatching()` cuando el usuario inicia sesión
     - Llamar a `stopWatching()` cuando el usuario cierra sesión
     - Mostrar modal de advertencia cuando quedan 2 minutos para el logout
     - Emitir `auth/renewToken` si el usuario elige extender la sesión
     - _Requisitos: 4.2, 4.3, 4.4_
 
-- [ ] 11. Checkpoint final — Verificar integración completa
+- [x] 11. Checkpoint final — Verificar integración completa
   - Ejecutar todos los tests (backend y frontend). Verificar que el servidor arranca con la nueva configuración. Verificar que el flujo completo de login, logout por inactividad y recuperación de contraseña funciona correctamente. Consultar al usuario si surgen dudas.
 
 ## Notas

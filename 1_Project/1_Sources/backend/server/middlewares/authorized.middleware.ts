@@ -68,7 +68,7 @@ export default class AuthorizedMiddleware {
     public async checkToken (token: string, socket: Socket, recovery: boolean = false): Promise<any> {        
         if (!token) {
             socket.emit("auth/logout", {});
-            SecurityLogger.logUnauthorizedAccess(this.getSocketIp(socket), 'unknown', 'Token ausente');
+            SecurityLogger.logAccessDenied(this.getSocketIp(socket), 'unknown', 'Token ausente');
             throw new ControlException('El usuario no tiene inicio de sesión', 401); 
         }
 

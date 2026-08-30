@@ -12,6 +12,7 @@ import { TitleShareService } from './services/share/title.service';
 import { WRPermissionShareService } from './services/share/wr-permission';
 import { UserService } from './services/websockets/user.service';
 import { WebsocketService } from './services/websocket.service';
+import { InactivityService } from './services/share/inactivity.service';
 
 import { MenuItem } from 'primeng/api';
 
@@ -38,6 +39,9 @@ export class AppComponent implements OnInit, OnDestroy {
   public project: string;
   public version: string;
 
+  // Control del modal de advertencia de inactividad (Requisito 4.3)
+  public showInactivityWarning: boolean = false;
+
   private permissionsHasRoles: RoleHasPermission[];
   private userId: number;
   private roleId: number;
@@ -58,7 +62,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private permissionService: PermissionService,
     private userService: UserService,
     private myPermissionShareService: MyPermissionShareService,
-    public websocketService: WebsocketService
+    public websocketService: WebsocketService,
+    private inactivityService: InactivityService
   ) {
     this.title = null;
     this.wrPermission = 'U';
@@ -210,6 +215,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this._editUser();
     this._addPermission();
     this._delPermission();
+
+    // Iniciar vigilancia de inactividad si la sesión ya estaba activa al cargar (Requisito 4.1)
+    if (this.websocketService.sessionOn) {
+      this._startInactivityWatching();
+    }
   }
 
   ngOnDestroy(): void {
@@ -239,6 +249,10 @@ export class AppComponent implements OnInit, OnDestroy {
    * Acciones posteriores a la finalización de la sesión
    */
   logoutPostActions() {
+    // Detener vigilancia de inactividad al cerrar sesión (Requisito 4.1)
+    this.inactivityService.stopWatching();
+    this.showInactivityWarning = false;
+
     localStorage.removeItem('token');
     localStorage.removeItem('id');
 
@@ -459,6 +473,9 @@ export class AppComponent implements OnInit, OnDestroy {
       this.websocketService.setSessionOn(true);
 
       this.getMyPermissionsHasRoles();
+
+      // Iniciar vigilancia de inactividad al hacer login (Requisito 4.1)
+      this._startInactivityWatching();
     });
 
     this.observables.push(ob);
@@ -527,5 +544,53 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     this.observables.push(ob);
+  }
+
+  /**
+   * Inicia la vigilancia de inactividad y suscribe a los observables de aviso y logout.
+   * Requisitos: 4.1, 4.2, 4.3, 4.4, 4.5
+   */
+  private _startInactivityWatching(): void {
+    // Detener primero por si ya había un ciclo anterior activo
+    this.inactivityService.stopWatching();
+
+    // Suscribir al aviso de 2 minutos antes del logout (Requisito 4.3)
+    const warnOb = this.inactivityService.warning$.subscribe(() => {
+      this.showInactivityWarning = true;
+    });
+    this.observables.push(warnOb);
+
+    // Suscribir al logout por inactividad (Requisito 4.2)
+    const logoutOb = this.inactivityService.logout$.subscribe(() => {
+      this.showInactivityWarning = false;
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Sesión',
+        detail: 'Tu sesión ha expirado por inactividad.',
+        life: 5000
+      });
+      this.logout();
+    });
+    this.observables.push(logoutOb);
+
+    // Arrancar la escucha de eventos DOM
+    this.inactivityService.startWatching();
+  }
+
+  /**
+   * El usuario elige extender la sesión desde el modal de advertencia.
+   * Emite renewToken y reinicia el contador de inactividad. (Requisito 4.4)
+   */
+  extendSession(): void {
+    this.showInactivityWarning = false;
+    this.authService.renewToken();
+    this.inactivityService.resetTimer();
+  }
+
+  /**
+   * El usuario descarta el modal y acepta que la sesión expire.
+   */
+  dismissInactivityWarning(): void {
+    this.showInactivityWarning = false;
   }
 }

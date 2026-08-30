@@ -42,3 +42,30 @@
 </div>
 
 <p-toast></p-toast>
+
+<!-- Modal de advertencia de inactividad (Requisito 4.3) -->
+<p-dialog
+  header="Aviso de inactividad"
+  [(visible)]="showInactivityWarning"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '400px' }"
+>
+  <p>Tu sesión está a punto de expirar por inactividad. ¿Deseas continuar conectado?</p>
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      label="Continuar sesión"
+      icon="pi pi-check"
+      class="p-button-success"
+      (click)="extendSession()"
+    ></button>
+    <button
+      pButton
+      label="Cerrar sesión"
+      icon="pi pi-times"
+      class="p-button-secondary"
+      (click)="dismissInactivityWarning()"
+    ></button>
+  </ng-template>
+</p-dialog>

@@ -76,11 +76,12 @@ export default class RateLimiter {
      * Elimina todas las entradas de rate limiting asociadas a un socket desconectado.
      */
     public clearSocket(socketId: string): void {
-        for (const key of this.records.keys()) {
+        // Usamos Array.from para compatibilidad con target ES5
+        Array.from(this.records.keys()).forEach(key => {
             if (key.startsWith(socketId + ':')) {
                 this.records.delete(key);
             }
-        }
+        });
     }
 
     private getLimit(eventName: string): RateLimitConfig {

@@ -10,6 +10,9 @@ import { UserService } from '../../../services/websockets/user.service';
 import { ValidateService } from '../../../services/help/validate.service';
 import { WebsocketService } from '../../../services/websocket.service';
 
+// Validación de contraseña (Requisitos 7.1, 7.2, 7.3, 7.4)
+import { PASSWORD_REGEX, validatePassword } from '../../../utils/password-validator';
+
 // Modelos
 import { UserModel } from '../../../models/user.model';
 
@@ -26,6 +29,7 @@ export class UserFormPasswordComponent implements OnInit, OnDestroy {
   public forma: FormGroup;
 
   public repeatPassword: string;
+  public passwordErrors: string[] = [];
 
   public restore: boolean;
   public myUserId: number;
@@ -47,7 +51,7 @@ export class UserFormPasswordComponent implements OnInit, OnDestroy {
       'email': new FormControl(''),
       'username': new FormControl(''),
       'member_num': new FormControl(0),
-      'password': new FormControl('', [Validators.required, this.validateService.textMin06, this.validateService.textMax15, Validators.pattern(/^(?=.*[0-9])(?=.*[A-ZÑ])(?=.*[a-zñ])(?=.*[$€#%&_-])\S{6,15}$/)]),      
+      'password': new FormControl('', [Validators.required, Validators.pattern(PASSWORD_REGEX)]),      
       'confirmPass': new FormControl('', [Validators.required]),      
       'active': new FormControl(false),
       'attempts': new FormControl(0),
@@ -79,8 +83,12 @@ export class UserFormPasswordComponent implements OnInit, OnDestroy {
 
   saveData() {    
     this.user = this.forma.value;
-
     this.userService.editPasswordUser(this.user);
+  }
+
+  onPasswordInput(): void {
+    const value = this.forma.get('password')?.value ?? '';
+    this.passwordErrors = validatePassword(value).errors;
   }
 
   cancelEmmiter() {
